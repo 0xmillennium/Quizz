@@ -49,6 +49,7 @@ public class QuestionMapper {
         return new QuestionSelectionResponse(
                 question.getId(),
                 question.getText(),
+                question.getCategory().getId(),
                 question.getCategory().getName()
         );
     }

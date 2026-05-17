@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Available Quizzes - Quizz</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="site-header">
+    <a th:href="@{/}">Quizz</a>
+</header>
+<main>
+    <div th:replace="~{layout/fragments :: flash}"></div>
+
+    <h1>Available Quizzes</h1>
+
+    <form th:action="@{/quizzes}" method="get">
+        <label for="categoryId">Category</label>
+        <select id="categoryId" name="categoryId">
+            <option value="">All categories</option>
+            <option th:each="category : ${categories}"
+                    th:value="${category.id()}"
+                    th:selected="${selectedCategoryId != null and selectedCategoryId == category.id()}"
+                    th:text="${category.name()}">Category</option>
+        </select>
+        <button type="submit">Filter</button>
+    </form>
+
+    <p th:if="${#lists.isEmpty(quizzes)}">No quizzes found.</p>
+
+    <table th:if="${!#lists.isEmpty(quizzes)}">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Duration</th>
+            <th>Question Count</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="quiz : ${quizzes}">
+            <td th:text="${quiz.title()}">Quiz title</td>
+            <td th:text="${quiz.categoryName()}">Category</td>
+            <td th:text="${quiz.durationMinutes()} + ' minutes'">30 minutes</td>
+            <td th:text="${quiz.questionCount()}">5</td>
+            <td><a th:href="@{/quizzes/{id}(id=${quiz.id()})}">Details</a></td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>

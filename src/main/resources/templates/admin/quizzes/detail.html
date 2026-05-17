@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${quiz.title()} + ' - Quizz Admin'">Quiz - Quizz Admin</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<header class="admin-header">
+    <a th:href="@{/}">Quizz Admin</a>
+</header>
+<main>
+    <div th:replace="~{layout/fragments :: flash}"></div>
+
+    <h1 th:text="${quiz.title()}">Quiz title</h1>
+    <p th:if="${quiz.description() != null}" th:text="${quiz.description()}">Description</p>
+
+    <dl>
+        <dt>Category</dt>
+        <dd th:text="${quiz.categoryName()}">Category</dd>
+        <dt>Duration</dt>
+        <dd th:text="${quiz.durationMinutes()} + ' minutes'">30 minutes</dd>
+        <dt>Status</dt>
+        <dd th:text="${quiz.status()}">DRAFT</dd>
+        <dt>Question count</dt>
+        <dd th:text="${quiz.questionCount()}">5</dd>
+    </dl>
+
+    <h2>Questions</h2>
+    <ol>
+        <li th:each="question : ${quiz.questions()}"
+            th:text="${question.text()}">Question text</li>
+    </ol>
+
+    <p>
+        <a th:if="${quiz.status() == 'DRAFT'}"
+           th:href="@{/admin/quizzes/{id}/edit(id=${quiz.id()})}">Edit</a>
+        <a th:href="@{/admin/quizzes}">Back to quizzes</a>
+    </p>
+
+    <form th:if="${quiz.status() == 'DRAFT'}"
+          th:action="@{/admin/quizzes/{id}/publish(id=${quiz.id()})}"
+          method="post">
+        <input type="hidden"
+               th:name="${_csrf.parameterName}"
+               th:value="${_csrf.token}">
+        <button type="submit">Publish</button>
+    </form>
+
+    <form th:if="${quiz.status() != 'ARCHIVED'}"
+          th:action="@{/admin/quizzes/{id}/archive(id=${quiz.id()})}"
+          method="post">
+        <input type="hidden"
+               th:name="${_csrf.parameterName}"
+               th:value="${_csrf.token}">
+        <button type="submit">Archive</button>
+    </form>
+</main>
+</body>
+</html>

@@ -65,10 +65,11 @@ class QuestionMapperTest {
 
         assertThat(response.id()).isEqualTo(10L);
         assertThat(response.text()).isEqualTo("What is water?");
+        assertThat(response.categoryId()).isEqualTo(20L);
         assertThat(response.categoryName()).isEqualTo("Science");
         assertThat(Arrays.stream(QuestionSelectionResponse.class.getRecordComponents())
                 .map(component -> component.getName()))
-                .containsExactly("id", "text", "categoryName");
+                .containsExactly("id", "text", "categoryId", "categoryName");
     }
 
     @Test
