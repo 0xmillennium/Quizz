@@ -1,0 +1,50 @@
+[
+  {
+    "title": "Demo Java Basics Quiz",
+    "description": "A short demo quiz for Java fundamentals.",
+    "category": "Demo Java",
+    "durationMinutes": 10,
+    "questions": [
+      "Demo Java: Which keyword is used to create a subclass?",
+      "Demo Java: Which collection type stores unique values without duplicates?",
+      "Demo Java: Which method is the conventional application entry point?"
+    ],
+    "publish": true
+  },
+  {
+    "title": "Demo Spring Boot Quiz",
+    "description": "A short demo quiz for Spring Boot MVC basics.",
+    "category": "Demo Spring Boot",
+    "durationMinutes": 12,
+    "questions": [
+      "Demo Spring Boot: Which annotation marks the main application class?",
+      "Demo Spring Boot: Which layer usually handles HTTP traffic in Spring MVC?",
+      "Demo Spring Boot: Which template engine is used by this application?"
+    ],
+    "publish": true
+  },
+  {
+    "title": "Demo Database Fundamentals Quiz",
+    "description": "A short demo quiz for relational database basics.",
+    "category": "Demo Databases",
+    "durationMinutes": 10,
+    "questions": [
+      "Demo Databases: What does a primary key identify?",
+      "Demo Databases: Which query clause filters rows?",
+      "Demo Databases: What is a foreign key commonly used for?"
+    ],
+    "publish": true
+  },
+  {
+    "title": "Demo Mixed Quiz",
+    "description": "A cross-topic demo quiz for the sample catalog.",
+    "category": "Demo Java",
+    "durationMinutes": 15,
+    "questions": [
+      "Demo Java: Which type represents a true or false value?",
+      "Demo Spring Boot: What does CSRF protection help defend against?",
+      "Demo Databases: Which concept helps keep related database changes all-or-nothing?"
+    ],
+    "publish": true
+  }
+]

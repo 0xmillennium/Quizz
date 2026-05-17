@@ -1,0 +1,122 @@
+[
+  {
+    "category": "Demo Java",
+    "text": "Demo Java: Which keyword is used to create a subclass?",
+    "options": [
+      {"text": "extends", "correct": true},
+      {"text": "implements", "correct": false},
+      {"text": "inherits", "correct": false},
+      {"text": "package", "correct": false}
+    ]
+  },
+  {
+    "category": "Demo Java",
+    "text": "Demo Java: Which collection type stores unique values without duplicates?",
+    "options": [
+      {"text": "List", "correct": false},
+      {"text": "Set", "correct": true},
+      {"text": "Queue", "correct": false},
+      {"text": "Map", "correct": false}
+    ]
+  },
+  {
+    "category": "Demo Java",
+    "text": "Demo Java: Which method is the conventional application entry point?",
+    "options": [
+      {"text": "start(String[] args)", "correct": false},
+      {"text": "run(String[] args)", "correct": false},
+      {"text": "main(String[] args)", "correct": true},
+      {"text": "init(String[] args)", "correct": false}
+    ]
+  },
+  {
+    "category": "Demo Java",
+    "text": "Demo Java: Which type represents a true or false value?",
+    "options": [
+      {"text": "char", "correct": false},
+      {"text": "int", "correct": false},
+      {"text": "boolean", "correct": true},
+      {"text": "String", "correct": false}
+    ]
+  },
+  {
+    "category": "Demo Spring Boot",
+    "text": "Demo Spring Boot: Which annotation marks the main application class?",
+    "options": [
+      {"text": "@SpringBootApplication", "correct": true},
+      {"text": "@Controller", "correct": false},
+      {"text": "@Entity", "correct": false},
+      {"text": "@Repository", "correct": false}
+    ]
+  },
+  {
+    "category": "Demo Spring Boot",
+    "text": "Demo Spring Boot: Which layer usually handles HTTP traffic in Spring MVC?",
+    "options": [
+      {"text": "Repository", "correct": false},
+      {"text": "Controller", "correct": true},
+      {"text": "Entity", "correct": false},
+      {"text": "View", "correct": false}
+    ]
+  },
+  {
+    "category": "Demo Spring Boot",
+    "text": "Demo Spring Boot: Which template engine is used by this application?",
+    "options": [
+      {"text": "Mustache", "correct": false},
+      {"text": "Freemarker", "correct": false},
+      {"text": "Thymeleaf", "correct": true},
+      {"text": "Handlebars", "correct": false}
+    ]
+  },
+  {
+    "category": "Demo Spring Boot",
+    "text": "Demo Spring Boot: What does CSRF protection help defend against?",
+    "options": [
+      {"text": "Cross-site request forgery", "correct": true},
+      {"text": "Slow database queries", "correct": false},
+      {"text": "Missing CSS files", "correct": false},
+      {"text": "Java compilation errors", "correct": false}
+    ]
+  },
+  {
+    "category": "Demo Databases",
+    "text": "Demo Databases: What does a primary key identify?",
+    "options": [
+      {"text": "A unique row in a table", "correct": true},
+      {"text": "A database password", "correct": false},
+      {"text": "A table comment", "correct": false},
+      {"text": "An application profile", "correct": false}
+    ]
+  },
+  {
+    "category": "Demo Databases",
+    "text": "Demo Databases: Which query clause filters rows?",
+    "options": [
+      {"text": "ORDER BY", "correct": false},
+      {"text": "WHERE", "correct": true},
+      {"text": "GROUP BY", "correct": false},
+      {"text": "JOIN", "correct": false}
+    ]
+  },
+  {
+    "category": "Demo Databases",
+    "text": "Demo Databases: What is a foreign key commonly used for?",
+    "options": [
+      {"text": "Compressing table data", "correct": false},
+      {"text": "Linking related rows between tables", "correct": true},
+      {"text": "Encrypting queries", "correct": false},
+      {"text": "Starting the database server", "correct": false}
+    ]
+  },
+  {
+    "category": "Demo Databases",
+    "text": "Demo Databases: Which concept helps keep related database changes all-or-nothing?",
+    "options": [
+      {"text": "Transaction", "correct": true},
+      {"text": "Stylesheet", "correct": false},
+      {"text": "Template", "correct": false},
+      {"text": "Route", "correct": false}
+    ]
+  }
+]

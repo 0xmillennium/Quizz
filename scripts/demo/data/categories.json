@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Demo Java",
+    "description": "Demo questions covering Java language fundamentals."
+  },
+  {
+    "name": "Demo Spring Boot",
+    "description": "Demo questions covering Spring Boot MVC and application basics."
+  },
+  {
+    "name": "Demo Databases",
+    "description": "Demo questions covering relational database fundamentals."
+  }
+]

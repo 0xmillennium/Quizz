@@ -72,6 +72,8 @@ Health URL: <http://localhost:8081/actuator/health>
 
 PostgreSQL is intentionally not exposed to the host; it is reachable only by the Quizz container on the internal backend network. Full Docker workflow details are in [docs/DOCKER.md](docs/DOCKER.md), and admin bootstrap details are in [docs/ADMIN_BOOTSTRAP.md](docs/ADMIN_BOOTSTRAP.md).
 
+After an admin exists, demo catalog content can be loaded through the admin MVC endpoints with the endpoint-based fixture tooling. See [Demo fixtures](docs/DEMO_FIXTURES.md).
+
 ## Profiles And Configuration
 
 - `spring.application.name=quizz`
@@ -138,6 +140,7 @@ Admin:
 - [Local setup](docs/LOCAL_SETUP.md)
 - [Docker runtime](docs/DOCKER.md)
 - [Admin bootstrap](docs/ADMIN_BOOTSTRAP.md)
+- [Demo fixtures](docs/DEMO_FIXTURES.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Final requirements checklist](docs/FINAL_REQUIREMENTS_CHECKLIST.md)
 - [Phase summary](docs/PHASE_SUMMARY.md)
