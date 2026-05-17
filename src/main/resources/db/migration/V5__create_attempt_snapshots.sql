@@ -43,10 +43,11 @@ CREATE TABLE quiz_attempts (
 
     CONSTRAINT ck_quiz_attempts_counts
         CHECK (
-            total_questions >= 0
+            total_questions > 0
             AND correct_count >= 0
             AND wrong_count >= 0
             AND unanswered_count >= 0
+            AND correct_count + wrong_count + unanswered_count = total_questions
         ),
 
     CONSTRAINT ck_quiz_attempts_time

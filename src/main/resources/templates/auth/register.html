@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Register - Online Quiz</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main>
+    <h1>Register</h1>
+
+    <form th:action="@{/register}" th:object="${registerRequest}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+        <div>
+            <label for="fullName">Full name</label>
+            <input id="fullName" type="text" th:field="*{fullName}" autocomplete="name" required>
+            <p th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></p>
+        </div>
+
+        <div>
+            <label for="email">Email</label>
+            <input id="email" type="email" th:field="*{email}" autocomplete="email" required>
+            <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+        </div>
+
+        <div>
+            <label for="password">Password</label>
+            <input id="password" type="password" th:field="*{password}" autocomplete="new-password" required>
+            <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+        </div>
+
+        <div>
+            <label for="confirmPassword">Confirm password</label>
+            <input id="confirmPassword" type="password" th:field="*{confirmPassword}" autocomplete="new-password" required>
+            <p th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></p>
+        </div>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <p><a th:href="@{/login}">Already have an account?</a></p>
+</main>
+</body>
+</html>

@@ -9,6 +9,8 @@ CREATE TABLE users (
     role VARCHAR(30) NOT NULL,
     enabled BOOLEAN NOT NULL,
 
-    CONSTRAINT uk_users_email UNIQUE (email),
     CONSTRAINT ck_users_role CHECK (role IN ('USER', 'ADMIN'))
 );
+
+CREATE UNIQUE INDEX ux_users_email_ci
+ON users (lower(email));
