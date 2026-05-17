@@ -1,0 +1,48 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #1f2933;
+    background: #f8fafc;
+}
+
+a {
+    color: #1d4ed8;
+}
+
+.site-header,
+.admin-header {
+    padding: 1rem;
+    background: #ffffff;
+    border-bottom: 1px solid #d9e2ec;
+}
+
+main {
+    padding: 1rem;
+}
+
+.flash {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #bcccdc;
+    background: #ffffff;
+}
+
+.flash-success {
+    border-color: #2f855a;
+}
+
+.flash-error {
+    border-color: #c53030;
+}
+
+.flash-warning {
+    border-color: #b7791f;
+}
+
+.flash-info {
+    border-color: #2b6cb0;
+}
+
+.error-page {
+    max-width: 42rem;
+}

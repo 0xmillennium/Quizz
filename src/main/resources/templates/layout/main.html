@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${pageTitle ?: 'Online Quiz'}">Online Quiz</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header class="site-header">
+    <a th:href="@{/}">Online Quiz</a>
+</header>
+<main>
+    <div th:replace="~{layout/fragments :: flash}"></div>
+    <section th:fragment="content"></section>
+</main>
+</body>
+</html>
