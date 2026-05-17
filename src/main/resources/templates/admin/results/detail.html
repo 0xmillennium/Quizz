@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Result Detail - Quizz Admin</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<header class="admin-header">
+    <a th:href="@{/admin}">Quizz Admin</a>
+</header>
+<main>
+    <div th:replace="~{layout/fragments :: flash}"></div>
+
+    <h1>Result Detail</h1>
+
+    <p><a th:href="@{/admin/results}">Back to results</a></p>
+
+    <section aria-label="Result summary">
+        <h2 th:text="${result.quizTitle()}">Science Quiz</h2>
+        <dl>
+            <dt>User</dt>
+            <dd th:text="${result.userFullName()}">Ada Lovelace</dd>
+            <dt>Category</dt>
+            <dd th:text="${result.categoryName()}">Science</dd>
+            <dt>Status</dt>
+            <dd th:text="${result.status()}">COMPLETED</dd>
+            <dt>Score percentage</dt>
+            <dd th:text="${result.scorePercentage() + '%'}">80%</dd>
+            <dt>Correct / Wrong / Unanswered</dt>
+            <dd>
+                <span th:text="${result.correctCount()}">4</span> /
+                <span th:text="${result.wrongCount()}">1</span> /
+                <span th:text="${result.unansweredCount()}">0</span>
+            </dd>
+            <dt>Scoring version</dt>
+            <dd th:text="${result.scoringVersion()}">v1</dd>
+            <dt>Started At</dt>
+            <dd th:text="${result.startedAt()}">2026-01-01T10:00:00Z</dd>
+            <dt>Expires At</dt>
+            <dd th:text="${result.expiresAt()}">2026-01-01T10:30:00Z</dd>
+            <dt>Submitted At</dt>
+            <dd th:text="${result.submittedAt() ?: '-'}">2026-01-01T10:15:00Z</dd>
+        </dl>
+    </section>
+
+    <section aria-label="Question results">
+        <h2>Questions</h2>
+        <article th:each="question : ${result.questions()}">
+            <h3>
+                <span th:text="${question.displayOrder()}">1</span>.
+                <span th:text="${question.questionText()}">Question text</span>
+            </h3>
+
+            <p>
+                Selected option:
+                <span th:each="option : ${question.options()}"
+                      th:if="${option.selected()}"
+                      th:text="${option.optionText()}">Selected answer</span>
+                <span th:if="${question.selectedOptionId() == null}">Unanswered</span>
+            </p>
+
+            <p>
+                Correct option:
+                <span th:each="option : ${question.options()}"
+                      th:if="${option.correct()}"
+                      th:text="${option.optionText()}">Correct answer</span>
+            </p>
+
+            <ul>
+                <li th:each="option : ${question.options()}">
+                    <span th:text="${option.displayOrder()}">1</span>.
+                    <span th:text="${option.optionText()}">Option text</span>
+                    <span th:if="${option.selected()}">Selected</span>
+                    <span th:if="${option.correct()}">Correct</span>
+                </li>
+            </ul>
+        </article>
+    </section>
+</main>
+</body>
+</html>

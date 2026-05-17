@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>User Results - Quizz Admin</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<header class="admin-header">
+    <a th:href="@{/admin}">Quizz Admin</a>
+</header>
+<main>
+    <div th:replace="~{layout/fragments :: flash}"></div>
+
+    <h1>User Results</h1>
+
+    <form th:action="@{/admin/results}" method="get">
+        <label for="userId">User ID</label>
+        <input id="userId" name="userId" type="number" min="1" th:value="${filter.userId}">
+
+        <label for="quizId">Quiz</label>
+        <select id="quizId" name="quizId">
+            <option value="">All quizzes</option>
+            <option th:each="quiz : ${quizzes}"
+                    th:value="${quiz.id()}"
+                    th:selected="${filter.quizId != null && filter.quizId == quiz.id()}"
+                    th:text="${quiz.title()}">Quiz</option>
+        </select>
+
+        <label for="categoryId">Category</label>
+        <select id="categoryId" name="categoryId">
+            <option value="">All categories</option>
+            <option th:each="category : ${categories}"
+                    th:value="${category.id()}"
+                    th:selected="${filter.categoryId != null && filter.categoryId == category.id()}"
+                    th:text="${category.name()}">Category</option>
+        </select>
+
+        <label for="status">Status</label>
+        <select id="status" name="status">
+            <option value="">All statuses</option>
+            <option th:each="status : ${statuses}"
+                    th:value="${status}"
+                    th:selected="${filter.status != null && filter.status == status}"
+                    th:text="${status}">COMPLETED</option>
+        </select>
+
+        <label for="startedFrom">Started From</label>
+        <input id="startedFrom" name="startedFrom" type="date" th:value="${filter.startedFrom}">
+
+        <label for="startedTo">Started To</label>
+        <input id="startedTo" name="startedTo" type="date" th:value="${filter.startedTo}">
+
+        <label for="size">Page Size</label>
+        <input id="size" name="size" type="number" min="1" max="100" th:value="${results.page().size()}">
+
+        <button type="submit">Filter</button>
+        <a th:href="@{/admin/results}">Clear filters</a>
+    </form>
+
+    <p th:if="${#lists.isEmpty(results.results())}">No results found.</p>
+
+    <table th:if="${!#lists.isEmpty(results.results())}">
+        <thead>
+        <tr>
+            <th>User</th>
+            <th>Quiz</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Score %</th>
+            <th>Correct / Wrong / Unanswered</th>
+            <th>Started At</th>
+            <th>Submitted At</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="result : ${results.results()}">
+            <td th:text="${result.userFullName()}">Ada Lovelace</td>
+            <td th:text="${result.quizTitle()}">Science Quiz</td>
+            <td th:text="${result.categoryName()}">Science</td>
+            <td th:text="${result.status()}">COMPLETED</td>
+            <td th:text="${result.scorePercentage()}">80</td>
+            <td>
+                <span th:text="${result.correctCount()}">4</span> /
+                <span th:text="${result.wrongCount()}">1</span> /
+                <span th:text="${result.unansweredCount()}">0</span>
+            </td>
+            <td th:text="${result.startedAt()}">2026-01-01T10:00:00Z</td>
+            <td th:text="${result.submittedAt() ?: '-'}">2026-01-01T10:15:00Z</td>
+            <td><a th:href="@{/admin/results/{attemptId}(attemptId=${result.attemptId()})}">Detail</a></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <nav aria-label="Pagination" th:if="${results.page().totalPages() > 0}">
+        <a th:if="${results.page().hasPrevious()}"
+           th:href="@{/admin/results(userId=${filter.userId},quizId=${filter.quizId},categoryId=${filter.categoryId},status=${filter.status},startedFrom=${filter.startedFrom},startedTo=${filter.startedTo},size=${results.page().size()},page=${results.page().page() - 1})}">Previous</a>
+
+        <span>
+            Page <span th:text="${results.page().page()}">1</span> /
+            <span th:text="${results.page().totalPages()}">1</span>
+        </span>
+
+        <a th:if="${results.page().hasNext()}"
+           th:href="@{/admin/results(userId=${filter.userId},quizId=${filter.quizId},categoryId=${filter.categoryId},status=${filter.status},startedFrom=${filter.startedFrom},startedTo=${filter.startedTo},size=${results.page().size()},page=${results.page().page() + 1})}">Next</a>
+    </nav>
+
+    <p><a th:href="@{/admin}">Back to dashboard</a></p>
+</main>
+</body>
+</html>

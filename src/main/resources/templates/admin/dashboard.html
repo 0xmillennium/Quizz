@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard - Quizz Admin</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<header class="admin-header">
+    <a th:href="@{/admin}">Quizz Admin</a>
+</header>
+<main>
+    <div th:replace="~{layout/fragments :: flash}"></div>
+
+    <h1>Dashboard</h1>
+
+    <nav aria-label="Admin navigation">
+        <a th:href="@{/admin/categories}">Manage Categories</a>
+        <a th:href="@{/admin/questions}">Manage Questions</a>
+        <a th:href="@{/admin/quizzes}">Manage Quizzes</a>
+        <a th:href="@{/admin/results}">View Results</a>
+        <a th:href="@{/leaderboard}">Leaderboard</a>
+    </nav>
+
+    <section aria-label="Admin metrics">
+        <article>
+            <h2>Users</h2>
+            <p><strong th:text="${dashboard.totalUsers()}">0</strong> total</p>
+            <p><span th:text="${dashboard.enabledUsers()}">0</span> enabled users</p>
+        </article>
+        <article>
+            <h2>Categories</h2>
+            <p><strong th:text="${dashboard.totalCategories()}">0</strong> total</p>
+            <p><span th:text="${dashboard.activeCategories()}">0</span> active categories</p>
+        </article>
+        <article>
+            <h2>Questions</h2>
+            <p><strong th:text="${dashboard.totalQuestions()}">0</strong> total</p>
+            <p><span th:text="${dashboard.activeQuestions()}">0</span> active questions</p>
+        </article>
+        <article>
+            <h2>Quizzes</h2>
+            <p><strong th:text="${dashboard.totalQuizzes()}">0</strong> total</p>
+            <p>
+                Draft <span th:text="${dashboard.draftQuizzes()}">0</span>,
+                Published <span th:text="${dashboard.publishedQuizzes()}">0</span>,
+                Archived <span th:text="${dashboard.archivedQuizzes()}">0</span>
+            </p>
+        </article>
+        <article>
+            <h2>Attempts</h2>
+            <p><strong th:text="${dashboard.totalAttempts()}">0</strong> total</p>
+            <p>
+                In Progress <span th:text="${dashboard.inProgressAttempts()}">0</span>,
+                Completed <span th:text="${dashboard.completedAttempts()}">0</span>,
+                Expired <span th:text="${dashboard.expiredAttempts()}">0</span>
+            </p>
+        </article>
+        <article>
+            <h2>Average score</h2>
+            <p><strong th:text="${#numbers.formatDecimal(dashboard.averageScorePercentage(), 1, 1)}">0.0</strong>%</p>
+        </article>
+    </section>
+
+    <h2>Recent Attempts</h2>
+    <p th:if="${#lists.isEmpty(dashboard.recentAttempts())}">No recent attempts found.</p>
+
+    <table th:if="${!#lists.isEmpty(dashboard.recentAttempts())}">
+        <thead>
+        <tr>
+            <th>User</th>
+            <th>Quiz</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Score</th>
+            <th>Started At</th>
+            <th>Submitted At</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="attempt : ${dashboard.recentAttempts()}">
+            <td th:text="${attempt.userFullName()}">Ada Lovelace</td>
+            <td th:text="${attempt.quizTitle()}">Science Quiz</td>
+            <td th:text="${attempt.categoryName()}">Science</td>
+            <td th:text="${attempt.status()}">COMPLETED</td>
+            <td th:text="${attempt.scorePercentage() + '%'}">80%</td>
+            <td th:text="${attempt.startedAt()}">2026-01-01T10:00:00Z</td>
+            <td th:text="${attempt.submittedAt() ?: '-'}">2026-01-01T10:15:00Z</td>
+            <td><a th:href="@{/admin/results/{attemptId}(attemptId=${attempt.attemptId()})}">Detail</a></td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>
