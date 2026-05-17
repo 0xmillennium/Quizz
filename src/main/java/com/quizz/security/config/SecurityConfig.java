@@ -47,6 +47,7 @@ public class SecurityConfig {
     ) throws Exception {
         http
                 .authenticationProvider(authenticationProvider)
+                .csrf(Customizer.withDefaults())
                 .securityContext(Customizer.withDefaults())
                 .anonymous(Customizer.withDefaults())
                 .exceptionHandling(Customizer.withDefaults())

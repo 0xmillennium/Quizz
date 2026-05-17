@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${result.quizTitle()} + ' Result - Quizz'">Result - Quizz</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script defer th:src="@{/js/result-chart.js}"></script>
+</head>
+<body>
+<header class="site-header">
+    <a th:href="@{/}">Quizz</a>
+</header>
+<main>
+    <div th:replace="~{layout/fragments :: flash}"></div>
+
+    <h1 th:text="${result.quizTitle()}">Quiz title</h1>
+    <p th:text="${result.categoryName()}">Category</p>
+
+    <section>
+        <h2>Result</h2>
+        <dl>
+            <dt>Status</dt>
+            <dd th:text="${result.status()}">COMPLETED</dd>
+            <dt>Score</dt>
+            <dd th:text="${result.scorePercentage()} + '%'">80%</dd>
+            <dt>Correct</dt>
+            <dd th:text="${result.correctCount()}">4</dd>
+            <dt>Wrong</dt>
+            <dd th:text="${result.wrongCount()}">1</dd>
+            <dt>Unanswered</dt>
+            <dd th:text="${result.unansweredCount()}">0</dd>
+            <dt>Scoring version</dt>
+            <dd th:text="${result.scoringVersion()}">DEFAULT_V1</dd>
+            <dt>Started</dt>
+            <dd th:text="${result.startedAt()}">Started</dd>
+            <dt th:if="${result.submittedAt() != null}">Submitted</dt>
+            <dd th:if="${result.submittedAt() != null}" th:text="${result.submittedAt()}">Submitted</dd>
+        </dl>
+    </section>
+
+    <section>
+        <h2>Breakdown</h2>
+        <div id="result-chart"
+             th:attr="data-chart-url=@{/attempts/{attemptId}/chart-data(attemptId=${result.attemptId()})}">
+            <canvas width="480" height="220" aria-label="Result chart"></canvas>
+        </div>
+    </section>
+
+    <section>
+        <h2>Questions</h2>
+        <ol>
+            <li th:each="question : ${result.questions()}">
+                <h3 th:text="${question.displayOrder()} + '. ' + ${question.questionText()}">Question</h3>
+                <p th:if="${!question.answered()}">Unanswered</p>
+                <p th:if="${question.answered()}"
+                   th:text="${question.correct()} ? 'Answered correctly' : 'Answered incorrectly'">Answered</p>
+                <ul>
+                    <li th:each="option : ${question.options()}">
+                        <span th:text="${option.optionText()}">Option</span>
+                        <strong th:if="${option.selected()}">Selected</strong>
+                        <strong th:if="${option.correct()}">Correct option</strong>
+                    </li>
+                </ul>
+            </li>
+        </ol>
+    </section>
+
+    <p>
+        <a th:href="@{/quizzes}">Back to quizzes</a>
+        <a th:href="@{/attempts/history}">History</a>
+    </p>
+</main>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${attempt.quizTitle()} + ' - Quizz'">Quiz - Quizz</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script defer th:src="@{/js/quiz-timer.js}"></script>
+</head>
+<body>
+<header class="site-header">
+    <a th:href="@{/}">Quizz</a>
+</header>
+<main>
+    <div th:replace="~{layout/fragments :: flash}"></div>
+
+    <h1 th:text="${attempt.quizTitle()}">Quiz title</h1>
+    <p th:text="${attempt.categoryName()}">Category</p>
+
+    <section>
+        <h2>Time remaining</h2>
+        <p id="quiz-timer"
+           th:attr="data-expires-at=${attempt.expiresAt()}"
+           aria-live="polite">--:--</p>
+        <p id="quiz-timer-message" aria-live="polite"></p>
+    </section>
+
+    <form id="quiz-submit-form"
+          th:action="@{/attempts/{attemptId}/submit(attemptId=${attempt.attemptId()})}"
+          th:object="${submitQuizRequest}"
+          method="post">
+        <input type="hidden"
+               th:name="${_csrf.parameterName}"
+               th:value="${_csrf.token}">
+
+        <ol>
+            <li th:each="question, questionStat : ${attempt.questions()}">
+                <h2 th:text="${question.displayOrder()} + '. ' + ${question.questionText()}">Question</h2>
+                <input type="hidden"
+                       th:field="*{answers[__${questionStat.index}__].attemptQuestionId}">
+                <div th:each="option : ${question.options()}">
+                    <label>
+                        <input type="radio"
+                               th:field="*{answers[__${questionStat.index}__].selectedOptionId}"
+                               th:value="${option.id()}">
+                        <span th:text="${option.optionText()}">Option</span>
+                    </label>
+                </div>
+            </li>
+        </ol>
+
+        <button type="submit">Submit Quiz</button>
+    </form>
+</main>
+</body>
+</html>
