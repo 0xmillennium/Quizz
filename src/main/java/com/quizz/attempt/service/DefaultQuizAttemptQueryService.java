@@ -1,6 +1,7 @@
 package com.quizz.attempt.service;
 
 import com.quizz.attempt.dto.ResultChartResponse;
+import com.quizz.attempt.entity.AttemptQuestion;
 import com.quizz.attempt.entity.QuizAttempt;
 import com.quizz.attempt.mapper.QuizAttemptMapper;
 import com.quizz.attempt.repository.QuizAttemptRepository;
@@ -32,7 +33,7 @@ public class DefaultQuizAttemptQueryService implements QuizAttemptQueryService {
 
     @Override
     public QuizAttempt getAttemptPage(Long attemptId, Long userId) {
-        QuizAttempt attempt = quizAttemptRepository.findByIdAndUserIdWithQuestionsAndOptions(attemptId, userId)
+        QuizAttempt attempt = quizAttemptRepository.findByIdAndUserIdWithQuestions(attemptId, userId)
                 .orElseThrow(() -> new NotFoundException("Attempt not found."));
         if (!attempt.isInProgress()) {
             throw new BusinessRuleException("Attempt is not in progress.");
@@ -40,6 +41,7 @@ public class DefaultQuizAttemptQueryService implements QuizAttemptQueryService {
         if (attempt.isExpiredAt(Instant.now(clock))) {
             throw new BusinessRuleException("Attempt has expired.");
         }
+        loadQuestionOptions(attempt);
         return attempt;
     }
 
@@ -50,6 +52,7 @@ public class DefaultQuizAttemptQueryService implements QuizAttemptQueryService {
         if (attempt.isInProgress()) {
             throw new BusinessRuleException("Attempt is still in progress.");
         }
+        loadQuestionOptions(attempt);
         return attempt;
     }
 
@@ -61,5 +64,14 @@ public class DefaultQuizAttemptQueryService implements QuizAttemptQueryService {
     @Override
     public ResultChartResponse getResultChart(Long attemptId, Long userId) {
         return quizAttemptMapper.toChartResponse(getResult(attemptId, userId));
+    }
+
+    private void loadQuestionOptions(QuizAttempt attempt) {
+        List<Long> questionIds = attempt.getQuestions().stream()
+                .map(AttemptQuestion::getId)
+                .toList();
+        if (!questionIds.isEmpty()) {
+            quizAttemptRepository.findQuestionsWithOptionsByIdIn(questionIds);
+        }
     }
 }

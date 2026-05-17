@@ -2,11 +2,14 @@ package com.quizz.quiz.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.quizz.common.exception.NotFoundException;
+import com.quizz.question.entity.Question;
 import com.quizz.quiz.entity.Quiz;
+import com.quizz.quiz.entity.QuizQuestion;
 import com.quizz.quiz.entity.QuizStatus;
 import com.quizz.quiz.repository.QuizRepository;
 import java.util.List;
@@ -82,9 +85,15 @@ class DefaultQuizQueryServiceTest {
 
     @Test
     void getPublishedByIdForAttemptReturnsQuizWithAttemptGraph() {
+        Question question = mock(Question.class);
+        QuizQuestion quizQuestion = mock(QuizQuestion.class);
+        when(quizQuestion.getQuestion()).thenReturn(question);
+        when(question.getId()).thenReturn(5L);
+        when(quiz.getQuestions()).thenReturn(List.of(quizQuestion));
         when(quizRepository.findByIdAndStatusWithAttemptGraph(1L, QuizStatus.PUBLISHED)).thenReturn(Optional.of(quiz));
 
         assertThat(service.getPublishedByIdForAttempt(1L)).isSameAs(quiz);
+        verify(quizRepository).findQuestionsWithOptionsByIdIn(List.of(5L));
     }
 
     @Test

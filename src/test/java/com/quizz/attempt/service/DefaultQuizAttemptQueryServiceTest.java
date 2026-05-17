@@ -58,16 +58,17 @@ class DefaultQuizAttemptQueryServiceTest {
     @Test
     void getAttemptPageReturnsInProgressAttempt() throws Exception {
         QuizAttempt attempt = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(60));
-        when(quizAttemptRepository.findByIdAndUserIdWithQuestionsAndOptions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
 
         assertThat(service.getAttemptPage(4L, 1L)).isSameAs(attempt);
+        verify(quizAttemptRepository).findQuestionsWithOptionsByIdIn(List.of(400L));
     }
 
     @Test
     void getAttemptPageRejectsCompletedAttempt() throws Exception {
         QuizAttempt attempt = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(60));
         attempt.complete(NOW.minusSeconds(10), new ScoreResult(1, 0, 0, 1, 0, "DEFAULT_V1"));
-        when(quizAttemptRepository.findByIdAndUserIdWithQuestionsAndOptions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
 
         assertThatThrownBy(() -> service.getAttemptPage(4L, 1L))
                 .isInstanceOf(BusinessRuleException.class)
@@ -78,7 +79,7 @@ class DefaultQuizAttemptQueryServiceTest {
     void getAttemptPageRejectsExpiredStatusAttempt() throws Exception {
         QuizAttempt attempt = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(60));
         attempt.markExpired();
-        when(quizAttemptRepository.findByIdAndUserIdWithQuestionsAndOptions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
 
         assertThatThrownBy(() -> service.getAttemptPage(4L, 1L))
                 .isInstanceOf(BusinessRuleException.class)
@@ -88,7 +89,7 @@ class DefaultQuizAttemptQueryServiceTest {
     @Test
     void getAttemptPageRejectsTimeExpiredAttemptWithoutMutating() throws Exception {
         QuizAttempt attempt = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(30 * 60));
-        when(quizAttemptRepository.findByIdAndUserIdWithQuestionsAndOptions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
 
         assertThatThrownBy(() -> service.getAttemptPage(4L, 1L))
                 .isInstanceOf(BusinessRuleException.class)
@@ -103,6 +104,7 @@ class DefaultQuizAttemptQueryServiceTest {
         when(quizAttemptRepository.findResultByIdAndUserId(4L, 1L)).thenReturn(Optional.of(attempt));
 
         assertThat(service.getResult(4L, 1L)).isSameAs(attempt);
+        verify(quizAttemptRepository).findQuestionsWithOptionsByIdIn(List.of(400L));
     }
 
     @Test

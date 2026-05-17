@@ -1,5 +1,6 @@
 package com.quizz.attempt.repository;
 
+import com.quizz.attempt.entity.AttemptQuestion;
 import com.quizz.attempt.entity.AttemptStatus;
 import com.quizz.attempt.entity.QuizAttempt;
 import java.time.Instant;
@@ -14,8 +15,7 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
     @EntityGraph(attributePaths = {
             "user",
             "quiz",
-            "questions",
-            "questions.options"
+            "questions"
     })
     @Query("""
             select a
@@ -23,14 +23,13 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
             where a.id = :attemptId
               and a.user.id = :userId
             """)
-    Optional<QuizAttempt> findByIdAndUserIdWithQuestionsAndOptions(
+    Optional<QuizAttempt> findByIdAndUserIdWithQuestions(
             Long attemptId,
             Long userId
     );
 
     @EntityGraph(attributePaths = {
-            "questions",
-            "questions.options"
+            "questions"
     })
     @Query("""
             select a
@@ -42,6 +41,14 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
             Long attemptId,
             Long userId
     );
+
+    @Query("""
+            select distinct q
+            from AttemptQuestion q
+            left join fetch q.options
+            where q.id in :questionIds
+            """)
+    List<AttemptQuestion> findQuestionsWithOptionsByIdIn(List<Long> questionIds);
 
     @Query("""
             select a

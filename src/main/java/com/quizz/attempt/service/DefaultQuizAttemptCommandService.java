@@ -75,7 +75,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
             SubmitQuizRequest request
     ) {
         Instant now = Instant.now(clock);
-        QuizAttempt attempt = quizAttemptRepository.findByIdAndUserIdWithQuestionsAndOptions(attemptId, userId)
+        QuizAttempt attempt = quizAttemptRepository.findByIdAndUserIdWithQuestions(attemptId, userId)
                 .orElseThrow(() -> new NotFoundException("Attempt not found."));
 
         if (!attempt.isInProgress()) {
@@ -84,9 +84,11 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
 
         if (attempt.isExpiredAt(now)) {
             attempt.markExpired();
+            loadQuestionOptions(attempt);
             return quizAttemptMapper.toResultResponse(attempt);
         }
 
+        loadQuestionOptions(attempt);
         Map<Long, Long> submittedAnswers = validatedAnswers(request, attempt);
         for (AttemptQuestion question : attempt.getQuestions()) {
             attempt.answerQuestion(question.getId(), submittedAnswers.get(question.getId()));
@@ -136,6 +138,15 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
             submittedAnswers.put(questionId, answer.getSelectedOptionId());
         }
         return submittedAnswers;
+    }
+
+    private void loadQuestionOptions(QuizAttempt attempt) {
+        List<Long> questionIds = attempt.getQuestions().stream()
+                .map(AttemptQuestion::getId)
+                .toList();
+        if (!questionIds.isEmpty()) {
+            quizAttemptRepository.findQuestionsWithOptionsByIdIn(questionIds);
+        }
     }
 
     private void validateSelectedOptionBelongsToQuestion(

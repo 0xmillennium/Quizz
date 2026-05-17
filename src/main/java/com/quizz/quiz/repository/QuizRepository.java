@@ -1,5 +1,6 @@
 package com.quizz.quiz.repository;
 
+import com.quizz.question.entity.Question;
 import com.quizz.quiz.entity.Quiz;
 import com.quizz.quiz.entity.QuizStatus;
 import java.util.List;
@@ -53,8 +54,7 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
             "category",
             "questions",
             "questions.question",
-            "questions.question.category",
-            "questions.question.options"
+            "questions.question.category"
     })
     @Query("""
             select distinct q
@@ -66,4 +66,12 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
             Long id,
             QuizStatus status
     );
+
+    @Query("""
+            select distinct question
+            from Question question
+            left join fetch question.options
+            where question.id in :questionIds
+            """)
+    List<Question> findQuestionsWithOptionsByIdIn(List<Long> questionIds);
 }

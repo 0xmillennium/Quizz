@@ -38,8 +38,12 @@ public class DefaultQuizQueryService implements QuizQueryService {
 
     @Override
     public Quiz getPublishedByIdForAttempt(Long quizId) {
-        return quizRepository.findByIdAndStatusWithAttemptGraph(quizId, QuizStatus.PUBLISHED)
+        Quiz quiz = quizRepository.findByIdAndStatusWithAttemptGraph(quizId, QuizStatus.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("Published quiz not found."));
+        quizRepository.findQuestionsWithOptionsByIdIn(quiz.getQuestions().stream()
+                .map(quizQuestion -> quizQuestion.getQuestion().getId())
+                .toList());
+        return quiz;
     }
 
     @Override

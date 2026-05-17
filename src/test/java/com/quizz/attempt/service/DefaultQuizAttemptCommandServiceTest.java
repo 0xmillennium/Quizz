@@ -156,7 +156,7 @@ class DefaultQuizAttemptCommandServiceTest {
     void submitAttemptCompletesValidAttempt() throws Exception {
         QuizAttempt attempt = persistedAttempt();
         AttemptQuestion first = attempt.getQuestions().get(0);
-        when(quizAttemptRepository.findByIdAndUserIdWithQuestionsAndOptions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
         ScoreResult scoreResult = new ScoreResult(2, 1, 1, 0, 50, "DEFAULT_V1");
         when(scoringService.score(attempt)).thenReturn(scoreResult);
         QuizResultResponse response = resultResponse(4L, "COMPLETED");
@@ -168,6 +168,7 @@ class DefaultQuizAttemptCommandServiceTest {
         assertThat(attempt.getStatus()).isEqualTo(AttemptStatus.COMPLETED);
         assertThat(attempt.getSubmittedAt()).isEqualTo(NOW);
         assertThat(attempt.getScorePercentage()).isEqualTo(50);
+        verify(quizAttemptRepository).findQuestionsWithOptionsByIdIn(List.of(400L, 401L));
     }
 
     @Test
@@ -175,7 +176,7 @@ class DefaultQuizAttemptCommandServiceTest {
         QuizAttempt attempt = persistedAttempt();
         AttemptQuestion first = attempt.getQuestions().get(0);
         Long selectedOptionId = first.getOptions().get(1).getId();
-        when(quizAttemptRepository.findByIdAndUserIdWithQuestionsAndOptions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
         when(scoringService.score(attempt)).thenReturn(new ScoreResult(2, 0, 1, 1, 0, "DEFAULT_V1"));
         when(quizAttemptMapper.toResultResponse(attempt)).thenReturn(resultResponse(4L, "COMPLETED"));
 
@@ -187,7 +188,7 @@ class DefaultQuizAttemptCommandServiceTest {
     @Test
     void submitAttemptTreatsMissingAnswersAsUnanswered() throws Exception {
         QuizAttempt attempt = persistedAttempt();
-        when(quizAttemptRepository.findByIdAndUserIdWithQuestionsAndOptions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
         when(scoringService.score(attempt)).thenReturn(new ScoreResult(2, 0, 0, 2, 0, "DEFAULT_V1"));
         when(quizAttemptMapper.toResultResponse(attempt)).thenReturn(resultResponse(4L, "COMPLETED"));
 
@@ -201,7 +202,7 @@ class DefaultQuizAttemptCommandServiceTest {
     void submitAttemptRejectsDuplicateAttemptQuestionId() throws Exception {
         QuizAttempt attempt = persistedAttempt();
         AttemptQuestion first = attempt.getQuestions().get(0);
-        when(quizAttemptRepository.findByIdAndUserIdWithQuestionsAndOptions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
 
         assertThatThrownBy(() -> service.submitAttempt(4L, 1L, request(
                 answer(first, first.getOptions().get(0).getId()),
@@ -214,7 +215,7 @@ class DefaultQuizAttemptCommandServiceTest {
     @Test
     void submitAttemptRejectsUnknownAttemptQuestionId() throws Exception {
         QuizAttempt attempt = persistedAttempt();
-        when(quizAttemptRepository.findByIdAndUserIdWithQuestionsAndOptions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
 
         UserAnswerRequest answer = new UserAnswerRequest();
         answer.setAttemptQuestionId(999L);
@@ -229,7 +230,7 @@ class DefaultQuizAttemptCommandServiceTest {
         QuizAttempt attempt = persistedAttempt();
         AttemptQuestion first = attempt.getQuestions().get(0);
         AttemptQuestion second = attempt.getQuestions().get(1);
-        when(quizAttemptRepository.findByIdAndUserIdWithQuestionsAndOptions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
 
         assertThatThrownBy(() -> service.submitAttempt(
                 4L,
@@ -243,7 +244,7 @@ class DefaultQuizAttemptCommandServiceTest {
     @Test
     void submitAttemptMarksExpiredIfNowIsAtOrAfterExpiresAt() throws Exception {
         QuizAttempt attempt = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(30 * 60));
-        when(quizAttemptRepository.findByIdAndUserIdWithQuestionsAndOptions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
         QuizResultResponse response = resultResponse(4L, "EXPIRED");
         when(quizAttemptMapper.toResultResponse(attempt)).thenReturn(response);
 
@@ -251,12 +252,13 @@ class DefaultQuizAttemptCommandServiceTest {
 
         assertThat(result).isSameAs(response);
         assertThat(attempt.getStatus()).isEqualTo(AttemptStatus.EXPIRED);
+        verify(quizAttemptRepository).findQuestionsWithOptionsByIdIn(List.of(400L, 401L));
     }
 
     @Test
     void submitAttemptDoesNotScoreExpiredAttempt() throws Exception {
         QuizAttempt attempt = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(30 * 60));
-        when(quizAttemptRepository.findByIdAndUserIdWithQuestionsAndOptions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
         when(quizAttemptMapper.toResultResponse(attempt)).thenReturn(resultResponse(4L, "EXPIRED"));
 
         service.submitAttempt(4L, 1L, request());
@@ -269,7 +271,7 @@ class DefaultQuizAttemptCommandServiceTest {
     void submitAttemptRejectsCompletedAttempt() throws Exception {
         QuizAttempt attempt = persistedAttempt();
         attempt.complete(NOW.minusSeconds(10), new ScoreResult(2, 1, 1, 0, 50, "DEFAULT_V1"));
-        when(quizAttemptRepository.findByIdAndUserIdWithQuestionsAndOptions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
 
         assertThatThrownBy(() -> service.submitAttempt(4L, 1L, request()))
                 .isInstanceOf(BusinessRuleException.class)
@@ -280,7 +282,7 @@ class DefaultQuizAttemptCommandServiceTest {
     void submitAttemptRejectsAlreadyExpiredAttempt() throws Exception {
         QuizAttempt attempt = persistedAttempt();
         attempt.markExpired();
-        when(quizAttemptRepository.findByIdAndUserIdWithQuestionsAndOptions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
 
         assertThatThrownBy(() -> service.submitAttempt(4L, 1L, request()))
                 .isInstanceOf(BusinessRuleException.class)
