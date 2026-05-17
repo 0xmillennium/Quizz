@@ -30,11 +30,17 @@ Docker Compose mounts the password as a Docker secret. PostgreSQL reads it throu
 docker compose up --build
 ```
 
+After the stack is up and Flyway has created the schema, bootstrap an admin account:
+
+```bash
+./scripts/bootstrap-admin.sh
+```
+
 ## Verify
 
 ```bash
 docker compose ps
-curl http://localhost:8080/actuator/health
+curl http://localhost:8081/actuator/health
 ```
 
 Expected:
@@ -66,7 +72,7 @@ Warning: this deletes the PostgreSQL data volume.
 
 ## Network Layout
 
-- `quizz_frontend` is the bridge network used for host access to the Quizz app on port `8080`.
+- `quizz_frontend` is the bridge network used for host access to the Quizz app on host port `8081`.
 - `quizz_backend` is an internal bridge network used for private app-to-database traffic.
 - `postgres` has no host port and is attached only to `quizz_backend`.
 - `quizz` reaches PostgreSQL by service name: `postgres`.
@@ -81,13 +87,17 @@ The output should not show port `5432` published. `localhost:5432` should not be
 
 ## Admin Bootstrap
 
-Connect to PostgreSQL inside the Docker network:
+Use the bootstrap script:
 
 ```bash
-docker compose exec postgres psql -U quizz -d quizz
+./scripts/bootstrap-admin.sh
 ```
 
-Then follow [Admin bootstrap](ADMIN_BOOTSTRAP.md). Do not add a `DevDataInitializer`.
+The script is idempotent. It prompts for admin details, sends the password through stdin to the Quizz image `hash-password` CLI mode, and applies `scripts/sql/upsert-admin.sql` with `docker compose exec -T postgres psql`.
+
+The script does not require a PostgreSQL host port, does not use HTTP, and does not require local Java or Maven. Do not add a `DevDataInitializer`.
+
+More detail is in [Admin bootstrap](ADMIN_BOOTSTRAP.md).
 
 ## Troubleshooting
 

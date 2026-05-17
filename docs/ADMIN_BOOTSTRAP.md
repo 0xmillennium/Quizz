@@ -1,34 +1,50 @@
 # Admin Bootstrap
 
-Public registration creates `USER` accounts only. This project does not include an admin creation UI, user management screen, seed data, or a `DevDataInitializer`.
+Public registration creates `USER` accounts only. Quizz does not include an admin creation UI, public admin registration, seed data, a `DevDataInitializer`, or a default admin account.
 
-Admin bootstrap is manual:
+The recommended admin creation path is the Docker bootstrap script:
 
-- `password_hash` must contain a BCrypt encoded password.
-- `role` must be `ADMIN`.
-- `enabled` must be `true`.
-- Use a real BCrypt hash generated outside the application. Do not store a plaintext password.
-
-Example SQL with a placeholder hash:
-
-```sql
-INSERT INTO users (
-    created_at,
-    updated_at,
-    full_name,
-    email,
-    password_hash,
-    role,
-    enabled
-) VALUES (
-    now(),
-    now(),
-    'Admin User',
-    'admin@example.com',
-    '<BCrypt hash here>',
-    'ADMIN',
-    true
-);
+```bash
+chmod +x scripts/bootstrap-admin.sh
+./scripts/bootstrap-admin.sh
 ```
 
-The placeholder is intentional. The project does not provide a default admin password.
+The script prompts for:
+
+- admin email, defaulting to `admin@example.com`
+- admin full name, defaulting to `Admin User`
+- password and confirmation, read hidden from the terminal
+
+The plaintext password is not written to disk and is not passed as a command-line argument. The script sends it through stdin to the Quizz Docker image:
+
+```bash
+printf '%s' 'StrongPassword123!' | docker compose run --rm --no-deps quizz hash-password
+```
+
+The `hash-password` mode uses the same BCrypt encoder as the application and writes only the BCrypt hash to stdout. Validation errors are written to stderr.
+
+After generating the hash, the script executes the SQL in `scripts/sql/upsert-admin.sql` through `docker compose exec -T postgres psql`. PostgreSQL does not need a host port; the script works with the private Compose network.
+
+The SQL is idempotent. It matches an existing user with `lower(email) = lower(:'admin_email')`, updates that user to `ADMIN` and `enabled = true`, or inserts a new admin user when no matching email exists.
+
+## Direct Hash Generation
+
+For troubleshooting, a BCrypt hash can be generated directly from the Compose image:
+
+```bash
+printf '%s' 'StrongPassword123!' | docker compose run --rm --no-deps quizz hash-password
+```
+
+After publishing an image to GHCR, the same CLI mode can be used without local Maven or a local JDK:
+
+```bash
+printf '%s' 'StrongPassword123!' | docker run --rm -i ghcr.io/<owner>/quizz:<tag> hash-password
+```
+
+Do not store real passwords or generated hashes in application config, Docker secrets, `.env` files, docs, or committed files.
+
+## Advanced Troubleshooting
+
+Manual SQL should only be used when debugging the bootstrap flow. Prefer `./scripts/bootstrap-admin.sh` for normal admin creation.
+
+If manual execution is necessary, generate a hash through the image CLI, keep it only in memory for the current shell session, and pipe `scripts/sql/upsert-admin.sql` into `psql` inside the Postgres container with `-v admin_email=...`, `-v admin_full_name=...`, and `-v password_hash=...`.

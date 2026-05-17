@@ -60,11 +60,17 @@ Then start the application and PostgreSQL:
 docker compose up --build
 ```
 
+Bootstrap an admin account:
+
+```bash
+./scripts/bootstrap-admin.sh
+```
+
 Application URL: <http://localhost:8081>
 
 Health URL: <http://localhost:8081/actuator/health>
 
-PostgreSQL is intentionally not exposed to the host; it is reachable only by the Quizz container on the internal backend network. Full Docker workflow details are in [docs/DOCKER.md](docs/DOCKER.md).
+PostgreSQL is intentionally not exposed to the host; it is reachable only by the Quizz container on the internal backend network. Full Docker workflow details are in [docs/DOCKER.md](docs/DOCKER.md), and admin bootstrap details are in [docs/ADMIN_BOOTSTRAP.md](docs/ADMIN_BOOTSTRAP.md).
 
 ## Profiles And Configuration
 
