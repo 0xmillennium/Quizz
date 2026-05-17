@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Leaderboard - Quizz</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script defer th:src="@{/js/leaderboard.js}"></script>
+</head>
+<body>
+<header class="site-header">
+    <a th:href="@{/}">Quizz</a>
+</header>
+<main>
+    <div th:replace="~{layout/fragments :: flash}"></div>
+
+    <h1>Leaderboard</h1>
+
+    <form th:action="@{/leaderboard}" method="get" id="leaderboard-filter-form">
+        <label for="quizId">Quiz</label>
+        <select id="quizId" name="quizId">
+            <option value="">All quizzes</option>
+            <option th:each="quiz : ${quizzes}"
+                    th:value="${quiz.id()}"
+                    th:selected="${filter.quizId != null and filter.quizId == quiz.id()}"
+                    th:text="${quiz.title()}">Quiz</option>
+        </select>
+
+        <label for="categoryId">Category</label>
+        <select id="categoryId" name="categoryId">
+            <option value="">All categories</option>
+            <option th:each="category : ${categories}"
+                    th:value="${category.id()}"
+                    th:selected="${filter.categoryId != null and filter.categoryId == category.id()}"
+                    th:text="${category.name()}">Category</option>
+        </select>
+
+        <label for="limit">Limit</label>
+        <input id="limit"
+               type="number"
+               name="limit"
+               min="1"
+               max="100"
+               th:value="${leaderboard.limit()}">
+
+        <button type="submit">Apply</button>
+        <a th:href="@{/leaderboard}">Clear filters</a>
+    </form>
+
+    <p th:if="${#lists.isEmpty(leaderboard.entries())}">No completed attempts found.</p>
+
+    <table th:if="${!#lists.isEmpty(leaderboard.entries())}">
+        <thead>
+        <tr>
+            <th>Rank</th>
+            <th>User</th>
+            <th>Quiz</th>
+            <th>Category</th>
+            <th>Score %</th>
+            <th>Correct / Total</th>
+            <th>Submitted At</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="entry : ${leaderboard.entries()}">
+            <td th:text="${entry.rankPosition()}">1</td>
+            <td th:text="${entry.userFullName()}">User</td>
+            <td th:text="${entry.quizTitle()}">Quiz</td>
+            <td th:text="${entry.categoryName()}">Category</td>
+            <td th:text="${entry.scorePercentage()} + '%'">80%</td>
+            <td th:text="${entry.correctCount()} + ' / ' + ${entry.totalQuestions()}">4 / 5</td>
+            <td th:text="${entry.submittedAt()}">Submitted</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>
