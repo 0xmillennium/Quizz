@@ -1,6 +1,6 @@
 spring:
   application:
-    name: online-quiz
+    name: quizz
 
   profiles:
     active: dev
