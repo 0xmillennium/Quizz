@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.quizz.common.exception.DuplicateResourceException;
-import com.quizz.user.dto.CreateUserCommand;
 import com.quizz.user.entity.User;
 import com.quizz.user.entity.UserRole;
 import com.quizz.user.repository.UserRepository;

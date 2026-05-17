@@ -2,7 +2,7 @@ package com.quizz.auth.service;
 
 import com.quizz.auth.dto.RegisterRequest;
 import com.quizz.common.exception.BusinessRuleException;
-import com.quizz.user.dto.CreateUserCommand;
+import com.quizz.user.service.CreateUserCommand;
 import com.quizz.user.entity.UserRole;
 import com.quizz.user.service.UserAccountService;
 import org.springframework.security.crypto.password.PasswordEncoder;

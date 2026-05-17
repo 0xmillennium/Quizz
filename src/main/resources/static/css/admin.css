@@ -5,3 +5,7 @@
 .admin-header a {
     color: #ffffff;
 }
+
+.admin-header .nav-logout button {
+    color: #ffffff;
+}

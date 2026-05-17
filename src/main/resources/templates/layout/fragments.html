@@ -1,6 +1,35 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
+<header class="site-header" th:fragment="userNav">
+    <a th:href="@{/}">Quizz</a>
+    <nav aria-label="User navigation">
+        <a th:href="@{/quizzes}">Quizzes</a>
+        <a th:href="@{/leaderboard}">Leaderboard</a>
+        <a th:href="@{/attempts/history}">History</a>
+        <form class="nav-logout" th:action="@{/logout}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit">Logout</button>
+        </form>
+    </nav>
+</header>
+
+<header class="admin-header" th:fragment="adminNav">
+    <a th:href="@{/admin}">Quizz Admin</a>
+    <nav aria-label="Admin navigation">
+        <a th:href="@{/admin}">Dashboard</a>
+        <a th:href="@{/admin/categories}">Categories</a>
+        <a th:href="@{/admin/questions}">Questions</a>
+        <a th:href="@{/admin/quizzes}">Quizzes</a>
+        <a th:href="@{/admin/results}">Results</a>
+        <a th:href="@{/leaderboard}">Leaderboard</a>
+        <form class="nav-logout" th:action="@{/logout}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit">Logout</button>
+        </form>
+    </nav>
+</header>
+
 <div th:fragment="flash"
      th:if="${flashMessage != null}"
      th:class="'flash flash-' + ${flashMessage.type()}"

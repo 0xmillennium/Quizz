@@ -1,4 +1,4 @@
-package com.quizz.user.dto;
+package com.quizz.user.service;
 
 import com.quizz.user.entity.UserRole;
 

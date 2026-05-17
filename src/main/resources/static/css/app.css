@@ -14,6 +14,33 @@ a {
     padding: 1rem;
     background: #ffffff;
     border-bottom: 1px solid #d9e2ec;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.site-header nav,
+.admin-header nav {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.nav-logout {
+    display: inline;
+    margin: 0;
+}
+
+.nav-logout button {
+    border: 0;
+    padding: 0;
+    color: #1d4ed8;
+    background: transparent;
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 main {

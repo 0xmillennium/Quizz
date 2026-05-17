@@ -8,9 +8,7 @@
     <script defer th:src="@{/js/leaderboard.js}"></script>
 </head>
 <body>
-<header class="site-header">
-    <a th:href="@{/}">Quizz</a>
-</header>
+<header th:replace="~{layout/fragments :: userNav}"></header>
 <main>
     <div th:replace="~{layout/fragments :: flash}"></div>
 

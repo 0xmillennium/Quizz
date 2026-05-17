@@ -2,7 +2,6 @@ package com.quizz.user.service;
 
 import com.quizz.common.exception.BusinessRuleException;
 import com.quizz.common.exception.DuplicateResourceException;
-import com.quizz.user.dto.CreateUserCommand;
 import com.quizz.user.entity.User;
 import com.quizz.user.entity.UserRole;
 import com.quizz.user.repository.UserRepository;
