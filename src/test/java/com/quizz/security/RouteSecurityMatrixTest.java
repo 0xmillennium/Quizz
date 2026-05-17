@@ -49,6 +49,7 @@ class RouteSecurityMatrixTest {
     void anonymousRoutesFollowMatrix() throws Exception {
         expectAnonymousAllowed("/login");
         expectAnonymousAllowed("/register");
+        expectAnonymousAllowed("/actuator/health");
         expectAnonymousRedirectsToLogin("/quizzes");
         expectAnonymousRedirectsToLogin("/leaderboard");
         expectAnonymousRedirectsToLogin("/attempts/history");
@@ -166,6 +167,12 @@ class RouteSecurityMatrixTest {
         @ResponseBody
         String publicPage() {
             return "public";
+        }
+
+        @GetMapping("/actuator/health")
+        @ResponseBody
+        String health() {
+            return "{\"status\":\"UP\"}";
         }
 
         @GetMapping({"/quizzes", "/leaderboard", "/attempts/history"})

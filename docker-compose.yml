@@ -1,0 +1,80 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: quizz
+      POSTGRES_USER: quizz
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - source: postgres_password
+        target: postgres_password
+    volumes:
+      - quizz_postgres_data:/var/lib/postgresql/data
+    networks:
+      - quizz_backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quizz -d quizz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  quizz:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    secrets:
+      - source: postgres_password
+        target: spring.datasource.password
+    ports:
+      - "8081:8080"
+    networks:
+      - quizz_frontend
+      - quizz_backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  quizz_postgres_data:
+
+secrets:
+  postgres_password:
+    file: ./docker/secrets/postgres_password.txt
+
+networks:
+  quizz_frontend:
+    driver: bridge
+
+  quizz_backend:
+    driver: bridge
+    internal: true

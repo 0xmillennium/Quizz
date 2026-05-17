@@ -1,0 +1,12 @@
+target/
+.git/
+.idea/
+.vscode/
+*.iml
+*.log
+docker/secrets/*
+!docker/secrets/.gitkeep
+!docker/secrets/README.md
+.env
+.env.*
+.DS_Store

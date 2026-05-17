@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: quizz
+
+  config:
+    import: optional:configtree:/run/secrets/
+
+  datasource:
+    url: jdbc:postgresql://postgres:5432/quizz
+    username: quizz
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never

@@ -8,7 +8,6 @@ import com.quizz.question.dto.QuestionResponse;
 import com.quizz.question.dto.QuestionSelectionResponse;
 import com.quizz.question.dto.QuestionSummaryResponse;
 import com.quizz.question.dto.QuestionUpdateRequest;
-import com.quizz.question.entity.AnswerOption;
 import com.quizz.question.entity.AnswerOptionDraft;
 import com.quizz.question.entity.Question;
 import java.lang.reflect.Field;

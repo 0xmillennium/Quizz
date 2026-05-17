@@ -42,7 +42,7 @@ class AdminDashboardQueryRepositoryTest {
     @Test
     void fetchMetricsQueriesExpectedTables() {
         DashboardMetricsRow metrics = new DashboardMetricsRow(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.0);
-        when(jdbcTemplate.queryForObject(anyString(), anyMap(), any(RowMapper.class))).thenReturn(metrics);
+        when(jdbcTemplate.queryForObject(anyString(), anyMap(), anyRowMapper())).thenReturn(metrics);
 
         repository.fetchMetrics();
 
@@ -65,7 +65,7 @@ class AdminDashboardQueryRepositoryTest {
 
     @Test
     void findRecentAttemptsPassesLimitOrdersByStartedAtDescAndDoesNotSelectEmail() {
-        when(jdbcTemplate.query(anyString(), anyMap(), any(RowMapper.class))).thenReturn(List.of());
+        when(jdbcTemplate.query(anyString(), anyMap(), anyRowMapper())).thenReturn(List.of());
 
         repository.findRecentAttempts(10);
 
@@ -81,7 +81,7 @@ class AdminDashboardQueryRepositoryTest {
     void recentRowMapperMapsFields() throws Exception {
         Instant startedAt = Instant.parse("2026-01-01T10:00:00Z");
         Instant submittedAt = Instant.parse("2026-01-01T10:15:00Z");
-        when(jdbcTemplate.query(anyString(), anyMap(), any(RowMapper.class))).thenReturn(List.of());
+        when(jdbcTemplate.query(anyString(), anyMap(), anyRowMapper())).thenReturn(List.of());
         when(resultSet.getLong("attempt_id")).thenReturn(1L);
         when(resultSet.getLong("user_id")).thenReturn(2L);
         when(resultSet.getString("user_full_name")).thenReturn("Ada Lovelace");
@@ -129,5 +129,9 @@ class AdminDashboardQueryRepositoryTest {
             Map<String, ?> params,
             RowMapper<T> rowMapper
     ) {
+    }
+
+    private static <T> RowMapper<T> anyRowMapper() {
+        return any();
     }
 }

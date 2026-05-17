@@ -41,7 +41,7 @@ class AdminResultQueryRepositoryTest {
     @BeforeEach
     void setUp() {
         repository = new AdminResultQueryRepository(jdbcTemplate);
-        lenient().when(jdbcTemplate.query(anyString(), anyMap(), any(RowMapper.class))).thenReturn(List.of());
+        lenient().when(jdbcTemplate.query(anyString(), anyMap(), anyRowMapper())).thenReturn(List.of());
         lenient().when(jdbcTemplate.queryForObject(anyString(), anyMap(), eq(Long.class))).thenReturn(0L);
     }
 
@@ -268,5 +268,9 @@ class AdminResultQueryRepositoryTest {
             String sql,
             Map<String, ?> params
     ) {
+    }
+
+    private static <T> RowMapper<T> anyRowMapper() {
+        return any();
     }
 }

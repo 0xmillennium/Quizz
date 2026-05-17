@@ -36,7 +36,7 @@ class LeaderboardQueryRepositoryTest {
     @BeforeEach
     void setUp() {
         repository = new LeaderboardQueryRepository(jdbcTemplate);
-        when(jdbcTemplate.query(anyString(), anyMap(), any(RowMapper.class))).thenReturn(List.of());
+        when(jdbcTemplate.query(anyString(), anyMap(), anyRowMapper())).thenReturn(List.of());
     }
 
     @Test
@@ -128,5 +128,9 @@ class LeaderboardQueryRepositoryTest {
             Map<String, ?> params,
             RowMapper<LeaderboardRow> rowMapper
     ) {
+    }
+
+    private static <T> RowMapper<T> anyRowMapper() {
+        return any();
     }
 }

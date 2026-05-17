@@ -75,6 +75,12 @@ class SecurityConfigTest {
     }
 
     @Test
+    void actuatorHealthIsPublic() throws Exception {
+        mockMvc.perform(get("/actuator/health"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void anonymousGetAdminRedirectsToLogin() throws Exception {
         mockMvc.perform(get("/admin"))
                 .andExpect(status().is3xxRedirection())
@@ -164,6 +170,12 @@ class SecurityConfigTest {
         @ResponseBody
         String css() {
             return "body {}";
+        }
+
+        @GetMapping("/actuator/health")
+        @ResponseBody
+        String health() {
+            return "{\"status\":\"UP\"}";
         }
 
         @GetMapping("/admin")

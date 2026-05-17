@@ -43,3 +43,12 @@ buildNumber.properties
 ##############################
 .vscode/
 .code-workspace
+
+##############################
+## Local Docker secrets
+##############################
+docker/secrets/*
+!docker/secrets/.gitkeep
+!docker/secrets/README.md
+.env
+.env.*

@@ -44,6 +44,28 @@ Flyway runs database migrations on startup. Hibernate is configured with `ddl-au
 
 More setup detail is in [docs/LOCAL_SETUP.md](docs/LOCAL_SETUP.md).
 
+## Docker Quick Start
+
+Docker is an additional local runtime option. Create the local secret file first:
+
+```bash
+mkdir -p docker/secrets
+openssl rand -base64 48 | tr -d '\n' > docker/secrets/postgres_password.txt
+chmod 600 docker/secrets/postgres_password.txt
+```
+
+Then start the application and PostgreSQL:
+
+```bash
+docker compose up --build
+```
+
+Application URL: <http://localhost:8081>
+
+Health URL: <http://localhost:8081/actuator/health>
+
+PostgreSQL is intentionally not exposed to the host; it is reachable only by the Quizz container on the internal backend network. Full Docker workflow details are in [docs/DOCKER.md](docs/DOCKER.md).
+
 ## Profiles And Configuration
 
 - `spring.application.name=quizz`
@@ -108,6 +130,7 @@ Admin:
 ## Documentation
 
 - [Local setup](docs/LOCAL_SETUP.md)
+- [Docker runtime](docs/DOCKER.md)
 - [Admin bootstrap](docs/ADMIN_BOOTSTRAP.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Final requirements checklist](docs/FINAL_REQUIREMENTS_CHECKLIST.md)
