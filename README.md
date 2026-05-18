@@ -47,7 +47,15 @@ More setup detail is in [docs/LOCAL_SETUP.md](docs/LOCAL_SETUP.md).
 
 ## Docker Quick Start
 
-Docker is an additional local runtime option. Create the local secret file first:
+Docker is an additional local runtime option. Create the non-secret local config and review it first:
+
+```bash
+cp .env.example .env
+```
+
+The `.env` file controls local non-secret values such as `QUIZZ_HTTP_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, and the admin identity used by the bootstrap script. Do not put passwords, tokens, API keys, or database secrets in `.env`; database password remains a Docker Compose secret.
+
+Create the local secret file:
 
 ```bash
 mkdir -p docker/secrets
@@ -67,9 +75,9 @@ Bootstrap an admin account:
 ./scripts/bootstrap-admin.sh
 ```
 
-Application URL: <http://localhost:8081>
+Application URL: `http://localhost:<QUIZZ_HTTP_PORT from .env>`.
 
-Health URL: <http://localhost:8081/actuator/health>
+Using the default `.env.example` value, the application URL is <http://localhost:8081> and the health URL is <http://localhost:8081/actuator/health>.
 
 PostgreSQL is intentionally not exposed to the host; it is reachable only by the Quizz container on the internal backend network. Full Docker workflow details are in [docs/DOCKER.md](docs/DOCKER.md), and admin bootstrap details are in [docs/ADMIN_BOOTSTRAP.md](docs/ADMIN_BOOTSTRAP.md).
 
@@ -83,6 +91,7 @@ After an admin exists, demo catalog content can be loaded through the admin MVC 
 - `spring.flyway.enabled=true`
 - `application-dev.yml` uses the `quizz` PostgreSQL database naming.
 - `application-test.yml` keeps strict JPA and Flyway settings, but the current tests avoid requiring an external database.
+- Local Docker and tooling use `.env` as the single source of truth for non-secret configuration. Tooling derives the base URL as `http://localhost:<QUIZZ_HTTP_PORT>`; do not define `QUIZZ_BASE_URL`.
 
 ## Route Overview
 

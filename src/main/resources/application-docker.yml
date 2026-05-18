@@ -6,8 +6,8 @@ spring:
     import: optional:configtree:/run/secrets/
 
   datasource:
-    url: jdbc:postgresql://postgres:5432/quizz
-    username: quizz
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
     driver-class-name: org.postgresql.Driver
 
   jpa:

@@ -3,32 +3,29 @@ from __future__ import annotations
 
 import argparse
 import getpass
-import os
 import sys
 from pathlib import Path
 
 from quizz_http.admin_catalog import AdminCatalogClient
 from quizz_http.auth import AuthClient
 from quizz_http.client import QuizzHttpClient
+from quizz_http.config import DemoToolConfig, load_demo_tool_config
 from quizz_http.errors import DemoFixtureError
 from quizz_http.fixtures import load_questions
 from quizz_http.output import print_results
 
 
-DEFAULT_BASE_URL = "http://localhost:8080"
-DEFAULT_ADMIN_EMAIL = "admin@example.com"
 SCRIPT_DIR = Path(__file__).resolve().parent
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Load demo questions through admin HTTP endpoints.")
-    parser.add_argument("--base-url", default=None)
-    parser.add_argument("--admin-email", default=DEFAULT_ADMIN_EMAIL)
-    args = parser.parse_args()
+    parser.parse_args()
 
     try:
+        config = load_demo_tool_config()
         questions = load_questions(SCRIPT_DIR / "data" / "questions.json")
-        http = _login(_base_url(args.base_url), args.admin_email)
+        http = _login(config)
         results = AdminCatalogClient(http).ensure_questions(questions)
         print_results("Demo Questions", results)
         return 0
@@ -37,14 +34,10 @@ def main() -> int:
         return 1
 
 
-def _base_url(cli_value: str | None) -> str:
-    return cli_value or os.environ.get("QUIZZ_BASE_URL") or DEFAULT_BASE_URL
-
-
-def _login(base_url: str, email: str) -> QuizzHttpClient:
-    password = getpass.getpass(f"Admin password for {email}: ")
-    http = QuizzHttpClient(base_url)
-    AuthClient(http).login(email, password)
+def _login(config: DemoToolConfig) -> QuizzHttpClient:
+    password = getpass.getpass(f"Admin password for {config.default_admin_email}: ")
+    http = QuizzHttpClient(config.base_url)
+    AuthClient(http).login(config.default_admin_email, password)
     return http
 
 

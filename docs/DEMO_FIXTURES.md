@@ -8,33 +8,27 @@ This tooling is for catalog content only. It does not create demo users, solve q
 
 ## Prerequisites
 
+- Create and review `.env`:
+
+```bash
+cp .env.example .env
+```
+
 - The Quizz application is running, for example through Docker.
 - An admin account has already been bootstrapped.
 - The admin account can log in through `/login` and access `/admin`.
 
-For Docker, the app is commonly available at `http://localhost:8081`. For a local Spring Boot run, it may be `http://localhost:8081`.
+The `.env` file is non-secret local config. Do not put passwords, tokens, API keys, or database secrets in it. The database password remains a Docker Compose secret, and the admin password is prompted interactively.
+
+`QUIZZ_HTTP_PORT` controls the host port. Demo tooling derives the base URL as `http://localhost:<QUIZZ_HTTP_PORT>`. With the default `.env.example` value, that is `http://localhost:8081`. Do not define `QUIZZ_BASE_URL`.
 
 ## Load All Demo Catalog Data
 
 ```bash
-python3 scripts/demo/load-all-demo-catalog.py --base-url http://localhost:8081
+python3 scripts/demo/load-all-demo-catalog.py
 ```
 
-The script prompts for the admin password with hidden input. Passwords are not accepted through command-line arguments or environment variables.
-
-## Base URL Override
-
-Base URL resolution order:
-
-1. `--base-url`
-2. `QUIZZ_BASE_URL`
-3. `http://localhost:8081`
-
-Example:
-
-```bash
-QUIZZ_BASE_URL=http://localhost:8081 python3 scripts/demo/load-all-demo-catalog.py
-```
+The script reads `QUIZZ_HTTP_PORT` and `QUIZZ_DEFAULT_ADMIN_EMAIL` from `.env`, then prompts for the admin password with hidden input. Passwords are not accepted through command-line arguments or environment variables. Demo scripts no longer accept `--base-url` or `--admin-email`.
 
 ## Individual Commands
 
@@ -88,7 +82,7 @@ Existing content is not edited, deleted, reset, or overwritten.
 ## Troubleshooting
 
 Login failed:
-Verify the admin email, password, and ADMIN role. The default email is `admin@example.com`; override it with `--admin-email`.
+Verify `QUIZZ_DEFAULT_ADMIN_EMAIL` in `.env`, the prompted password, and the ADMIN role.
 
 CSRF token not found:
 Confirm the app is serving the expected MVC pages and that you are using the correct base URL. A proxy or error page may be returning non-form HTML.
@@ -103,4 +97,4 @@ Quiz archived:
 Archived quizzes are not edited or republished by this phase. Rename the fixture title or handle the archived quiz manually.
 
 Wrong port or base URL:
-Use `--base-url` or `QUIZZ_BASE_URL`. Docker may use `http://localhost:8081`.
+Set `QUIZZ_HTTP_PORT` in `.env`. Tooling derives `http://localhost:<QUIZZ_HTTP_PORT>` and rejects `QUIZZ_BASE_URL`.

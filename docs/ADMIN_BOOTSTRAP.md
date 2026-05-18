@@ -5,15 +5,19 @@ Public registration creates `USER` accounts only. Quizz does not include an admi
 The recommended admin creation path is the Docker bootstrap script:
 
 ```bash
+cp .env.example .env
 chmod +x scripts/bootstrap-admin.sh
 ./scripts/bootstrap-admin.sh
 ```
 
-The script prompts for:
+Review `.env` before running the script. It is the single source for non-secret local bootstrap configuration. Do not put passwords, tokens, API keys, or database secrets in `.env`; the database password remains a Docker Compose secret.
 
-- admin email, defaulting to `admin@example.com`
-- admin full name, defaulting to `Admin User`
-- password and confirmation, read hidden from the terminal
+The script reads from `.env`:
+
+- admin email from `QUIZZ_DEFAULT_ADMIN_EMAIL`
+- admin full name from `QUIZZ_DEFAULT_ADMIN_FULL_NAME`
+
+The script prompts only for password and confirmation, read hidden from the terminal.
 
 The plaintext password is not written to disk and is not passed as a command-line argument. The script sends it through stdin to the Quizz Docker image:
 
@@ -24,6 +28,8 @@ printf '%s' 'StrongPassword123!' | docker compose run --rm --no-deps quizz hash-
 The `hash-password` mode uses the same BCrypt encoder as the application and writes only the BCrypt hash to stdout. Validation errors are written to stderr.
 
 After generating the hash, the script executes the SQL in `scripts/sql/upsert-admin.sql` through `docker compose exec -T postgres psql`. PostgreSQL does not need a host port; the script works with the private Compose network.
+
+`POSTGRES_DB` and `POSTGRES_USER` come from `.env`. The PostgreSQL password does not; it stays in Docker Compose secrets.
 
 The SQL is idempotent. It matches an existing user with `lower(email) = lower(:'admin_email')`, updates that user to `ADMIN` and `enabled = true`, or inserts a new admin user when no matching email exists.
 

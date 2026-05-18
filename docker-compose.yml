@@ -3,8 +3,8 @@ services:
     image: postgres:17-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: quizz
-      POSTGRES_USER: quizz
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
     secrets:
       - source: postgres_password
@@ -14,7 +14,7 @@ services:
     networks:
       - quizz_backend
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U quizz -d quizz"]
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -34,11 +34,13 @@ services:
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
     secrets:
       - source: postgres_password
         target: spring.datasource.password
     ports:
-      - "8081:8080"
+      - "${QUIZZ_HTTP_PORT}:8080"
     networks:
       - quizz_frontend
       - quizz_backend

@@ -1,14 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-POSTGRES_USER="quizz"
-POSTGRES_DB="quizz"
-ADMIN_EMAIL=""
-ADMIN_FULL_NAME=""
-ADMIN_PASSWORD=""
-ADMIN_PASSWORD_CONFIRM=""
-PASSWORD_HASH=""
-PROJECT_ROOT=""
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# shellcheck source=scripts/lib/env.sh
+source "$SCRIPT_DIR/lib/env.sh"
 
 require_command() {
     local command_name="$1"
@@ -19,23 +15,7 @@ require_command() {
     fi
 }
 
-resolve_project_root() {
-    local script_dir
-
-    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    PROJECT_ROOT="$(cd "$script_dir/.." && pwd)"
-}
-
-read_admin_input() {
-    local email_input
-    local full_name_input
-
-    read -r -p "Admin email [admin@example.com]: " email_input
-    ADMIN_EMAIL="${email_input:-admin@example.com}"
-
-    read -r -p "Admin full name [Admin User]: " full_name_input
-    ADMIN_FULL_NAME="${full_name_input:-Admin User}"
-
+read_admin_password() {
     read -r -s -p "Admin password: " ADMIN_PASSWORD
     printf '\n'
 
@@ -163,9 +143,17 @@ upsert_admin() {
 }
 
 main() {
+    PROJECT_ROOT="$(resolve_project_root "$SCRIPT_DIR")"
+    load_required_env "$PROJECT_ROOT" \
+        QUIZZ_DEFAULT_ADMIN_EMAIL \
+        QUIZZ_DEFAULT_ADMIN_FULL_NAME \
+        POSTGRES_DB \
+        POSTGRES_USER
+    ADMIN_EMAIL="$QUIZZ_DEFAULT_ADMIN_EMAIL"
+    ADMIN_FULL_NAME="$QUIZZ_DEFAULT_ADMIN_FULL_NAME"
+
     require_command docker
-    resolve_project_root
-    read_admin_input
+    read_admin_password
     ensure_secret_file_exists
     ensure_compose_services
     wait_for_postgres
