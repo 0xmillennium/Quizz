@@ -33,6 +33,9 @@ class DemoQuiz:
     description: str
     category: str
     duration_minutes: int
+    question_count: int
+    attempt_limit: int
+    retake_cooldown_minutes: int
     questions: list[str]
     publish: bool
 
@@ -97,6 +100,15 @@ def load_quizzes(path: Path) -> list[DemoQuiz]:
         duration = item.get("durationMinutes")
         if not isinstance(duration, int) or not 1 <= duration <= 180:
             raise FixtureValidationError(f"{context} durationMinutes must be between 1 and 180.")
+        question_count = item.get("questionCount")
+        if not isinstance(question_count, int) or question_count < 1:
+            raise FixtureValidationError(f"{context} questionCount must be at least 1.")
+        attempt_limit = item.get("attemptLimit")
+        if not isinstance(attempt_limit, int) or attempt_limit < 1:
+            raise FixtureValidationError(f"{context} attemptLimit must be at least 1.")
+        retake_cooldown_minutes = item.get("retakeCooldownMinutes")
+        if not isinstance(retake_cooldown_minutes, int) or retake_cooldown_minutes < 1:
+            raise FixtureValidationError(f"{context} retakeCooldownMinutes must be at least 1.")
         questions_raw = item.get("questions")
         if not isinstance(questions_raw, list):
             raise FixtureValidationError(f"{context} questions must be a list.")
@@ -111,6 +123,10 @@ def load_quizzes(path: Path) -> list[DemoQuiz]:
             questions.append(question.strip())
         if len(set(questions)) != len(questions):
             raise FixtureValidationError(f"{context} questions must not contain duplicates.")
+        if question_count > len(questions):
+            raise FixtureValidationError(
+                f"{context} questionCount must not exceed the number of listed questions."
+            )
         publish = item.get("publish")
         if not isinstance(publish, bool):
             raise FixtureValidationError(f"{context} publish must be boolean.")
@@ -120,6 +136,9 @@ def load_quizzes(path: Path) -> list[DemoQuiz]:
                 description=description,
                 category=category,
                 duration_minutes=duration,
+                question_count=question_count,
+                attempt_limit=attempt_limit,
+                retake_cooldown_minutes=retake_cooldown_minutes,
                 questions=questions,
                 publish=publish,
             )

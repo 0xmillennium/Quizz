@@ -9,8 +9,11 @@ public record QuizAdminResponse(
         Long categoryId,
         String categoryName,
         int durationMinutes,
-        String status,
         int questionCount,
+        int attemptLimit,
+        int retakeCooldownMinutes,
+        String status,
+        int poolSize,
         List<QuizQuestionResponse> questions
 ) {
 }

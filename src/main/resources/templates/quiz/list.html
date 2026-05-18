@@ -33,7 +33,8 @@
             <th>Title</th>
             <th>Category</th>
             <th>Duration</th>
-            <th>Question Count</th>
+            <th>Questions</th>
+            <th>Attempts</th>
             <th>Actions</th>
         </tr>
         </thead>
@@ -43,6 +44,7 @@
             <td th:text="${quiz.categoryName()}">Category</td>
             <td th:text="${quiz.durationMinutes()} + ' minutes'">30 minutes</td>
             <td th:text="${quiz.questionCount()}">5</td>
+            <td th:text="${quiz.attemptLimit()} + ', cooldown ' + ${quiz.retakeCooldownMinutes()} + ' min'">3, cooldown 1440 min</td>
             <td><a th:href="@{/quizzes/{id}(id=${quiz.id()})}">Details</a></td>
         </tr>
         </tbody>

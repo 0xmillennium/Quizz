@@ -39,19 +39,32 @@ public class AttemptAnswerOption extends BaseEntity {
     protected AttemptAnswerOption() {
     }
 
-    private AttemptAnswerOption(AttemptQuestion attemptQuestion, AnswerOption answerOption) {
+    private AttemptAnswerOption(AttemptQuestion attemptQuestion, AnswerOption answerOption, int displayOrder) {
         this.attemptQuestion = attemptQuestion;
         this.originalAnswerOptionId = answerOption.getId();
         this.optionText = answerOption.getText();
         this.correct = answerOption.isCorrect();
-        this.displayOrder = answerOption.getDisplayOrder();
+        this.displayOrder = displayOrder;
+    }
+
+    private AttemptAnswerOption(AttemptQuestion attemptQuestion, AttemptAnswerOption source) {
+        this.attemptQuestion = attemptQuestion;
+        this.originalAnswerOptionId = source.originalAnswerOptionId;
+        this.optionText = source.optionText;
+        this.correct = source.correct;
+        this.displayOrder = source.displayOrder;
     }
 
     static AttemptAnswerOption snapshotFrom(
             AttemptQuestion attemptQuestion,
-            AnswerOption answerOption
+            AnswerOption answerOption,
+            int displayOrder
     ) {
-        return new AttemptAnswerOption(attemptQuestion, answerOption);
+        return new AttemptAnswerOption(attemptQuestion, answerOption, displayOrder);
+    }
+
+    static AttemptAnswerOption copyForRestart(AttemptQuestion attemptQuestion, AttemptAnswerOption source) {
+        return new AttemptAnswerOption(attemptQuestion, source);
     }
 
     public AttemptQuestion getAttemptQuestion() {

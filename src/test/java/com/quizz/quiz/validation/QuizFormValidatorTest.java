@@ -117,6 +117,59 @@ class QuizFormValidatorTest {
     }
 
     @Test
+    void questionCountLessThanOneAddsError() {
+        QuizCreateRequest request = validCreateRequest();
+        request.setQuestionCount(0);
+        BindingResult bindingResult = bindingResult(request, "quizCreateRequest");
+        when(categoryQueryService.getActiveById(1L)).thenReturn(category);
+        when(questionQueryService.getActiveById(10L)).thenReturn(question);
+
+        validator.validateCreate(request, bindingResult);
+
+        assertThat(bindingResult.getFieldError("questionCount").getCode()).isEqualTo("quiz.questionCount.min");
+    }
+
+    @Test
+    void attemptLimitLessThanOneAddsError() {
+        QuizCreateRequest request = validCreateRequest();
+        request.setAttemptLimit(0);
+        BindingResult bindingResult = bindingResult(request, "quizCreateRequest");
+        when(categoryQueryService.getActiveById(1L)).thenReturn(category);
+        when(questionQueryService.getActiveById(10L)).thenReturn(question);
+
+        validator.validateCreate(request, bindingResult);
+
+        assertThat(bindingResult.getFieldError("attemptLimit").getCode()).isEqualTo("quiz.attemptLimit.min");
+    }
+
+    @Test
+    void retakeCooldownMinutesLessThanOneAddsError() {
+        QuizCreateRequest request = validCreateRequest();
+        request.setRetakeCooldownMinutes(0);
+        BindingResult bindingResult = bindingResult(request, "quizCreateRequest");
+        when(categoryQueryService.getActiveById(1L)).thenReturn(category);
+        when(questionQueryService.getActiveById(10L)).thenReturn(question);
+
+        validator.validateCreate(request, bindingResult);
+
+        assertThat(bindingResult.getFieldError("retakeCooldownMinutes").getCode())
+                .isEqualTo("quiz.retakeCooldownMinutes.min");
+    }
+
+    @Test
+    void questionCountGreaterThanSelectedPoolSizeAddsError() {
+        QuizCreateRequest request = validCreateRequest();
+        request.setQuestionCount(2);
+        BindingResult bindingResult = bindingResult(request, "quizCreateRequest");
+        when(categoryQueryService.getActiveById(1L)).thenReturn(category);
+        when(questionQueryService.getActiveById(10L)).thenReturn(question);
+
+        validator.validateCreate(request, bindingResult);
+
+        assertThat(bindingResult.getFieldError("questionCount").getCode()).isEqualTo("quiz.questionCount.poolSize");
+    }
+
+    @Test
     void questionIdsFieldAlreadyHasErrorDoesNotCallQuestionService() {
         QuizCreateRequest request = validCreateRequest();
         BindingResult bindingResult = bindingResult(request, "quizCreateRequest");

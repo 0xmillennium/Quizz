@@ -11,6 +11,7 @@ import com.quizz.quiz.entity.Quiz;
 import com.quizz.user.entity.User;
 import java.lang.reflect.Field;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 
 public final class AttemptTestFactory {
@@ -46,14 +47,22 @@ public final class AttemptTestFactory {
     }
 
     public static Quiz quiz(Long id, Category category, Question... questions) throws Exception {
-        Quiz quiz = Quiz.create("Science Quiz", "Basics", category, 30, List.of(questions));
+        Quiz quiz = Quiz.create("Science Quiz", "Basics", category, 30, questions.length, 3, 1440, List.of(questions));
         quiz.publish();
         setId(quiz, id);
         return quiz;
     }
 
     public static QuizAttempt attempt(Long id, User user, Quiz quiz, Instant startedAt) throws Exception {
-        QuizAttempt attempt = QuizAttempt.start(user, quiz, startedAt);
+        QuizAttempt attempt = QuizAttempt.start(
+                user,
+                quiz,
+                startedAt,
+                quiz.getQuestions(),
+                question -> question.getOptions().stream()
+                        .sorted(Comparator.comparingInt(option -> option.getDisplayOrder()))
+                        .toList()
+        );
         setId(attempt, id);
         long questionId = id * 100;
         long optionId = id * 1000;

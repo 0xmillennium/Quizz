@@ -10,5 +10,13 @@
   {
     "name": "Demo Databases",
     "description": "Demo questions covering relational database fundamentals."
+  },
+  {
+    "name": "Demo Web Security",
+    "description": "Demo questions covering web application security fundamentals."
+  },
+  {
+    "name": "Demo Software Architecture",
+    "description": "Demo questions covering maintainable software design and architecture."
   }
 ]

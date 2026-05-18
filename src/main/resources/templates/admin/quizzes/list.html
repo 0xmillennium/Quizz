@@ -24,7 +24,8 @@
             <th>Category</th>
             <th>Duration</th>
             <th>Status</th>
-            <th>Question Count</th>
+            <th>Questions / Pool</th>
+            <th>Attempts</th>
             <th>Actions</th>
         </tr>
         </thead>
@@ -34,7 +35,8 @@
             <td th:text="${quiz.categoryName()}">Category</td>
             <td th:text="${quiz.durationMinutes()} + ' minutes'">30 minutes</td>
             <td th:text="${quiz.status()}">DRAFT</td>
-            <td th:text="${quiz.questionCount()}">5</td>
+            <td th:text="${quiz.questionCount()} + ' / ' + ${quiz.poolSize()}">6 / 12</td>
+            <td th:text="${quiz.attemptLimit()} + ', cooldown ' + ${quiz.retakeCooldownMinutes()} + ' min'">3, cooldown 60 min</td>
             <td>
                 <a th:href="@{/admin/quizzes/{id}(id=${quiz.id()})}">Detail</a>
                 <a th:if="${quiz.status() == 'DRAFT'}"

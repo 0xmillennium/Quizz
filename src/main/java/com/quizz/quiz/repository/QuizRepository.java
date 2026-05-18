@@ -11,7 +11,12 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
 
-    @EntityGraph(attributePaths = {"category", "questions", "questions.question", "questions.question.category"})
+    @EntityGraph(attributePaths = {
+            "category",
+            "questions",
+            "questions.question",
+            "questions.question.category"
+    })
     @Query("select distinct q from Quiz q order by q.createdAt desc")
     List<Quiz> findAllWithCategoryAndQuestionsForAdmin();
 
@@ -37,7 +42,12 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
             QuizStatus status
     );
 
-    @EntityGraph(attributePaths = {"category", "questions", "questions.question", "questions.question.category"})
+    @EntityGraph(attributePaths = {
+            "category",
+            "questions",
+            "questions.question",
+            "questions.question.category"
+    })
     @Query("select distinct q from Quiz q where q.id = :id")
     Optional<Quiz> findByIdWithAdminDetails(Long id);
 

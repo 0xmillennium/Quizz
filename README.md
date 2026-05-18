@@ -16,9 +16,10 @@ Quizz is a Spring Boot MVC quiz application with public registration/login, admi
 
 ## Main Features
 
-- Users can register, log in, browse published quizzes, complete timed attempts, view scores, see result history, and use the leaderboard.
-- Admins can manage categories, questions, and quizzes, publish or archive quizzes, and review submitted results.
+- Users can register, log in, browse published quizzes, complete timed randomized attempts, view scores, see result history, and use the leaderboard.
+- Admins can manage categories, questions, quiz question pools, questions per attempt, attempt limits, cooldown policy, and review submitted results.
 - Attempts store quiz, question, and answer snapshots so historical results remain stable after content changes.
+- Restart consumes an additional attempt right but reuses the same stored question and option snapshot; cooldown expiry restores attempt rights.
 - Leaderboard and admin reporting are read models backed by JDBC queries over attempt snapshots.
 
 ## Tests

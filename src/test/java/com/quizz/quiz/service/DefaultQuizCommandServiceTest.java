@@ -64,6 +64,9 @@ class DefaultQuizCommandServiceTest {
 
         assertThat(quiz.getStatus()).isEqualTo(QuizStatus.DRAFT);
         assertThat(quiz.getQuestions()).hasSize(2);
+        assertThat(quiz.getQuestionCount()).isEqualTo(1);
+        assertThat(quiz.getAttemptLimit()).isEqualTo(3);
+        assertThat(quiz.getRetakeCooldownMinutes()).isEqualTo(1440);
     }
 
     @Test
@@ -124,6 +127,46 @@ class DefaultQuizCommandServiceTest {
     }
 
     @Test
+    void createRejectsQuestionCountBelowOne() {
+        QuizCreateRequest request = createRequest("Science Quiz", null, 1L, 30, 10L);
+        request.setQuestionCount(0);
+
+        assertThatThrownBy(() -> service.create(request))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("Questions per attempt must be at least 1.");
+    }
+
+    @Test
+    void createRejectsAttemptLimitBelowOne() {
+        QuizCreateRequest request = createRequest("Science Quiz", null, 1L, 30, 10L);
+        request.setAttemptLimit(0);
+
+        assertThatThrownBy(() -> service.create(request))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("Attempt limit must be at least 1.");
+    }
+
+    @Test
+    void createRejectsRetakeCooldownBelowOne() {
+        QuizCreateRequest request = createRequest("Science Quiz", null, 1L, 30, 10L);
+        request.setRetakeCooldownMinutes(0);
+
+        assertThatThrownBy(() -> service.create(request))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("Retake cooldown must be at least 1 minute.");
+    }
+
+    @Test
+    void createRejectsQuestionCountGreaterThanSelectedPoolSize() {
+        QuizCreateRequest request = createRequest("Science Quiz", null, 1L, 30, 10L);
+        request.setQuestionCount(2);
+
+        assertThatThrownBy(() -> service.create(request))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("Questions per attempt cannot exceed the pool size.");
+    }
+
+    @Test
     void createRejectsQuestionFromDifferentCategory() throws Exception {
         Category otherCategory = category(2L, "History");
         when(questionQueryService.getActiveById(30L)).thenReturn(question(30L, "Other?", otherCategory));
@@ -135,7 +178,7 @@ class DefaultQuizCommandServiceTest {
 
     @Test
     void updateDraftUpdatesOnlyDraftQuiz() {
-        Quiz quiz = Quiz.create("Old", null, category, 20, List.of(firstQuestion));
+        Quiz quiz = Quiz.create("Old", null, category, 20, 1, 3, 1440, List.of(firstQuestion));
         when(quizRepository.findByIdWithAdminDetails(1L)).thenReturn(Optional.of(quiz));
 
         Quiz updated = service.updateDraft(1L, updateRequest("New Title", "New", 1L, 40, 20L));
@@ -147,8 +190,24 @@ class DefaultQuizCommandServiceTest {
     }
 
     @Test
+    void updateDraftUpdatesAttemptPolicy() {
+        Quiz quiz = Quiz.create("Old", null, category, 20, 1, 3, 1440, List.of(firstQuestion, secondQuestion));
+        QuizUpdateRequest request = updateRequest("New Title", "New", 1L, 40, 10L, 20L);
+        request.setQuestionCount(2);
+        request.setAttemptLimit(5);
+        request.setRetakeCooldownMinutes(60);
+        when(quizRepository.findByIdWithAdminDetails(1L)).thenReturn(Optional.of(quiz));
+
+        Quiz updated = service.updateDraft(1L, request);
+
+        assertThat(updated.getQuestionCount()).isEqualTo(2);
+        assertThat(updated.getAttemptLimit()).isEqualTo(5);
+        assertThat(updated.getRetakeCooldownMinutes()).isEqualTo(60);
+    }
+
+    @Test
     void updateDraftReplacesQuizQuestionRows() {
-        Quiz quiz = Quiz.create("Old", null, category, 20, List.of(firstQuestion, secondQuestion));
+        Quiz quiz = Quiz.create("Old", null, category, 20, 1, 3, 1440, List.of(firstQuestion, secondQuestion));
         when(quizRepository.findByIdWithAdminDetails(1L)).thenReturn(Optional.of(quiz));
 
         service.updateDraft(1L, updateRequest("Old", null, 1L, 20, 20L));
@@ -160,7 +219,7 @@ class DefaultQuizCommandServiceTest {
 
     @Test
     void updateDraftRejectsPublishedQuiz() {
-        Quiz quiz = Quiz.create("Old", null, category, 20, List.of(firstQuestion));
+        Quiz quiz = Quiz.create("Old", null, category, 20, 1, 3, 1440, List.of(firstQuestion));
         quiz.publish();
         when(quizRepository.findByIdWithAdminDetails(1L)).thenReturn(Optional.of(quiz));
 
@@ -171,7 +230,7 @@ class DefaultQuizCommandServiceTest {
 
     @Test
     void updateDraftRejectsArchivedQuiz() {
-        Quiz quiz = Quiz.create("Old", null, category, 20, List.of(firstQuestion));
+        Quiz quiz = Quiz.create("Old", null, category, 20, 1, 3, 1440, List.of(firstQuestion));
         quiz.archive();
         when(quizRepository.findByIdWithAdminDetails(1L)).thenReturn(Optional.of(quiz));
 
@@ -182,7 +241,7 @@ class DefaultQuizCommandServiceTest {
 
     @Test
     void publishChangesDraftToPublished() {
-        Quiz quiz = Quiz.create("Old", null, category, 20, List.of(firstQuestion));
+        Quiz quiz = Quiz.create("Old", null, category, 20, 1, 3, 1440, List.of(firstQuestion, secondQuestion));
         when(quizRepository.findByIdWithAdminDetails(1L)).thenReturn(Optional.of(quiz));
 
         service.publish(1L);
@@ -191,8 +250,18 @@ class DefaultQuizCommandServiceTest {
     }
 
     @Test
+    void publishRejectsQuestionCountGreaterThanActivePoolSize() {
+        Quiz quiz = Quiz.create("Old", null, category, 20, 2, 3, 1440, List.of(firstQuestion));
+        when(quizRepository.findByIdWithAdminDetails(1L)).thenReturn(Optional.of(quiz));
+
+        assertThatThrownBy(() -> service.publish(1L))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("Questions per attempt cannot exceed the pool size.");
+    }
+
+    @Test
     void publishRejectsQuizWithArchivedQuestion() {
-        Quiz quiz = Quiz.create("Old", null, category, 20, List.of(firstQuestion));
+        Quiz quiz = Quiz.create("Old", null, category, 20, 1, 3, 1440, List.of(firstQuestion));
         firstQuestion.archive();
         when(quizRepository.findByIdWithAdminDetails(1L)).thenReturn(Optional.of(quiz));
 
@@ -203,7 +272,7 @@ class DefaultQuizCommandServiceTest {
 
     @Test
     void publishRejectsQuizWithInactiveCategory() {
-        Quiz quiz = Quiz.create("Old", null, category, 20, List.of(firstQuestion));
+        Quiz quiz = Quiz.create("Old", null, category, 20, 1, 3, 1440, List.of(firstQuestion));
         category.deactivate();
         when(quizRepository.findByIdWithAdminDetails(1L)).thenReturn(Optional.of(quiz));
 
@@ -214,7 +283,7 @@ class DefaultQuizCommandServiceTest {
 
     @Test
     void publishRejectsNonDraftQuiz() {
-        Quiz quiz = Quiz.create("Old", null, category, 20, List.of(firstQuestion));
+        Quiz quiz = Quiz.create("Old", null, category, 20, 1, 3, 1440, List.of(firstQuestion));
         quiz.publish();
         when(quizRepository.findByIdWithAdminDetails(1L)).thenReturn(Optional.of(quiz));
 
@@ -225,7 +294,7 @@ class DefaultQuizCommandServiceTest {
 
     @Test
     void archiveMarksQuizArchived() {
-        Quiz quiz = Quiz.create("Old", null, category, 20, List.of(firstQuestion));
+        Quiz quiz = Quiz.create("Old", null, category, 20, 1, 3, 1440, List.of(firstQuestion));
         when(quizRepository.findById(1L)).thenReturn(Optional.of(quiz));
 
         service.archive(1L);
@@ -235,7 +304,7 @@ class DefaultQuizCommandServiceTest {
 
     @Test
     void archiveIsIdempotent() {
-        Quiz quiz = Quiz.create("Old", null, category, 20, List.of(firstQuestion));
+        Quiz quiz = Quiz.create("Old", null, category, 20, 1, 3, 1440, List.of(firstQuestion));
         quiz.archive();
         when(quizRepository.findById(1L)).thenReturn(Optional.of(quiz));
 

@@ -26,6 +26,18 @@ public class QuizUpdateRequest {
     @Max(180)
     private Integer durationMinutes;
 
+    @NotNull
+    @Min(1)
+    private Integer questionCount = 1;
+
+    @NotNull
+    @Min(1)
+    private Integer attemptLimit = 3;
+
+    @NotNull
+    @Min(1)
+    private Integer retakeCooldownMinutes = 1440;
+
     @NotEmpty
     private List<Long> questionIds = new ArrayList<>();
 
@@ -59,6 +71,30 @@ public class QuizUpdateRequest {
 
     public void setDurationMinutes(Integer durationMinutes) {
         this.durationMinutes = durationMinutes;
+    }
+
+    public Integer getQuestionCount() {
+        return questionCount;
+    }
+
+    public void setQuestionCount(Integer questionCount) {
+        this.questionCount = questionCount;
+    }
+
+    public Integer getAttemptLimit() {
+        return attemptLimit;
+    }
+
+    public void setAttemptLimit(Integer attemptLimit) {
+        this.attemptLimit = attemptLimit;
+    }
+
+    public Integer getRetakeCooldownMinutes() {
+        return retakeCooldownMinutes;
+    }
+
+    public void setRetakeCooldownMinutes(Integer retakeCooldownMinutes) {
+        this.retakeCooldownMinutes = retakeCooldownMinutes;
     }
 
     public List<Long> getQuestionIds() {

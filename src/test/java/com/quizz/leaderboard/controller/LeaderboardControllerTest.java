@@ -157,7 +157,7 @@ class LeaderboardControllerTest {
     @Test
     void getLeaderboardAddsCategoriesAndQuizzesToModel() throws Exception {
         List<CategoryOptionResponse> categories = List.of(new CategoryOptionResponse(1L, "Science"));
-        List<QuizSummaryResponse> quizzes = List.of(new QuizSummaryResponse(2L, "Science Quiz", "Science", 30, 5));
+        List<QuizSummaryResponse> quizzes = List.of(new QuizSummaryResponse(2L, "Science Quiz", "Science", 30, 5, 3, 1440));
         when(leaderboardService.getLeaderboard(any(LeaderboardFilterRequest.class))).thenReturn(emptyLeaderboard());
         when(categoryQueryService.findActive()).thenReturn(List.of());
         when(categoryMapper.toOptionResponseList(List.of())).thenReturn(categories);

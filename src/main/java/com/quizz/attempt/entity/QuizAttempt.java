@@ -3,6 +3,8 @@ package com.quizz.attempt.entity;
 import com.quizz.attempt.scoring.ScoreResult;
 import com.quizz.common.entity.BaseEntity;
 import com.quizz.common.exception.BusinessRuleException;
+import com.quizz.question.entity.AnswerOption;
+import com.quizz.question.entity.Question;
 import com.quizz.quiz.entity.Quiz;
 import com.quizz.quiz.entity.QuizQuestion;
 import com.quizz.user.entity.User;
@@ -21,8 +23,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
 
 @Entity
 @Table(name = "quiz_attempts")
@@ -99,8 +101,14 @@ public class QuizAttempt extends BaseEntity {
     protected QuizAttempt() {
     }
 
-    private QuizAttempt(User user, Quiz quiz, Instant startedAt) {
-        if (quiz.getQuestions().isEmpty()) {
+    private QuizAttempt(
+            User user,
+            Quiz quiz,
+            Instant startedAt,
+            List<QuizQuestion> selectedQuestions,
+            Function<Question, List<AnswerOption>> optionOrderProvider
+    ) {
+        if (selectedQuestions.isEmpty()) {
             throw new BusinessRuleException("Quiz must have at least one question.");
         }
         this.user = user;
@@ -112,27 +120,56 @@ public class QuizAttempt extends BaseEntity {
         this.startedAt = startedAt;
         this.expiresAt = startedAt.plus(Duration.ofMinutes(durationMinutes));
         this.status = AttemptStatus.IN_PROGRESS;
-        this.totalQuestions = quiz.getQuestions().size();
+        this.totalQuestions = selectedQuestions.size();
         this.correctCount = 0;
         this.wrongCount = 0;
         this.unansweredCount = totalQuestions;
         this.scorePercentage = 0;
         this.scoringVersion = DEFAULT_SCORING_VERSION;
-        quiz.getQuestions().stream()
-                .sorted(Comparator.comparingInt(QuizQuestion::getDisplayOrder))
-                .forEach(quizQuestion -> questions.add(AttemptQuestion.snapshotFrom(
-                        this,
-                        quizQuestion.getQuestion(),
-                        quizQuestion.getDisplayOrder()
-                )));
+        int questionDisplayOrder = 1;
+        for (QuizQuestion quizQuestion : selectedQuestions) {
+            Question question = quizQuestion.getQuestion();
+            questions.add(AttemptQuestion.snapshotFrom(
+                    this,
+                    question,
+                    questionDisplayOrder,
+                    optionOrderProvider.apply(question)
+            ));
+            questionDisplayOrder++;
+        }
+    }
+
+    private QuizAttempt(QuizAttempt source, Instant startedAt) {
+        this.user = source.user;
+        this.quiz = source.quiz;
+        this.quizTitleSnapshot = source.quizTitleSnapshot;
+        this.categoryIdSnapshot = source.categoryIdSnapshot;
+        this.categoryNameSnapshot = source.categoryNameSnapshot;
+        this.durationMinutes = source.durationMinutes;
+        this.startedAt = startedAt;
+        this.expiresAt = startedAt.plus(Duration.ofMinutes(durationMinutes));
+        this.status = AttemptStatus.IN_PROGRESS;
+        this.totalQuestions = source.totalQuestions;
+        this.correctCount = 0;
+        this.wrongCount = 0;
+        this.unansweredCount = totalQuestions;
+        this.scorePercentage = 0;
+        this.scoringVersion = DEFAULT_SCORING_VERSION;
+        source.questions.forEach(question -> questions.add(AttemptQuestion.copyForRestart(this, question)));
     }
 
     public static QuizAttempt start(
             User user,
             Quiz quiz,
-            Instant startedAt
+            Instant startedAt,
+            List<QuizQuestion> selectedQuestions,
+            Function<Question, List<AnswerOption>> optionOrderProvider
     ) {
-        return new QuizAttempt(user, quiz, startedAt);
+        return new QuizAttempt(user, quiz, startedAt, selectedQuestions, optionOrderProvider);
+    }
+
+    public static QuizAttempt restartFromSnapshot(QuizAttempt source, Instant startedAt) {
+        return new QuizAttempt(source, startedAt);
     }
 
     public boolean belongsTo(Long userId) {

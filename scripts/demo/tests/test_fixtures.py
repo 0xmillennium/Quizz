@@ -76,6 +76,9 @@ class FixtureLoaderTests(unittest.TestCase):
                 "description": "Description",
                 "category": "Demo Java",
                 "durationMinutes": 10,
+                "questionCount": 1,
+                "attemptLimit": 3,
+                "retakeCooldownMinutes": 60,
                 "questions": ["Question?"],
                 "publish": True,
             }
@@ -85,9 +88,36 @@ class FixtureLoaderTests(unittest.TestCase):
 
         self.assertEqual("Demo Quiz", quizzes[0].title)
         self.assertEqual(10, quizzes[0].duration_minutes)
+        self.assertEqual(1, quizzes[0].question_count)
+        self.assertEqual(3, quizzes[0].attempt_limit)
+        self.assertEqual(60, quizzes[0].retake_cooldown_minutes)
 
     def test_rejects_quiz_with_invalid_duration(self) -> None:
         path = self._quiz_fixture(duration=181)
+
+        with self.assertRaises(FixtureValidationError):
+            load_quizzes(path)
+
+    def test_rejects_quiz_missing_question_count(self) -> None:
+        data = self._quiz_data()
+        del data[0]["questionCount"]
+        path = self._fixture(data)
+
+        with self.assertRaises(FixtureValidationError):
+            load_quizzes(path)
+
+    def test_rejects_quiz_missing_attempt_limit(self) -> None:
+        data = self._quiz_data()
+        del data[0]["attemptLimit"]
+        path = self._fixture(data)
+
+        with self.assertRaises(FixtureValidationError):
+            load_quizzes(path)
+
+    def test_rejects_quiz_missing_retake_cooldown_minutes(self) -> None:
+        data = self._quiz_data()
+        del data[0]["retakeCooldownMinutes"]
+        path = self._fixture(data)
 
         with self.assertRaises(FixtureValidationError):
             load_quizzes(path)
@@ -100,6 +130,12 @@ class FixtureLoaderTests(unittest.TestCase):
 
     def test_rejects_quiz_without_questions(self) -> None:
         path = self._quiz_fixture(questions=[])
+
+        with self.assertRaises(FixtureValidationError):
+            load_quizzes(path)
+
+    def test_rejects_question_count_greater_than_listed_questions(self) -> None:
+        path = self._quiz_fixture(question_count=2, questions=["Question?"])
 
         with self.assertRaises(FixtureValidationError):
             load_quizzes(path)
@@ -119,18 +155,31 @@ class FixtureLoaderTests(unittest.TestCase):
     def _quiz_fixture(
         self,
         duration: int = 10,
+        question_count: int = 1,
         questions: list[str] | None = None,
     ) -> Path:
-        return self._fixture([
+        data = self._quiz_data(duration=duration, question_count=question_count, questions=questions)
+        return self._fixture(data)
+
+    def _quiz_data(
+        self,
+        duration: int = 10,
+        question_count: int = 1,
+        questions: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        return [
             {
                 "title": "Demo Quiz",
                 "description": "Description",
                 "category": "Demo Java",
                 "durationMinutes": duration,
+                "questionCount": question_count,
+                "attemptLimit": 3,
+                "retakeCooldownMinutes": 60,
                 "questions": ["Question?"] if questions is None else questions,
                 "publish": True,
             }
-        ])
+        ]
 
     def _fixture(self, data: list[dict[str, Any]]) -> Path:
         handle = tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False)

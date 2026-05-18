@@ -45,3 +45,6 @@ ON quiz_attempts(status, started_at DESC);
 
 CREATE INDEX idx_quiz_attempts_admin_category_started
 ON quiz_attempts(category_id_snapshot, started_at DESC);
+
+CREATE INDEX idx_quiz_attempt_allowances_cooldown
+ON quiz_attempt_allowances(cooldown_until);

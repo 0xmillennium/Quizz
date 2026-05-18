@@ -4,9 +4,16 @@ import java.time.Instant;
 
 public record QuizAttemptStateResponse(
         Long activeAttemptId,
-        Instant startedAt,
-        Instant expiresAt,
-        Long autoSubmittedAttemptId
+        Instant activeStartedAt,
+        Instant activeExpiresAt,
+        Long latestCompletedAttemptId,
+        Long autoSubmittedAttemptId,
+        int attemptLimit,
+        int remainingAttempts,
+        Instant cooldownUntil,
+        boolean canStart,
+        boolean canContinue,
+        boolean canRestart
 ) {
     public boolean hasActiveAttempt() {
         return activeAttemptId != null;
@@ -14,5 +21,9 @@ public record QuizAttemptStateResponse(
 
     public boolean hasAutoSubmittedAttempt() {
         return autoSubmittedAttemptId != null;
+    }
+
+    public boolean isInCooldown() {
+        return cooldownUntil != null;
     }
 }

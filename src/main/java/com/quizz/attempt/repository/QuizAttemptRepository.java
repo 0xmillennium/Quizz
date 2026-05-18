@@ -93,4 +93,12 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
             Long quizId,
             AttemptStatus status
     );
+
+    boolean existsByUserIdAndQuizIdAndStatus(Long userId, Long quizId, AttemptStatus status);
+
+    Optional<QuizAttempt> findFirstByUserIdAndQuizIdAndStatusOrderBySubmittedAtDescStartedAtDesc(
+            Long userId,
+            Long quizId,
+            AttemptStatus status
+    );
 }

@@ -146,6 +146,9 @@ class QuizAdminControllerTest {
                         .param("title", "Science Quiz")
                         .param("categoryId", "1")
                         .param("durationMinutes", "30")
+                        .param("questionCount", "1")
+                        .param("attemptLimit", "3")
+                        .param("retakeCooldownMinutes", "1440")
                         .param("questionIds", "10"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/quizzes"));
@@ -163,6 +166,9 @@ class QuizAdminControllerTest {
                         .param("title", "")
                         .param("categoryId", "1")
                         .param("durationMinutes", "30")
+                        .param("questionCount", "1")
+                        .param("attemptLimit", "3")
+                        .param("retakeCooldownMinutes", "1440")
                         .param("questionIds", "10"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/quizzes/create"));
@@ -207,6 +213,9 @@ class QuizAdminControllerTest {
                         .param("title", "Science Quiz")
                         .param("categoryId", "1")
                         .param("durationMinutes", "30")
+                        .param("questionCount", "1")
+                        .param("attemptLimit", "3")
+                        .param("retakeCooldownMinutes", "1440")
                         .param("questionIds", "10"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/quizzes/1"));
@@ -224,6 +233,9 @@ class QuizAdminControllerTest {
                         .param("title", "")
                         .param("categoryId", "1")
                         .param("durationMinutes", "30")
+                        .param("questionCount", "1")
+                        .param("attemptLimit", "3")
+                        .param("retakeCooldownMinutes", "1440")
                         .param("questionIds", "10"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/quizzes/edit"))
@@ -269,7 +281,7 @@ class QuizAdminControllerTest {
     }
 
     private QuizAdminResponse adminResponse(String status) {
-        return new QuizAdminResponse(1L, "Science Quiz", null, 1L, "Science", 30, status, 0, List.of());
+        return new QuizAdminResponse(1L, "Science Quiz", null, 1L, "Science", 30, 1, 3, 1440, status, 0, List.of());
     }
 
     private QuizUpdateRequest updateRequest() {

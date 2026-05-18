@@ -19,29 +19,35 @@
         <dd th:text="${quiz.categoryName()}">Category</dd>
         <dt>Duration</dt>
         <dd th:text="${quiz.durationMinutes()} + ' minutes'">30 minutes</dd>
-        <dt>Question count</dt>
+        <dt>Questions per attempt</dt>
         <dd th:text="${quiz.questionCount()}">5</dd>
+        <dt>Attempt limit</dt>
+        <dd th:text="${quiz.attemptLimit()} + ' per cooldown window'">3 per cooldown window</dd>
+        <dt>Retake cooldown</dt>
+        <dd th:text="${quiz.retakeCooldownMinutes()} + ' minutes after attempts are used'">1440 minutes after attempts are used</dd>
     </dl>
 
-    <h2>Questions</h2>
-    <ol>
-        <li th:each="question : ${quiz.questions()}"
-            th:text="${question.text()}">Question text</li>
-    </ol>
-
     <section th:if="${attemptState.hasActiveAttempt()}">
-        <h2>Active attempt</h2>
+        <h2>You have an active attempt.</h2>
         <p>
-            Started <span th:text="${attemptState.startedAt()}">Started</span>,
-            expires <span th:text="${attemptState.expiresAt()}">Expires</span>
+            Started <span th:text="${attemptState.activeStartedAt()}">Started</span>,
+            expires <span th:text="${attemptState.activeExpiresAt()}">Expires</span>
+        </p>
+        <p>
+            Attempts remaining after this attempt:
+            <span th:text="${attemptState.remainingAttempts()}">0</span> /
+            <span th:text="${attemptState.attemptLimit()}">3</span>
         </p>
         <a th:href="@{/attempts/{attemptId}(attemptId=${attemptState.activeAttemptId()})}">Continue</a>
-        <form th:action="@{/attempts/{attemptId}/restart(attemptId=${attemptState.activeAttemptId()})}" method="post">
+        <p th:if="${attemptState.canRestart()}">Restart will abandon your current attempt, consume one additional attempt right, and restart with the same question set.</p>
+        <form th:if="${attemptState.canRestart()}"
+              th:action="@{/attempts/{attemptId}/restart(attemptId=${attemptState.activeAttemptId()})}" method="post">
             <input type="hidden"
                    th:name="${_csrf.parameterName}"
                    th:value="${_csrf.token}">
             <button type="submit">Restart</button>
         </form>
+        <p th:if="${!attemptState.canRestart()}">No restart attempts remaining.</p>
     </section>
 
     <section th:if="${attemptState.hasAutoSubmittedAttempt()}">
@@ -51,7 +57,24 @@
         </p>
     </section>
 
-    <form th:if="${!attemptState.hasActiveAttempt()}" th:action="@{/attempts/start}" method="post">
+    <section th:if="${!attemptState.hasActiveAttempt() and attemptState.isInCooldown()}">
+        <p>No attempts remaining.</p>
+        <p>You can try again after: <span th:text="${attemptState.cooldownUntil()}">Cooldown</span></p>
+        <p>Cooldown remaining until <span th:text="${attemptState.cooldownUntil()}">Cooldown</span></p>
+        <p th:if="${attemptState.latestCompletedAttemptId() != null}">
+            <a th:href="@{/attempts/{attemptId}/result(attemptId=${attemptState.latestCompletedAttemptId()})}">View Last Result</a>
+        </p>
+    </section>
+
+    <section th:if="${!attemptState.hasActiveAttempt() and !attemptState.isInCooldown()}">
+        <p>
+            Attempts remaining:
+            <span th:text="${attemptState.remainingAttempts()}">3</span> /
+            <span th:text="${attemptState.attemptLimit()}">3</span>
+        </p>
+    </section>
+
+    <form th:if="${attemptState.canStart()}" th:action="@{/attempts/start}" method="post">
         <input type="hidden" name="quizId" th:value="${quiz.id()}">
         <input type="hidden"
                th:name="${_csrf.parameterName}"

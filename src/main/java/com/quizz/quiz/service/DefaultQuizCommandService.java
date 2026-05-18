@@ -46,7 +46,15 @@ public class DefaultQuizCommandService implements QuizCommandService {
 
         String title = normalizeTitle(request.getTitle());
         String description = normalizeDescription(request.getDescription());
-        validateRequest(title, description, request.getDurationMinutes(), request.getQuestionIds());
+        validateRequest(
+                title,
+                description,
+                request.getDurationMinutes(),
+                request.getQuestionCount(),
+                request.getAttemptLimit(),
+                request.getRetakeCooldownMinutes(),
+                request.getQuestionIds()
+        );
         Category category = categoryQueryService.getActiveById(request.getCategoryId());
         List<Question> questions = loadActiveQuestions(request.getQuestionIds());
         validateQuestionCategories(category, questions);
@@ -56,6 +64,9 @@ public class DefaultQuizCommandService implements QuizCommandService {
                 description,
                 category,
                 request.getDurationMinutes(),
+                request.getQuestionCount(),
+                request.getAttemptLimit(),
+                request.getRetakeCooldownMinutes(),
                 questions
         ));
     }
@@ -70,12 +81,29 @@ public class DefaultQuizCommandService implements QuizCommandService {
                 .orElseThrow(() -> new NotFoundException("Quiz not found."));
         String title = normalizeTitle(request.getTitle());
         String description = normalizeDescription(request.getDescription());
-        validateRequest(title, description, request.getDurationMinutes(), request.getQuestionIds());
+        validateRequest(
+                title,
+                description,
+                request.getDurationMinutes(),
+                request.getQuestionCount(),
+                request.getAttemptLimit(),
+                request.getRetakeCooldownMinutes(),
+                request.getQuestionIds()
+        );
         Category category = categoryQueryService.getActiveById(request.getCategoryId());
         List<Question> questions = loadActiveQuestions(request.getQuestionIds());
         validateQuestionCategories(category, questions);
 
-        quiz.updateDraft(title, description, category, request.getDurationMinutes(), questions);
+        quiz.updateDraft(
+                title,
+                description,
+                category,
+                request.getDurationMinutes(),
+                request.getQuestionCount(),
+                request.getAttemptLimit(),
+                request.getRetakeCooldownMinutes(),
+                questions
+        );
         return quiz;
     }
 
@@ -91,11 +119,26 @@ public class DefaultQuizCommandService implements QuizCommandService {
         if (quiz.getQuestions().isEmpty()) {
             throw new BusinessRuleException("Quiz must have at least one question.");
         }
+        if (quiz.getQuestionCount() > quiz.getQuestions().size()) {
+            throw new BusinessRuleException("Questions per attempt cannot exceed the pool size.");
+        }
         if (!quiz.getCategory().isActive()) {
             throw new BusinessRuleException("Quiz category is inactive.");
         }
         if (quiz.getQuestions().stream().anyMatch(quizQuestion -> !quizQuestion.getQuestion().isActive())) {
             throw new BusinessRuleException("Quiz contains archived questions.");
+        }
+        quizRepository.findQuestionsWithOptionsByIdIn(quiz.getQuestions().stream()
+                .map(quizQuestion -> quizQuestion.getQuestion().getId())
+                .toList());
+        if (quiz.getQuestions().stream().anyMatch(quizQuestion -> quizQuestion.getQuestion().getOptions().size() < 2)) {
+            throw new BusinessRuleException("Every question must have at least two options.");
+        }
+        if (quiz.getQuestions().stream()
+                .anyMatch(quizQuestion -> quizQuestion.getQuestion().getOptions().stream()
+                        .filter(option -> option.isCorrect())
+                        .count() != 1)) {
+            throw new BusinessRuleException("Every question must have exactly one correct option.");
         }
 
         quiz.publish();
@@ -112,6 +155,9 @@ public class DefaultQuizCommandService implements QuizCommandService {
             String title,
             String description,
             Integer durationMinutes,
+            Integer questionCount,
+            Integer attemptLimit,
+            Integer retakeCooldownMinutes,
             List<Long> questionIds
     ) {
         if (title.isBlank()) {
@@ -128,7 +174,19 @@ public class DefaultQuizCommandService implements QuizCommandService {
                 || durationMinutes > MAX_DURATION_MINUTES) {
             throw new BusinessRuleException("Quiz duration must be between 1 and 180 minutes.");
         }
+        if (questionCount == null || questionCount < 1) {
+            throw new BusinessRuleException("Questions per attempt must be at least 1.");
+        }
+        if (attemptLimit == null || attemptLimit < 1) {
+            throw new BusinessRuleException("Attempt limit must be at least 1.");
+        }
+        if (retakeCooldownMinutes == null || retakeCooldownMinutes < 1) {
+            throw new BusinessRuleException("Retake cooldown must be at least 1 minute.");
+        }
         validateQuestionIds(questionIds);
+        if (questionCount > questionIds.size()) {
+            throw new BusinessRuleException("Questions per attempt cannot exceed the pool size.");
+        }
     }
 
     private void validateQuestionIds(List<Long> questionIds) {

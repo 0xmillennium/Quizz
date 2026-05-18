@@ -23,6 +23,9 @@ import java.util.List;
 @Table(name = "quizzes")
 public class Quiz extends BaseEntity {
 
+    public static final int DEFAULT_ATTEMPT_LIMIT = 3;
+    public static final int DEFAULT_RETAKE_COOLDOWN_MINUTES = 1440;
+
     @Column(name = "title", nullable = false, length = 150)
     private String title;
 
@@ -35,6 +38,15 @@ public class Quiz extends BaseEntity {
 
     @Column(name = "duration_minutes", nullable = false)
     private int durationMinutes;
+
+    @Column(name = "question_count", nullable = false)
+    private int questionCount;
+
+    @Column(name = "attempt_limit", nullable = false)
+    private int attemptLimit;
+
+    @Column(name = "retake_cooldown_minutes", nullable = false)
+    private int retakeCooldownMinutes;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
@@ -56,12 +68,18 @@ public class Quiz extends BaseEntity {
             String description,
             Category category,
             int durationMinutes,
+            int questionCount,
+            int attemptLimit,
+            int retakeCooldownMinutes,
             List<Question> selectedQuestions
     ) {
         this.title = title;
         this.description = description;
         this.category = category;
         this.durationMinutes = durationMinutes;
+        this.questionCount = questionCount;
+        this.attemptLimit = attemptLimit;
+        this.retakeCooldownMinutes = retakeCooldownMinutes;
         this.status = QuizStatus.DRAFT;
         replaceQuestions(selectedQuestions);
     }
@@ -71,9 +89,21 @@ public class Quiz extends BaseEntity {
             String description,
             Category category,
             int durationMinutes,
+            int questionCount,
+            int attemptLimit,
+            int retakeCooldownMinutes,
             List<Question> selectedQuestions
     ) {
-        return new Quiz(title, description, category, durationMinutes, selectedQuestions);
+        return new Quiz(
+                title,
+                description,
+                category,
+                durationMinutes,
+                questionCount,
+                attemptLimit,
+                retakeCooldownMinutes,
+                selectedQuestions
+        );
     }
 
     public void updateDraft(
@@ -81,6 +111,9 @@ public class Quiz extends BaseEntity {
             String description,
             Category category,
             int durationMinutes,
+            int questionCount,
+            int attemptLimit,
+            int retakeCooldownMinutes,
             List<Question> selectedQuestions
     ) {
         ensureDraft();
@@ -88,6 +121,9 @@ public class Quiz extends BaseEntity {
         this.description = description;
         this.category = category;
         this.durationMinutes = durationMinutes;
+        this.questionCount = questionCount;
+        this.attemptLimit = attemptLimit;
+        this.retakeCooldownMinutes = retakeCooldownMinutes;
         replaceQuestions(selectedQuestions);
     }
 
@@ -95,6 +131,15 @@ public class Quiz extends BaseEntity {
         ensureDraft();
         if (questions.isEmpty()) {
             throw new BusinessRuleException("Quiz must have at least one question.");
+        }
+        if (questionCount < 1 || questionCount > questions.size()) {
+            throw new BusinessRuleException("Questions per attempt must be between 1 and the pool size.");
+        }
+        if (attemptLimit < 1) {
+            throw new BusinessRuleException("Attempt limit must be at least 1.");
+        }
+        if (retakeCooldownMinutes < 1) {
+            throw new BusinessRuleException("Retake cooldown must be at least 1 minute.");
         }
         status = QuizStatus.PUBLISHED;
     }
@@ -145,6 +190,18 @@ public class Quiz extends BaseEntity {
 
     public int getDurationMinutes() {
         return durationMinutes;
+    }
+
+    public int getQuestionCount() {
+        return questionCount;
+    }
+
+    public int getAttemptLimit() {
+        return attemptLimit;
+    }
+
+    public int getRetakeCooldownMinutes() {
+        return retakeCooldownMinutes;
     }
 
     public QuizStatus getStatus() {

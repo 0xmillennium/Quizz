@@ -22,11 +22,17 @@
         <dd th:text="${quiz.durationMinutes()} + ' minutes'">30 minutes</dd>
         <dt>Status</dt>
         <dd th:text="${quiz.status()}">DRAFT</dd>
-        <dt>Question count</dt>
+        <dt>Questions per attempt</dt>
         <dd th:text="${quiz.questionCount()}">5</dd>
+        <dt>Question pool size</dt>
+        <dd th:text="${quiz.poolSize()}">12</dd>
+        <dt>Attempt limit per cooldown window</dt>
+        <dd th:text="${quiz.attemptLimit()}">3</dd>
+        <dt>Cooldown minutes after attempts are used</dt>
+        <dd th:text="${quiz.retakeCooldownMinutes()}">1440</dd>
     </dl>
 
-    <h2>Questions</h2>
+    <h2>Question pool</h2>
     <ol>
         <li th:each="question : ${quiz.questions()}"
             th:text="${question.text()}">Question text</li>

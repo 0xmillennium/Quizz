@@ -96,7 +96,7 @@ class QuizAttemptControllerTest {
     @Test
     void postStartRedirectsToAttempt() throws Exception {
         when(currentUserProvider.getCurrentUserId()).thenReturn(7L);
-        when(quizAttemptCommandService.startAttempt(3L, 7L)).thenReturn(new StartQuizResponse(11L, false, false, null));
+        when(quizAttemptCommandService.startAttempt(3L, 7L)).thenReturn(new StartQuizResponse(11L, false, false, null, 2, null));
 
         mockMvc.perform(post("/attempts/start")
                         .param("quizId", "3")

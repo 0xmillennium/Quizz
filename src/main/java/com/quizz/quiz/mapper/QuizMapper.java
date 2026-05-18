@@ -22,6 +22,9 @@ public class QuizMapper {
                 quiz.getCategory().getId(),
                 quiz.getCategory().getName(),
                 quiz.getDurationMinutes(),
+                quiz.getQuestionCount(),
+                quiz.getAttemptLimit(),
+                quiz.getRetakeCooldownMinutes(),
                 quiz.getStatus().name(),
                 quiz.getQuestions().size(),
                 quiz.getQuestions().stream()
@@ -43,7 +46,9 @@ public class QuizMapper {
                 quiz.getTitle(),
                 quiz.getCategory().getName(),
                 quiz.getDurationMinutes(),
-                quiz.getQuestions().size()
+                quiz.getQuestionCount(),
+                quiz.getAttemptLimit(),
+                quiz.getRetakeCooldownMinutes()
         );
     }
 
@@ -60,6 +65,9 @@ public class QuizMapper {
                 quiz.getDescription(),
                 quiz.getCategory().getName(),
                 quiz.getDurationMinutes(),
+                quiz.getQuestionCount(),
+                quiz.getAttemptLimit(),
+                quiz.getRetakeCooldownMinutes(),
                 quiz.getQuestions().size(),
                 quiz.getQuestions().stream()
                         .sorted(Comparator.comparingInt(QuizQuestion::getDisplayOrder))
@@ -74,6 +82,9 @@ public class QuizMapper {
         request.setDescription(quiz.getDescription());
         request.setCategoryId(quiz.getCategory().getId());
         request.setDurationMinutes(quiz.getDurationMinutes());
+        request.setQuestionCount(quiz.getQuestionCount());
+        request.setAttemptLimit(quiz.getAttemptLimit());
+        request.setRetakeCooldownMinutes(quiz.getRetakeCooldownMinutes());
         request.setQuestionIds(quiz.getQuestions().stream()
                 .sorted(Comparator.comparingInt(QuizQuestion::getDisplayOrder))
                 .map(quizQuestion -> quizQuestion.getQuestion().getId())

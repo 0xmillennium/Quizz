@@ -18,7 +18,7 @@ Added question and answer option entities, validation for option counts and one 
 
 ## Phase 5 Quiz Definition
 
-Added quiz and quiz-question entities, draft/publish/archive lifecycle, category-based quiz composition, ordered question selection, and public published quiz browsing.
+Added quiz and quiz-question entities, draft/publish/archive lifecycle, category-based quiz composition, question pool membership, and public published quiz browsing.
 
 ## Phase 6 Attempt/Scoring/Results
 
@@ -31,6 +31,10 @@ Added read-only leaderboard service and JDBC repository using completed attempt 
 ## Phase 8 Admin Reporting
 
 Added admin dashboard and result reporting read models using JDBC queries over attempt snapshots, including detail pages that show stored question and option snapshots.
+
+## Phase 12
+
+Added randomized quiz pools, questions-per-attempt, per-user attempt rights, retake cooldowns, and restart behavior that reuses the same attempt snapshot while clearing answers.
 
 ## Phase 9 Hardening
 

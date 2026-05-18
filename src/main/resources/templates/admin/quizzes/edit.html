@@ -51,8 +51,27 @@
             <p th:if="${#fields.hasErrors('durationMinutes')}" th:errors="*{durationMinutes}"></p>
         </div>
 
+        <div>
+            <label for="questionCount">Questions per attempt</label>
+            <input id="questionCount" type="number" th:field="*{questionCount}" min="1" required>
+            <p th:if="${#fields.hasErrors('questionCount')}" th:errors="*{questionCount}"></p>
+        </div>
+
+        <div>
+            <label for="attemptLimit">Attempt limit per cooldown window</label>
+            <input id="attemptLimit" type="number" th:field="*{attemptLimit}" min="1" required>
+            <p th:if="${#fields.hasErrors('attemptLimit')}" th:errors="*{attemptLimit}"></p>
+        </div>
+
+        <div>
+            <label for="retakeCooldownMinutes">Cooldown minutes after attempts are used</label>
+            <input id="retakeCooldownMinutes" type="number" th:field="*{retakeCooldownMinutes}" min="1" required>
+            <p th:if="${#fields.hasErrors('retakeCooldownMinutes')}" th:errors="*{retakeCooldownMinutes}"></p>
+        </div>
+
         <fieldset>
-            <legend>Questions</legend>
+            <legend>Question pool</legend>
+            <p>Selected questions are the question pool.</p>
             <p th:if="${#fields.hasErrors('questionIds')}" th:errors="*{questionIds}"></p>
 
             <p th:if="${#lists.isEmpty(questions)}">No active questions found.</p>

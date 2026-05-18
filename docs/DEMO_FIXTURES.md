@@ -58,6 +58,12 @@ python3 scripts/demo/load-demo-quizzes.py
 
 Questions require the referenced categories to already exist. Quizzes require the referenced categories and questions to already exist.
 
+The bundled catalog contains five categories, at least twelve questions per category, four options per question, and one published quiz per category. Quiz fixtures define a question pool plus:
+
+- `questionCount`: questions sampled per attempt.
+- `attemptLimit`: attempt rights per cooldown window.
+- `retakeCooldownMinutes`: cooldown duration after rights are used.
+
 ## Idempotency
 
 - Category with the same exact name: skipped.

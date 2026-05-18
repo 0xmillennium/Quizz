@@ -7,6 +7,9 @@ CREATE TABLE quizzes (
     title VARCHAR(150) NOT NULL,
     description VARCHAR(1000),
     duration_minutes INT NOT NULL,
+    question_count INT NOT NULL,
+    attempt_limit INT NOT NULL DEFAULT 3,
+    retake_cooldown_minutes INT NOT NULL DEFAULT 1440,
     status VARCHAR(30) NOT NULL,
 
     CONSTRAINT fk_quizzes_category
@@ -17,7 +20,16 @@ CREATE TABLE quizzes (
         CHECK (status IN ('DRAFT', 'PUBLISHED', 'ARCHIVED')),
 
     CONSTRAINT ck_quizzes_duration
-        CHECK (duration_minutes BETWEEN 1 AND 180)
+        CHECK (duration_minutes BETWEEN 1 AND 180),
+
+    CONSTRAINT ck_quizzes_question_count
+        CHECK (question_count >= 1),
+
+    CONSTRAINT ck_quizzes_attempt_limit
+        CHECK (attempt_limit >= 1),
+
+    CONSTRAINT ck_quizzes_retake_cooldown
+        CHECK (retake_cooldown_minutes >= 1)
 );
 
 CREATE TABLE quiz_questions (

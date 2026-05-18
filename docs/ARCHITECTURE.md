@@ -9,8 +9,8 @@ Quizz is a Spring Boot MVC monolith organized by feature package under `com.quiz
 - `com.quizz.user`: `User` aggregate, role enum, user repository, account creation, user lookup, and user DTO mapping.
 - `com.quizz.category`: category aggregate, admin CRUD flow, validation, service layer, mapper, and repository.
 - `com.quizz.question`: question aggregate and answer options, admin question flow, validation, service layer, mapper, and repository.
-- `com.quizz.quiz`: quiz aggregate and ordered quiz questions, public quiz browsing, admin quiz flow, validation, service layer, mapper, and repository.
-- `com.quizz.attempt`: attempt snapshots, attempt lifecycle, scoring, result/history views, chart data, mapper, and repository.
+- `com.quizz.quiz`: quiz aggregate and question-pool membership, public quiz browsing, admin quiz flow, validation, service layer, mapper, and repository.
+- `com.quizz.attempt`: attempt snapshots, randomized attempt creation, attempt allowance/cooldown state, attempt lifecycle, scoring, result/history views, chart data, mapper, and repository.
 - `com.quizz.leaderboard`: read-only leaderboard MVC flow, filter DTOs, service, and JDBC query repository.
 - `com.quizz.admin`: admin dashboard and result reporting read models, services, controllers, DTOs, and JDBC query repositories.
 - `com.quizz.common`: shared base entity, validation response records, flash message model, and application exceptions.
@@ -25,6 +25,7 @@ Aggregate roots:
 - `Question`
 - `Quiz`
 - `QuizAttempt`
+- `QuizAttemptAllowance`
 
 Owned child entities:
 
@@ -32,7 +33,7 @@ Owned child entities:
 - `QuizQuestion` belongs to `Quiz`.
 - `AttemptQuestion` and `AttemptAnswerOption` belong to `QuizAttempt`.
 
-`QuizAttempt` owns immutable attempt snapshots for the submitted quiz state. The snapshot records original question and answer option IDs as metadata while using scalar selected option IDs for answers.
+`QuizAttempt` owns immutable attempt snapshots for the submitted quiz state. The snapshot records original question and answer option IDs as metadata while using scalar selected option IDs for answers. `QuizAttemptAllowance` tracks remaining attempt rights and cooldown for a user and quiz.
 
 ## Read Models
 
@@ -64,6 +65,14 @@ Spring Security is configured in `SecurityConfig`.
 - Logout is a POST to `/logout`.
 - `User` does not implement `UserDetails`; `CustomUserDetails` adapts the domain user for Spring Security.
 - Direct `SecurityContextHolder` access is isolated behind `SecurityCurrentUserProvider`.
+
+## Quiz Pools And Attempts
+
+Admin quiz questions are a pool, not a fixed play list. A quiz defines `questionCount`, `attemptLimit`, and `retakeCooldownMinutes`. Fresh attempts sample `questionCount` questions from the pool, randomize question order, randomize answer option order, and then persist that order in the snapshot.
+
+Resume reads the same stored snapshot and does not consume another attempt right or reset the timer. Restart abandons the active attempt, consumes one additional right, and creates a new attempt by copying the same question and option snapshot with answers and revisions cleared. It does not draw a new random pool.
+
+When the final consumed attempt becomes terminal and no active attempt remains, cooldown starts from the terminal time. Once cooldown expires, remaining rights reset to the quiz attempt limit.
 
 ## Snapshot Model
 

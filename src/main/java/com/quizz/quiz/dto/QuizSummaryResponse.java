@@ -5,6 +5,8 @@ public record QuizSummaryResponse(
         String title,
         String categoryName,
         int durationMinutes,
-        int questionCount
+        int questionCount,
+        int attemptLimit,
+        int retakeCooldownMinutes
 ) {
 }

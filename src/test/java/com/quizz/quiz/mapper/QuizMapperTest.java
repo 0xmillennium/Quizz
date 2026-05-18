@@ -39,7 +39,10 @@ class QuizMapperTest {
         assertThat(response.categoryName()).isEqualTo("Science");
         assertThat(response.durationMinutes()).isEqualTo(30);
         assertThat(response.status()).isEqualTo("DRAFT");
-        assertThat(response.questionCount()).isEqualTo(2);
+        assertThat(response.questionCount()).isEqualTo(1);
+        assertThat(response.poolSize()).isEqualTo(2);
+        assertThat(response.attemptLimit()).isEqualTo(3);
+        assertThat(response.retakeCooldownMinutes()).isEqualTo(1440);
         assertThat(response.questions()).hasSize(2);
         assertThat(response.questions().get(0).questionId()).isEqualTo(10L);
         assertThat(response.questions().get(0).displayOrder()).isEqualTo(1);
@@ -53,7 +56,9 @@ class QuizMapperTest {
         assertThat(response.title()).isEqualTo("Science Quiz");
         assertThat(response.categoryName()).isEqualTo("Science");
         assertThat(response.durationMinutes()).isEqualTo(30);
-        assertThat(response.questionCount()).isEqualTo(2);
+        assertThat(response.questionCount()).isEqualTo(1);
+        assertThat(response.attemptLimit()).isEqualTo(3);
+        assertThat(response.retakeCooldownMinutes()).isEqualTo(1440);
     }
 
     @Test
@@ -63,6 +68,8 @@ class QuizMapperTest {
         assertThat(response.id()).isEqualTo(100L);
         assertThat(response.title()).isEqualTo("Science Quiz");
         assertThat(response.description()).isEqualTo("Basics");
+        assertThat(response.questionCount()).isEqualTo(1);
+        assertThat(response.poolSize()).isEqualTo(2);
         assertThat(response.questions()).hasSize(2);
         assertThat(Arrays.stream(response.questions().get(0).getClass().getRecordComponents())
                 .map(component -> component.getName()))
@@ -77,6 +84,9 @@ class QuizMapperTest {
         assertThat(request.getDescription()).isEqualTo("Basics");
         assertThat(request.getCategoryId()).isEqualTo(1L);
         assertThat(request.getDurationMinutes()).isEqualTo(30);
+        assertThat(request.getQuestionCount()).isEqualTo(1);
+        assertThat(request.getAttemptLimit()).isEqualTo(3);
+        assertThat(request.getRetakeCooldownMinutes()).isEqualTo(1440);
         assertThat(request.getQuestionIds()).containsExactly(10L, 20L);
     }
 
@@ -95,7 +105,7 @@ class QuizMapperTest {
         setId(category, 1L);
         Question first = question(10L, "First?", category);
         Question second = question(20L, "Second?", category);
-        Quiz quiz = Quiz.create("Science Quiz", "Basics", category, 30, List.of(first, second));
+        Quiz quiz = Quiz.create("Science Quiz", "Basics", category, 30, 1, 3, 1440, List.of(first, second));
         setId(quiz, 100L);
         return quiz;
     }

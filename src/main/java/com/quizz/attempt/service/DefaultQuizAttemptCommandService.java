@@ -11,6 +11,9 @@ import com.quizz.attempt.entity.AttemptQuestion;
 import com.quizz.attempt.entity.AttemptStatus;
 import com.quizz.attempt.entity.AutosaveOutcome;
 import com.quizz.attempt.entity.QuizAttempt;
+import com.quizz.attempt.entity.QuizAttemptAllowance;
+import com.quizz.attempt.random.AttemptRandomizer;
+import com.quizz.attempt.repository.QuizAttemptAllowanceRepository;
 import com.quizz.attempt.repository.QuizAttemptRepository;
 import com.quizz.attempt.scoring.ScoreResult;
 import com.quizz.common.exception.BusinessRuleException;
@@ -21,6 +24,7 @@ import com.quizz.user.entity.User;
 import com.quizz.user.service.UserQueryService;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,22 +39,28 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultQuizAttemptCommandService implements QuizAttemptCommandService {
 
     private final QuizAttemptRepository quizAttemptRepository;
+    private final QuizAttemptAllowanceRepository allowanceRepository;
     private final QuizQueryService quizQueryService;
     private final UserQueryService userQueryService;
     private final ScoringService scoringService;
+    private final AttemptRandomizer attemptRandomizer;
     private final Clock clock;
 
     public DefaultQuizAttemptCommandService(
             QuizAttemptRepository quizAttemptRepository,
+            QuizAttemptAllowanceRepository allowanceRepository,
             QuizQueryService quizQueryService,
             UserQueryService userQueryService,
             ScoringService scoringService,
+            AttemptRandomizer attemptRandomizer,
             Clock clock
     ) {
         this.quizAttemptRepository = quizAttemptRepository;
+        this.allowanceRepository = allowanceRepository;
         this.quizQueryService = quizQueryService;
         this.userQueryService = userQueryService;
         this.scoringService = scoringService;
+        this.attemptRandomizer = attemptRandomizer;
         this.clock = clock;
     }
 
@@ -59,6 +69,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
         Instant now = Instant.now(clock);
         User user = userQueryService.getById(userId);
         Quiz quiz = quizQueryService.getPublishedByIdForAttempt(quizId);
+        QuizAttemptAllowance allowance = getOrCreateAllowanceForUpdate(user, quiz);
 
         QuizAttempt existing = quizAttemptRepository.findByUserIdAndQuizIdAndStatus(
                 userId,
@@ -66,20 +77,37 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
                 AttemptStatus.IN_PROGRESS
         ).orElse(null);
         if (existing != null && !existing.isOverdueAt(now)) {
-            return new StartQuizResponse(existing.getId(), true, false, null);
+            allowance.resetIfCooldownExpired(quiz, now);
+            return new StartQuizResponse(
+                    existing.getId(),
+                    true,
+                    false,
+                    null,
+                    allowance.getRemainingAttempts(),
+                    allowance.getCooldownUntil()
+            );
         }
+        boolean previousAttemptAutoSubmitted = false;
         if (existing != null) {
             autoSubmitExisting(existing);
             quizAttemptRepository.flush();
+            updateAllowanceAfterTerminal(existing, allowance);
+            previousAttemptAutoSubmitted = true;
         }
 
-        QuizAttempt attempt = QuizAttempt.start(user, quiz, now);
+        allowance.resetIfCooldownExpired(quiz, now);
+        ensureCanStart(allowance);
+        allowance.consumeRight(now);
+
+        QuizAttempt attempt = createFreshAttempt(user, quiz, now);
         QuizAttempt saved = quizAttemptRepository.save(attempt);
         return new StartQuizResponse(
                 saved.getId(),
                 false,
-                existing != null,
-                existing == null ? null : existing.getId()
+                previousAttemptAutoSubmitted,
+                existing == null ? null : existing.getId(),
+                allowance.getRemainingAttempts(),
+                allowance.getCooldownUntil()
         );
     }
 
@@ -92,18 +120,34 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
             throw new BusinessRuleException("Only an active attempt can be restarted.");
         }
 
-        boolean autoSubmitted = false;
         if (existing.isOverdueAt(now)) {
             autoSubmitExisting(existing);
-            autoSubmitted = true;
+            QuizAttemptAllowance allowance = getOrCreateAllowanceForUpdate(existing.getUser(), existing.getQuiz());
+            updateAllowanceAfterTerminal(existing, allowance);
+            quizAttemptRepository.flush();
+            throw new BusinessRuleException("Attempt expired and was automatically submitted.");
         } else {
+            QuizAttemptAllowance allowance = getOrCreateAllowanceForUpdate(existing.getUser(), existing.getQuiz());
+            allowance.resetIfCooldownExpired(existing.getQuiz(), now);
+            ensureCanStart(allowance);
+            if (allowance.getRemainingAttempts() <= 0) {
+                throw new BusinessRuleException("No restart attempts remaining.");
+            }
+            loadQuestionOptions(existing);
             existing.abandonForRestart(now);
+            quizAttemptRepository.flush();
+            allowance.consumeRight(now);
+            QuizAttempt replacement = QuizAttempt.restartFromSnapshot(existing, now);
+            QuizAttempt saved = quizAttemptRepository.save(replacement);
+            return new StartQuizResponse(
+                    saved.getId(),
+                    false,
+                    false,
+                    existing.getId(),
+                    allowance.getRemainingAttempts(),
+                    allowance.getCooldownUntil()
+            );
         }
-        quizAttemptRepository.flush();
-
-        QuizAttempt replacement = QuizAttempt.start(existing.getUser(), existing.getQuiz(), now);
-        QuizAttempt saved = quizAttemptRepository.save(replacement);
-        return new StartQuizResponse(saved.getId(), false, autoSubmitted, existing.getId());
     }
 
     @Override
@@ -129,6 +173,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
         }
         if (attempt.isOverdueAt(now)) {
             autoSubmitExisting(attempt);
+            updateAllowanceAfterTerminal(attempt);
             return new AutosaveAnswerResponse(
                     attempt.getId(),
                     attemptQuestionId,
@@ -178,6 +223,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
             throw new BusinessRuleException("Attempt has not expired yet.");
         }
         autoSubmitExisting(attempt);
+        updateAllowanceAfterTerminal(attempt);
         return autoSubmitResponse(attempt);
     }
 
@@ -189,7 +235,10 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
                 AttemptStatus.IN_PROGRESS,
                 now
         );
-        overdueAttempts.forEach(this::autoSubmitExisting);
+        overdueAttempts.forEach(attempt -> {
+            autoSubmitExisting(attempt);
+            updateAllowanceAfterTerminal(attempt);
+        });
         return overdueAttempts.size();
     }
 
@@ -213,6 +262,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
         if (attempt.isOverdueAt(now)) {
             ScoreResult scoreResult = scoringService.score(attempt);
             attempt.completeByTimeExpiry(scoreResult);
+            updateAllowanceAfterTerminal(attempt);
             return new SubmitQuizResponse(attempt.getId(), attempt.getCompletionReason().name());
         }
 
@@ -227,7 +277,25 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
 
         ScoreResult scoreResult = scoringService.score(attempt);
         attempt.completeManually(now, scoreResult);
+        updateAllowanceAfterTerminal(attempt);
         return new SubmitQuizResponse(attempt.getId(), attempt.getCompletionReason().name());
+    }
+
+    private QuizAttempt createFreshAttempt(User user, Quiz quiz, Instant now) {
+        List<com.quizz.quiz.entity.QuizQuestion> shuffledPool = attemptRandomizer.shuffledCopy(quiz.getQuestions());
+        if (shuffledPool.size() < quiz.getQuestionCount()) {
+            throw new BusinessRuleException("Quiz question pool is smaller than questions per attempt.");
+        }
+        List<com.quizz.quiz.entity.QuizQuestion> sampledQuestions = shuffledPool
+                .subList(0, quiz.getQuestionCount());
+        List<com.quizz.quiz.entity.QuizQuestion> questionOrder = attemptRandomizer.shuffledCopy(sampledQuestions);
+        return QuizAttempt.start(
+                user,
+                quiz,
+                now,
+                questionOrder,
+                question -> attemptRandomizer.shuffledCopy(question.getOptions())
+        );
     }
 
     private void autoSubmitExisting(QuizAttempt attempt) {
@@ -237,6 +305,44 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
         loadQuestionOptions(attempt);
         ScoreResult scoreResult = scoringService.score(attempt);
         attempt.completeByTimeExpiry(scoreResult);
+    }
+
+    private QuizAttemptAllowance getOrCreateAllowanceForUpdate(User user, Quiz quiz) {
+        return allowanceRepository.findByUserIdAndQuizIdForUpdate(user.getId(), quiz.getId())
+                .orElseGet(() -> allowanceRepository.save(QuizAttemptAllowance.initialize(user, quiz)));
+    }
+
+    private void ensureCanStart(QuizAttemptAllowance allowance) {
+        if (allowance.getCooldownUntil() != null) {
+            throw new BusinessRuleException("Quiz is in cooldown.");
+        }
+        if (allowance.getRemainingAttempts() <= 0) {
+            throw new BusinessRuleException("No attempts remaining.");
+        }
+    }
+
+    private void updateAllowanceAfterTerminal(QuizAttempt attempt) {
+        QuizAttemptAllowance allowance = getOrCreateAllowanceForUpdate(attempt.getUser(), attempt.getQuiz());
+        updateAllowanceAfterTerminal(attempt, allowance);
+    }
+
+    private void updateAllowanceAfterTerminal(QuizAttempt attempt, QuizAttemptAllowance allowance) {
+        if (allowance.getRemainingAttempts() != 0 || allowance.getCooldownUntil() != null) {
+            return;
+        }
+        boolean hasActiveAttempt = quizAttemptRepository.existsByUserIdAndQuizIdAndStatus(
+                attempt.getUser().getId(),
+                attempt.getQuiz().getId(),
+                AttemptStatus.IN_PROGRESS
+        );
+        if (hasActiveAttempt) {
+            return;
+        }
+        Instant terminalAt = attempt.isCompleted() ? attempt.getSubmittedAt() : attempt.getAbandonedAt();
+        if (terminalAt == null) {
+            return;
+        }
+        allowance.startCooldown(terminalAt.plus(attempt.getQuiz().getRetakeCooldownMinutes(), ChronoUnit.MINUTES));
     }
 
     private AutoSubmitResponse autoSubmitResponse(QuizAttempt attempt) {

@@ -125,12 +125,12 @@ class QuizControllerTest {
     @Test
     void getQuizDetailAsAuthenticatedUserReturnsDetailView() throws Exception {
         Quiz quiz = org.mockito.Mockito.mock(Quiz.class);
-        QuizDetailResponse response = new QuizDetailResponse(1L, "Science Quiz", null, "Science", 30, 0, List.of());
+        QuizDetailResponse response = new QuizDetailResponse(1L, "Science Quiz", null, "Science", 30, 1, 3, 1440, 0, List.of());
         when(quizQueryService.getPublishedById(1L)).thenReturn(quiz);
         when(quizMapper.toDetailResponse(quiz)).thenReturn(response);
         when(currentUserProvider.getCurrentUserId()).thenReturn(7L);
         when(quizAttemptStateProvider.resolveForQuizDetail(1L, 7L))
-                .thenReturn(new QuizAttemptStateResponse(null, null, null, null));
+                .thenReturn(new QuizAttemptStateResponse(null, null, null, null, null, 3, 3, null, true, false, false));
 
         mockMvc.perform(get("/quizzes/1").with(user("user@example.com").roles("USER")))
                 .andExpect(status().isOk())
@@ -154,7 +154,7 @@ class QuizControllerTest {
 
     @SuppressWarnings("unused")
     private QuizSummaryResponse summaryResponse() {
-        return new QuizSummaryResponse(1L, "Science Quiz", "Science", 30, 5);
+        return new QuizSummaryResponse(1L, "Science Quiz", "Science", 30, 5, 3, 1440);
     }
 
     private Filter springSecurityFilterChain() throws Exception {

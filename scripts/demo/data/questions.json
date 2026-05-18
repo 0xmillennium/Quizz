@@ -3,120 +3,1320 @@
     "category": "Demo Java",
     "text": "Demo Java: Which keyword is used to create a subclass?",
     "options": [
-      {"text": "extends", "correct": true},
-      {"text": "implements", "correct": false},
-      {"text": "inherits", "correct": false},
-      {"text": "package", "correct": false}
+      {
+        "text": "extends",
+        "correct": true
+      },
+      {
+        "text": "implements",
+        "correct": false
+      },
+      {
+        "text": "package",
+        "correct": false
+      },
+      {
+        "text": "imports",
+        "correct": false
+      }
     ]
   },
   {
     "category": "Demo Java",
     "text": "Demo Java: Which collection type stores unique values without duplicates?",
     "options": [
-      {"text": "List", "correct": false},
-      {"text": "Set", "correct": true},
-      {"text": "Queue", "correct": false},
-      {"text": "Map", "correct": false}
+      {
+        "text": "Set",
+        "correct": true
+      },
+      {
+        "text": "List",
+        "correct": false
+      },
+      {
+        "text": "Queue",
+        "correct": false
+      },
+      {
+        "text": "Map.Entry",
+        "correct": false
+      }
     ]
   },
   {
     "category": "Demo Java",
     "text": "Demo Java: Which method is the conventional application entry point?",
     "options": [
-      {"text": "start(String[] args)", "correct": false},
-      {"text": "run(String[] args)", "correct": false},
-      {"text": "main(String[] args)", "correct": true},
-      {"text": "init(String[] args)", "correct": false}
+      {
+        "text": "public static void main",
+        "correct": true
+      },
+      {
+        "text": "start",
+        "correct": false
+      },
+      {
+        "text": "run",
+        "correct": false
+      },
+      {
+        "text": "init",
+        "correct": false
+      }
     ]
   },
   {
     "category": "Demo Java",
     "text": "Demo Java: Which type represents a true or false value?",
     "options": [
-      {"text": "char", "correct": false},
-      {"text": "int", "correct": false},
-      {"text": "boolean", "correct": true},
-      {"text": "String", "correct": false}
+      {
+        "text": "boolean",
+        "correct": true
+      },
+      {
+        "text": "char",
+        "correct": false
+      },
+      {
+        "text": "byte",
+        "correct": false
+      },
+      {
+        "text": "String",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Java",
+    "text": "Demo Java: Which keyword prevents a class from being subclassed?",
+    "options": [
+      {
+        "text": "final",
+        "correct": true
+      },
+      {
+        "text": "static",
+        "correct": false
+      },
+      {
+        "text": "sealed",
+        "correct": false
+      },
+      {
+        "text": "volatile",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Java",
+    "text": "Demo Java: Which block runs whether or not an exception is thrown?",
+    "options": [
+      {
+        "text": "finally",
+        "correct": true
+      },
+      {
+        "text": "catch",
+        "correct": false
+      },
+      {
+        "text": "throws",
+        "correct": false
+      },
+      {
+        "text": "try",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Java",
+    "text": "Demo Java: Which operator compares primitive equality?",
+    "options": [
+      {
+        "text": "==",
+        "correct": true
+      },
+      {
+        "text": "=",
+        "correct": false
+      },
+      {
+        "text": "equals",
+        "correct": false
+      },
+      {
+        "text": "===",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Java",
+    "text": "Demo Java: Which interface is commonly used for sorting custom order?",
+    "options": [
+      {
+        "text": "Comparator",
+        "correct": true
+      },
+      {
+        "text": "Runnable",
+        "correct": false
+      },
+      {
+        "text": "Supplier",
+        "correct": false
+      },
+      {
+        "text": "Serializable",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Java",
+    "text": "Demo Java: Which keyword creates an object instance?",
+    "options": [
+      {
+        "text": "new",
+        "correct": true
+      },
+      {
+        "text": "make",
+        "correct": false
+      },
+      {
+        "text": "object",
+        "correct": false
+      },
+      {
+        "text": "alloc",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Java",
+    "text": "Demo Java: Which package contains List and Map?",
+    "options": [
+      {
+        "text": "java.util",
+        "correct": true
+      },
+      {
+        "text": "java.io",
+        "correct": false
+      },
+      {
+        "text": "java.net",
+        "correct": false
+      },
+      {
+        "text": "java.time",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Java",
+    "text": "Demo Java: Which type is immutable text in Java?",
+    "options": [
+      {
+        "text": "String",
+        "correct": true
+      },
+      {
+        "text": "StringBuilder",
+        "correct": false
+      },
+      {
+        "text": "char[]",
+        "correct": false
+      },
+      {
+        "text": "ByteBuffer",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Java",
+    "text": "Demo Java: Which modifier belongs to class-level shared members?",
+    "options": [
+      {
+        "text": "static",
+        "correct": true
+      },
+      {
+        "text": "transient",
+        "correct": false
+      },
+      {
+        "text": "native",
+        "correct": false
+      },
+      {
+        "text": "strictfp",
+        "correct": false
+      }
     ]
   },
   {
     "category": "Demo Spring Boot",
     "text": "Demo Spring Boot: Which annotation marks the main application class?",
     "options": [
-      {"text": "@SpringBootApplication", "correct": true},
-      {"text": "@Controller", "correct": false},
-      {"text": "@Entity", "correct": false},
-      {"text": "@Repository", "correct": false}
+      {
+        "text": "@SpringBootApplication",
+        "correct": true
+      },
+      {
+        "text": "@Entity",
+        "correct": false
+      },
+      {
+        "text": "@ControllerAdvice",
+        "correct": false
+      },
+      {
+        "text": "@Repository",
+        "correct": false
+      }
     ]
   },
   {
     "category": "Demo Spring Boot",
     "text": "Demo Spring Boot: Which layer usually handles HTTP traffic in Spring MVC?",
     "options": [
-      {"text": "Repository", "correct": false},
-      {"text": "Controller", "correct": true},
-      {"text": "Entity", "correct": false},
-      {"text": "View", "correct": false}
+      {
+        "text": "Controller",
+        "correct": true
+      },
+      {
+        "text": "Entity",
+        "correct": false
+      },
+      {
+        "text": "Repository",
+        "correct": false
+      },
+      {
+        "text": "Migration",
+        "correct": false
+      }
     ]
   },
   {
     "category": "Demo Spring Boot",
     "text": "Demo Spring Boot: Which template engine is used by this application?",
     "options": [
-      {"text": "Mustache", "correct": false},
-      {"text": "Freemarker", "correct": false},
-      {"text": "Thymeleaf", "correct": true},
-      {"text": "Handlebars", "correct": false}
+      {
+        "text": "Thymeleaf",
+        "correct": true
+      },
+      {
+        "text": "Mustache",
+        "correct": false
+      },
+      {
+        "text": "FreeMarker",
+        "correct": false
+      },
+      {
+        "text": "Velocity",
+        "correct": false
+      }
     ]
   },
   {
     "category": "Demo Spring Boot",
-    "text": "Demo Spring Boot: What does CSRF protection help defend against?",
+    "text": "Demo Spring Boot: Which annotation maps a GET route?",
     "options": [
-      {"text": "Cross-site request forgery", "correct": true},
-      {"text": "Slow database queries", "correct": false},
-      {"text": "Missing CSS files", "correct": false},
-      {"text": "Java compilation errors", "correct": false}
+      {
+        "text": "@GetMapping",
+        "correct": true
+      },
+      {
+        "text": "@Column",
+        "correct": false
+      },
+      {
+        "text": "@Bean",
+        "correct": false
+      },
+      {
+        "text": "@Table",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Spring Boot",
+    "text": "Demo Spring Boot: Which component contains business logic by convention?",
+    "options": [
+      {
+        "text": "Service",
+        "correct": true
+      },
+      {
+        "text": "View",
+        "correct": false
+      },
+      {
+        "text": "DTO",
+        "correct": false
+      },
+      {
+        "text": "Flyway",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Spring Boot",
+    "text": "Demo Spring Boot: Which annotation validates a submitted form object?",
+    "options": [
+      {
+        "text": "@Valid",
+        "correct": true
+      },
+      {
+        "text": "@Autowired",
+        "correct": false
+      },
+      {
+        "text": "@Id",
+        "correct": false
+      },
+      {
+        "text": "@Version",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Spring Boot",
+    "text": "Demo Spring Boot: Which file commonly stores Spring configuration properties?",
+    "options": [
+      {
+        "text": "application.yml",
+        "correct": true
+      },
+      {
+        "text": "package.json",
+        "correct": false
+      },
+      {
+        "text": "pom.lock",
+        "correct": false
+      },
+      {
+        "text": "settings.gradle.kts",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Spring Boot",
+    "text": "Demo Spring Boot: Which Spring Data interface provides CRUD persistence methods?",
+    "options": [
+      {
+        "text": "JpaRepository",
+        "correct": true
+      },
+      {
+        "text": "JdbcClient",
+        "correct": false
+      },
+      {
+        "text": "Model",
+        "correct": false
+      },
+      {
+        "text": "BindingResult",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Spring Boot",
+    "text": "Demo Spring Boot: Which annotation starts a database transaction?",
+    "options": [
+      {
+        "text": "@Transactional",
+        "correct": true
+      },
+      {
+        "text": "@RequestParam",
+        "correct": false
+      },
+      {
+        "text": "@PathVariable",
+        "correct": false
+      },
+      {
+        "text": "@Enumerated",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Spring Boot",
+    "text": "Demo Spring Boot: Which object carries data to a Thymeleaf view?",
+    "options": [
+      {
+        "text": "Model",
+        "correct": true
+      },
+      {
+        "text": "EntityManagerFactory",
+        "correct": false
+      },
+      {
+        "text": "Clock",
+        "correct": false
+      },
+      {
+        "text": "PasswordEncoder",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Spring Boot",
+    "text": "Demo Spring Boot: Which annotation marks a MVC controller?",
+    "options": [
+      {
+        "text": "@Controller",
+        "correct": true
+      },
+      {
+        "text": "@MappedSuperclass",
+        "correct": false
+      },
+      {
+        "text": "@CreatedDate",
+        "correct": false
+      },
+      {
+        "text": "@JoinColumn",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Spring Boot",
+    "text": "Demo Spring Boot: Which tool applies versioned database migrations here?",
+    "options": [
+      {
+        "text": "Flyway",
+        "correct": true
+      },
+      {
+        "text": "Liquibase Cloud only",
+        "correct": false
+      },
+      {
+        "text": "Webpack",
+        "correct": false
+      },
+      {
+        "text": "Javadoc",
+        "correct": false
+      }
     ]
   },
   {
     "category": "Demo Databases",
     "text": "Demo Databases: What does a primary key identify?",
     "options": [
-      {"text": "A unique row in a table", "correct": true},
-      {"text": "A database password", "correct": false},
-      {"text": "A table comment", "correct": false},
-      {"text": "An application profile", "correct": false}
+      {
+        "text": "A unique row",
+        "correct": true
+      },
+      {
+        "text": "A table comment",
+        "correct": false
+      },
+      {
+        "text": "A query timeout",
+        "correct": false
+      },
+      {
+        "text": "A backup file",
+        "correct": false
+      }
     ]
   },
   {
     "category": "Demo Databases",
     "text": "Demo Databases: Which query clause filters rows?",
     "options": [
-      {"text": "ORDER BY", "correct": false},
-      {"text": "WHERE", "correct": true},
-      {"text": "GROUP BY", "correct": false},
-      {"text": "JOIN", "correct": false}
+      {
+        "text": "WHERE",
+        "correct": true
+      },
+      {
+        "text": "ORDER BY",
+        "correct": false
+      },
+      {
+        "text": "GROUP BY",
+        "correct": false
+      },
+      {
+        "text": "SELECT",
+        "correct": false
+      }
     ]
   },
   {
     "category": "Demo Databases",
     "text": "Demo Databases: What is a foreign key commonly used for?",
     "options": [
-      {"text": "Compressing table data", "correct": false},
-      {"text": "Linking related rows between tables", "correct": true},
-      {"text": "Encrypting queries", "correct": false},
-      {"text": "Starting the database server", "correct": false}
+      {
+        "text": "Referential integrity",
+        "correct": true
+      },
+      {
+        "text": "Password hashing",
+        "correct": false
+      },
+      {
+        "text": "HTTP routing",
+        "correct": false
+      },
+      {
+        "text": "CSS styling",
+        "correct": false
+      }
     ]
   },
   {
     "category": "Demo Databases",
-    "text": "Demo Databases: Which concept helps keep related database changes all-or-nothing?",
+    "text": "Demo Databases: Which SQL command adds new rows?",
     "options": [
-      {"text": "Transaction", "correct": true},
-      {"text": "Stylesheet", "correct": false},
-      {"text": "Template", "correct": false},
-      {"text": "Route", "correct": false}
+      {
+        "text": "INSERT",
+        "correct": true
+      },
+      {
+        "text": "SELECT",
+        "correct": false
+      },
+      {
+        "text": "ALTER",
+        "correct": false
+      },
+      {
+        "text": "GRANT",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Databases",
+    "text": "Demo Databases: Which transaction property means all-or-nothing?",
+    "options": [
+      {
+        "text": "Atomicity",
+        "correct": true
+      },
+      {
+        "text": "Latency",
+        "correct": false
+      },
+      {
+        "text": "Pagination",
+        "correct": false
+      },
+      {
+        "text": "Indexing",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Databases",
+    "text": "Demo Databases: Which object can speed up lookups?",
+    "options": [
+      {
+        "text": "Index",
+        "correct": true
+      },
+      {
+        "text": "Trigger only",
+        "correct": false
+      },
+      {
+        "text": "View only",
+        "correct": false
+      },
+      {
+        "text": "Role only",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Databases",
+    "text": "Demo Databases: Which JOIN keeps unmatched rows from the left table?",
+    "options": [
+      {
+        "text": "LEFT JOIN",
+        "correct": true
+      },
+      {
+        "text": "INNER JOIN",
+        "correct": false
+      },
+      {
+        "text": "CROSS JOIN",
+        "correct": false
+      },
+      {
+        "text": "SELF JOIN",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Databases",
+    "text": "Demo Databases: Which constraint prevents duplicate values?",
+    "options": [
+      {
+        "text": "UNIQUE",
+        "correct": true
+      },
+      {
+        "text": "CHECKPOINT",
+        "correct": false
+      },
+      {
+        "text": "VACUUM",
+        "correct": false
+      },
+      {
+        "text": "ANALYZE",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Databases",
+    "text": "Demo Databases: Which PostgreSQL type stores timezone-aware instants?",
+    "options": [
+      {
+        "text": "TIMESTAMPTZ",
+        "correct": true
+      },
+      {
+        "text": "VARCHAR",
+        "correct": false
+      },
+      {
+        "text": "BOOLEAN",
+        "correct": false
+      },
+      {
+        "text": "JSONB only",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Databases",
+    "text": "Demo Databases: Which statement changes table structure?",
+    "options": [
+      {
+        "text": "ALTER TABLE",
+        "correct": true
+      },
+      {
+        "text": "COMMIT",
+        "correct": false
+      },
+      {
+        "text": "ROLLBACK",
+        "correct": false
+      },
+      {
+        "text": "EXPLAIN",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Databases",
+    "text": "Demo Databases: Which aggregate counts rows?",
+    "options": [
+      {
+        "text": "COUNT",
+        "correct": true
+      },
+      {
+        "text": "LOWER",
+        "correct": false
+      },
+      {
+        "text": "COALESCE",
+        "correct": false
+      },
+      {
+        "text": "SUBSTRING",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Databases",
+    "text": "Demo Databases: Which clause sorts result rows?",
+    "options": [
+      {
+        "text": "ORDER BY",
+        "correct": true
+      },
+      {
+        "text": "VALUES",
+        "correct": false
+      },
+      {
+        "text": "HAVING",
+        "correct": false
+      },
+      {
+        "text": "LIMIT",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Web Security",
+    "text": "Demo Web Security: What does CSRF protection help defend against?",
+    "options": [
+      {
+        "text": "Cross-site request forgery",
+        "correct": true
+      },
+      {
+        "text": "Slow database indexes",
+        "correct": false
+      },
+      {
+        "text": "Broken CSS",
+        "correct": false
+      },
+      {
+        "text": "Memory leaks",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Web Security",
+    "text": "Demo Web Security: Which cookie flag limits client-side script access?",
+    "options": [
+      {
+        "text": "HttpOnly",
+        "correct": true
+      },
+      {
+        "text": "Path",
+        "correct": false
+      },
+      {
+        "text": "Domain",
+        "correct": false
+      },
+      {
+        "text": "Max-Age",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Web Security",
+    "text": "Demo Web Security: Which principle grants only needed permissions?",
+    "options": [
+      {
+        "text": "Least privilege",
+        "correct": true
+      },
+      {
+        "text": "Big bang",
+        "correct": false
+      },
+      {
+        "text": "Global mutable state",
+        "correct": false
+      },
+      {
+        "text": "Optimistic UI",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Web Security",
+    "text": "Demo Web Security: What should passwords be stored as?",
+    "options": [
+      {
+        "text": "Strong salted hashes",
+        "correct": true
+      },
+      {
+        "text": "Plain text",
+        "correct": false
+      },
+      {
+        "text": "Base64 text",
+        "correct": false
+      },
+      {
+        "text": "HTML comments",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Web Security",
+    "text": "Demo Web Security: Which response code commonly means authenticated but forbidden?",
+    "options": [
+      {
+        "text": "403",
+        "correct": true
+      },
+      {
+        "text": "200",
+        "correct": false
+      },
+      {
+        "text": "302",
+        "correct": false
+      },
+      {
+        "text": "500",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Web Security",
+    "text": "Demo Web Security: Which attack injects script into rendered pages?",
+    "options": [
+      {
+        "text": "XSS",
+        "correct": true
+      },
+      {
+        "text": "N+1",
+        "correct": false
+      },
+      {
+        "text": "Deadlock",
+        "correct": false
+      },
+      {
+        "text": "Cache miss",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Web Security",
+    "text": "Demo Web Security: Which header can reduce MIME sniffing?",
+    "options": [
+      {
+        "text": "X-Content-Type-Options",
+        "correct": true
+      },
+      {
+        "text": "Accept-Language",
+        "correct": false
+      },
+      {
+        "text": "Content-Length",
+        "correct": false
+      },
+      {
+        "text": "Host",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Web Security",
+    "text": "Demo Web Security: Which validation should happen on the server?",
+    "options": [
+      {
+        "text": "All security-critical validation",
+        "correct": true
+      },
+      {
+        "text": "Only color choice",
+        "correct": false
+      },
+      {
+        "text": "Only local time",
+        "correct": false
+      },
+      {
+        "text": "Only browser width",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Web Security",
+    "text": "Demo Web Security: Which security control verifies resource ownership?",
+    "options": [
+      {
+        "text": "Authorization check",
+        "correct": true
+      },
+      {
+        "text": "Pretty URL",
+        "correct": false
+      },
+      {
+        "text": "CSS reset",
+        "correct": false
+      },
+      {
+        "text": "Database seed",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Web Security",
+    "text": "Demo Web Security: Which token protects state-changing forms in this app?",
+    "options": [
+      {
+        "text": "CSRF token",
+        "correct": true
+      },
+      {
+        "text": "Refresh-only token",
+        "correct": false
+      },
+      {
+        "text": "Sitemap token",
+        "correct": false
+      },
+      {
+        "text": "ETag",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Web Security",
+    "text": "Demo Web Security: Which session property helps protect cookies over HTTPS?",
+    "options": [
+      {
+        "text": "Secure",
+        "correct": true
+      },
+      {
+        "text": "Inline",
+        "correct": false
+      },
+      {
+        "text": "Static",
+        "correct": false
+      },
+      {
+        "text": "Abstract",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Web Security",
+    "text": "Demo Web Security: Which logging practice is safer?",
+    "options": [
+      {
+        "text": "Avoid secrets in logs",
+        "correct": true
+      },
+      {
+        "text": "Log passwords",
+        "correct": false
+      },
+      {
+        "text": "Log raw tokens",
+        "correct": false
+      },
+      {
+        "text": "Log private keys",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Software Architecture",
+    "text": "Demo Software Architecture: Which design keeps business rules out of controllers?",
+    "options": [
+      {
+        "text": "Service layer",
+        "correct": true
+      },
+      {
+        "text": "God controller",
+        "correct": false
+      },
+      {
+        "text": "Inline SQL in views",
+        "correct": false
+      },
+      {
+        "text": "CSS-only model",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Software Architecture",
+    "text": "Demo Software Architecture: Which property means code is easier to change safely?",
+    "options": [
+      {
+        "text": "Maintainability",
+        "correct": true
+      },
+      {
+        "text": "Obfuscation",
+        "correct": false
+      },
+      {
+        "text": "Duplication",
+        "correct": false
+      },
+      {
+        "text": "Temporal coupling",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Software Architecture",
+    "text": "Demo Software Architecture: Which pattern converts entities into view-friendly objects?",
+    "options": [
+      {
+        "text": "Mapper",
+        "correct": true
+      },
+      {
+        "text": "Deadlock",
+        "correct": false
+      },
+      {
+        "text": "Fork",
+        "correct": false
+      },
+      {
+        "text": "Poll",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Software Architecture",
+    "text": "Demo Software Architecture: Which dependency direction is usually preferred?",
+    "options": [
+      {
+        "text": "Inward toward domain rules",
+        "correct": true
+      },
+      {
+        "text": "Randomly between packages",
+        "correct": false
+      },
+      {
+        "text": "Views into repositories",
+        "correct": false
+      },
+      {
+        "text": "Database into UI",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Software Architecture",
+    "text": "Demo Software Architecture: Which test style checks a small unit in isolation?",
+    "options": [
+      {
+        "text": "Unit test",
+        "correct": true
+      },
+      {
+        "text": "Load test",
+        "correct": false
+      },
+      {
+        "text": "Manual smoke only",
+        "correct": false
+      },
+      {
+        "text": "Chaos experiment",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Software Architecture",
+    "text": "Demo Software Architecture: Which concept protects historical quiz results here?",
+    "options": [
+      {
+        "text": "Attempt snapshot",
+        "correct": true
+      },
+      {
+        "text": "Mutable live question join",
+        "correct": false
+      },
+      {
+        "text": "Browser cache",
+        "correct": false
+      },
+      {
+        "text": "CSS class",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Software Architecture",
+    "text": "Demo Software Architecture: Which practice reduces unrelated risk?",
+    "options": [
+      {
+        "text": "Small scoped changes",
+        "correct": true
+      },
+      {
+        "text": "Large unrelated refactors",
+        "correct": false
+      },
+      {
+        "text": "Hidden behavior",
+        "correct": false
+      },
+      {
+        "text": "Global flags everywhere",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Software Architecture",
+    "text": "Demo Software Architecture: Which artifact documents schema evolution?",
+    "options": [
+      {
+        "text": "Migration",
+        "correct": true
+      },
+      {
+        "text": "Screenshot",
+        "correct": false
+      },
+      {
+        "text": "Favicon",
+        "correct": false
+      },
+      {
+        "text": "Stack trace",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Software Architecture",
+    "text": "Demo Software Architecture: Which term describes clear module responsibility?",
+    "options": [
+      {
+        "text": "Cohesion",
+        "correct": true
+      },
+      {
+        "text": "Ambiguity",
+        "correct": false
+      },
+      {
+        "text": "Overfetch",
+        "correct": false
+      },
+      {
+        "text": "Race",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Software Architecture",
+    "text": "Demo Software Architecture: Which technique prevents concurrent lost updates?",
+    "options": [
+      {
+        "text": "Optimistic locking",
+        "correct": true
+      },
+      {
+        "text": "Random sleeps",
+        "correct": false
+      },
+      {
+        "text": "Long comments",
+        "correct": false
+      },
+      {
+        "text": "Manual refresh",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Software Architecture",
+    "text": "Demo Software Architecture: Which rule helps keep controllers thin?",
+    "options": [
+      {
+        "text": "Delegate use cases to services",
+        "correct": true
+      },
+      {
+        "text": "Open repositories in templates",
+        "correct": false
+      },
+      {
+        "text": "Score in JavaScript",
+        "correct": false
+      },
+      {
+        "text": "Disable validation",
+        "correct": false
+      }
+    ]
+  },
+  {
+    "category": "Demo Software Architecture",
+    "text": "Demo Software Architecture: Which quality helps explain production behavior later?",
+    "options": [
+      {
+        "text": "Auditability",
+        "correct": true
+      },
+      {
+        "text": "Minification only",
+        "correct": false
+      },
+      {
+        "text": "Untracked changes",
+        "correct": false
+      },
+      {
+        "text": "Magic constants",
+        "correct": false
+      }
     ]
   }
 ]

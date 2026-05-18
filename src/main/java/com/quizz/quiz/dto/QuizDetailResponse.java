@@ -9,6 +9,9 @@ public record QuizDetailResponse(
         String categoryName,
         int durationMinutes,
         int questionCount,
+        int attemptLimit,
+        int retakeCooldownMinutes,
+        int poolSize,
         List<QuizQuestionResponse> questions
 ) {
 }

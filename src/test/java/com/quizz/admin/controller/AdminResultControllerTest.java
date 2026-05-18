@@ -73,7 +73,7 @@ class AdminResultControllerTest {
     void getResultsAsAdminReturnsListViewWithModelAttributes() throws Exception {
         AdminResultListResponse response = emptyResults(new AdminResultFilterRequest());
         List<CategoryOptionResponse> categories = List.of(new CategoryOptionResponse(1L, "Science"));
-        List<QuizSummaryResponse> quizzes = List.of(new QuizSummaryResponse(2L, "Science Quiz", "Science", 30, 5));
+        List<QuizSummaryResponse> quizzes = List.of(new QuizSummaryResponse(2L, "Science Quiz", "Science", 30, 5, 3, 1440));
         when(adminResultService.searchResults(any(AdminResultFilterRequest.class))).thenReturn(response);
         when(categoryQueryService.findActive()).thenReturn(List.of());
         when(categoryMapper.toOptionResponseList(List.of())).thenReturn(categories);

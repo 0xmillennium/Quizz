@@ -15,6 +15,9 @@ import com.quizz.attempt.entity.AttemptCompletionReason;
 import com.quizz.attempt.entity.AttemptQuestion;
 import com.quizz.attempt.entity.AttemptStatus;
 import com.quizz.attempt.entity.QuizAttempt;
+import com.quizz.attempt.entity.QuizAttemptAllowance;
+import com.quizz.attempt.random.AttemptRandomizer;
+import com.quizz.attempt.repository.QuizAttemptAllowanceRepository;
 import com.quizz.attempt.repository.QuizAttemptRepository;
 import com.quizz.attempt.scoring.ScoreResult;
 import com.quizz.category.entity.Category;
@@ -27,12 +30,15 @@ import com.quizz.user.service.UserQueryService;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,6 +51,9 @@ class DefaultQuizAttemptCommandServiceTest {
     private QuizAttemptRepository quizAttemptRepository;
 
     @Mock
+    private QuizAttemptAllowanceRepository allowanceRepository;
+
+    @Mock
     private QuizQueryService quizQueryService;
 
     @Mock
@@ -53,8 +62,16 @@ class DefaultQuizAttemptCommandServiceTest {
     @Mock
     private ScoringService scoringService;
 
+    private final AttemptRandomizer deterministicRandomizer = new AttemptRandomizer() {
+        @Override
+        public <T> List<T> shuffledCopy(List<T> source) {
+            return new ArrayList<>(source);
+        }
+    };
+
     private User user;
     private Quiz quiz;
+    private QuizAttemptAllowance allowance;
     private DefaultQuizAttemptCommandService service;
 
     @BeforeEach
@@ -64,14 +81,19 @@ class DefaultQuizAttemptCommandServiceTest {
         Question first = AttemptTestFactory.question(10L, "First?", category);
         Question second = AttemptTestFactory.question(20L, "Second?", category);
         quiz = AttemptTestFactory.quiz(3L, category, first, second);
+        allowance = QuizAttemptAllowance.initialize(user, quiz);
         service = new DefaultQuizAttemptCommandService(
                 quizAttemptRepository,
+                allowanceRepository,
                 quizQueryService,
                 userQueryService,
                 scoringService,
+                deterministicRandomizer,
                 Clock.fixed(NOW, ZoneOffset.UTC)
         );
 
+        lenient().when(allowanceRepository.findByUserIdAndQuizIdForUpdate(1L, 3L))
+                .thenReturn(Optional.of(allowance));
         lenient().when(quizAttemptRepository.save(any(QuizAttempt.class))).thenAnswer(invocation -> {
             QuizAttempt attempt = invocation.getArgument(0);
             AttemptTestFactory.setId(attempt, 99L);
@@ -87,6 +109,8 @@ class DefaultQuizAttemptCommandServiceTest {
 
         assertThat(response.attemptId()).isEqualTo(99L);
         assertThat(response.resumed()).isFalse();
+        assertThat(response.remainingAttempts()).isEqualTo(2);
+        assertThat(allowance.getRemainingAttempts()).isEqualTo(2);
         verify(quizAttemptRepository).save(any(QuizAttempt.class));
     }
 
@@ -99,6 +123,7 @@ class DefaultQuizAttemptCommandServiceTest {
 
         assertThat(response.attemptId()).isEqualTo(11L);
         assertThat(response.resumed()).isTrue();
+        assertThat(allowance.getRemainingAttempts()).isEqualTo(3);
     }
 
     @Test
@@ -126,19 +151,64 @@ class DefaultQuizAttemptCommandServiceTest {
         assertThat(existing.getStatus()).isEqualTo(AttemptStatus.ABANDONED);
         assertThat(existing.getAbandonedAt()).isEqualTo(NOW);
         assertThat(response.attemptId()).isEqualTo(99L);
+        assertThat(allowance.getRemainingAttempts()).isEqualTo(2);
     }
 
     @Test
-    void restartAttemptAutoSubmitsOverdueAttemptAndCreatesNewAttempt() throws Exception {
+    void restartAttemptCopiesSnapshotOrderAndClearsAnswers() throws Exception {
+        QuizAttempt existing = persistedAttempt();
+        AttemptQuestion first = existing.getQuestions().get(0);
+        first.autosaveAnswer(first.getOptions().get(1).getId(), 4, NOW.minusSeconds(10));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(existing));
+
+        service.restartAttempt(4L, 1L);
+
+        ArgumentCaptor<QuizAttempt> captor = ArgumentCaptor.forClass(QuizAttempt.class);
+        verify(quizAttemptRepository).save(captor.capture());
+        QuizAttempt replacement = captor.getValue();
+        assertThat(replacement.getQuestions()).extracting(AttemptQuestion::getOriginalQuestionId)
+                .containsExactlyElementsOf(existing.getQuestions().stream()
+                        .map(AttemptQuestion::getOriginalQuestionId)
+                        .toList());
+        assertThat(replacement.getQuestions().get(0).getOptions())
+                .extracting(option -> option.getOriginalAnswerOptionId())
+                .containsExactlyElementsOf(first.getOptions().stream()
+                        .map(option -> option.getOriginalAnswerOptionId())
+                        .toList());
+        assertThat(replacement.getQuestions()).allSatisfy(question -> {
+            assertThat(question.getSelectedOptionId()).isNull();
+            assertThat(question.getAnswerRevision()).isZero();
+            assertThat(question.getAnsweredAt()).isNull();
+        });
+    }
+
+    @Test
+    void restartAttemptWithNoRemainingAttemptsDoesNotAbandonCurrentAttempt() throws Exception {
+        QuizAttempt existing = persistedAttempt();
+        allowance.consumeRight(NOW.minusSeconds(30));
+        allowance.consumeRight(NOW.minusSeconds(20));
+        allowance.consumeRight(NOW.minusSeconds(10));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(existing));
+
+        assertThatThrownBy(() -> service.restartAttempt(4L, 1L))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("No attempts remaining.");
+
+        assertThat(existing.getStatus()).isEqualTo(AttemptStatus.IN_PROGRESS);
+    }
+
+    @Test
+    void restartAttemptAutoSubmitsOverdueAttemptAndRejectsRestart() throws Exception {
         QuizAttempt existing = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(31 * 60));
         when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(existing));
         when(scoringService.score(existing)).thenReturn(SCORE);
 
-        StartQuizResponse response = service.restartAttempt(4L, 1L);
+        assertThatThrownBy(() -> service.restartAttempt(4L, 1L))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("Attempt expired and was automatically submitted.");
 
         assertThat(existing.getStatus()).isEqualTo(AttemptStatus.COMPLETED);
         assertThat(existing.getCompletionReason()).isEqualTo(AttemptCompletionReason.TIME_EXPIRED);
-        assertThat(response.previousAttemptAutoSubmitted()).isTrue();
     }
 
     @Test
@@ -212,6 +282,129 @@ class DefaultQuizAttemptCommandServiceTest {
         assertThat(attempt.getStatus()).isEqualTo(AttemptStatus.COMPLETED);
         assertThat(attempt.getCompletionReason()).isEqualTo(AttemptCompletionReason.MANUAL);
         assertThat(attempt.getSubmittedAt()).isEqualTo(NOW);
+        assertThat(allowance.getRemainingAttempts()).isEqualTo(3);
+    }
+
+    @Test
+    void completionOfLastUsedAttemptStartsCooldown() throws Exception {
+        QuizAttempt attempt = persistedAttempt();
+        AttemptQuestion first = attempt.getQuestions().get(0);
+        AttemptQuestion second = attempt.getQuestions().get(1);
+        allowance.consumeRight(NOW.minusSeconds(30));
+        allowance.consumeRight(NOW.minusSeconds(20));
+        allowance.consumeRight(NOW.minusSeconds(10));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(scoringService.score(attempt)).thenReturn(SCORE);
+
+        service.submitAttempt(4L, 1L, request(
+                answer(first, first.getOptions().get(0).getId()),
+                answer(second, second.getOptions().get(0).getId())
+        ));
+
+        assertThat(allowance.getCooldownUntil()).isEqualTo(NOW.plusSeconds(1440 * 60L));
+    }
+
+    @Test
+    void cooldownDoesNotStartWhileAnotherFinalAttemptIsActive() throws Exception {
+        QuizAttempt attempt = persistedAttempt();
+        AttemptQuestion first = attempt.getQuestions().get(0);
+        AttemptQuestion second = attempt.getQuestions().get(1);
+        allowance.consumeRight(NOW.minusSeconds(30));
+        allowance.consumeRight(NOW.minusSeconds(20));
+        allowance.consumeRight(NOW.minusSeconds(10));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(quizAttemptRepository.existsByUserIdAndQuizIdAndStatus(1L, 3L, AttemptStatus.IN_PROGRESS))
+                .thenReturn(true);
+        when(scoringService.score(attempt)).thenReturn(SCORE);
+
+        service.submitAttempt(4L, 1L, request(
+                answer(first, first.getOptions().get(0).getId()),
+                answer(second, second.getOptions().get(0).getId())
+        ));
+
+        assertThat(allowance.getCooldownUntil()).isNull();
+    }
+
+    @Test
+    void startAttemptBlockedDuringCooldown() {
+        allowance.consumeRight(NOW.minusSeconds(30));
+        allowance.consumeRight(NOW.minusSeconds(20));
+        allowance.consumeRight(NOW.minusSeconds(10));
+        allowance.startCooldown(NOW.plusSeconds(3600));
+        stubStartDependencies(Optional.empty());
+
+        assertThatThrownBy(() -> service.startAttempt(3L, 1L))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("Quiz is in cooldown.");
+    }
+
+    @Test
+    void cooldownResetRestoresAttemptLimitBeforeStartConsumesOneRight() {
+        allowance.consumeRight(NOW.minusSeconds(30));
+        allowance.consumeRight(NOW.minusSeconds(20));
+        allowance.consumeRight(NOW.minusSeconds(10));
+        allowance.startCooldown(NOW.minusSeconds(1));
+        stubStartDependencies(Optional.empty());
+
+        StartQuizResponse response = service.startAttempt(3L, 1L);
+
+        assertThat(response.remainingAttempts()).isEqualTo(2);
+        assertThat(response.cooldownUntil()).isNull();
+    }
+
+    @Test
+    void activeAttemptCanContinueWithNoRemainingRights() throws Exception {
+        QuizAttempt existing = AttemptTestFactory.attempt(11L, user, quiz, NOW.minusSeconds(60));
+        allowance.consumeRight(NOW.minusSeconds(30));
+        allowance.consumeRight(NOW.minusSeconds(20));
+        allowance.consumeRight(NOW.minusSeconds(10));
+        stubStartDependencies(Optional.of(existing));
+
+        StartQuizResponse response = service.startAttempt(3L, 1L);
+
+        assertThat(response.resumed()).isTrue();
+        assertThat(response.remainingAttempts()).isZero();
+    }
+
+    @Test
+    void freshAttemptSamplesQuestionCountAndUsesRandomizedQuestionAndOptionOrder() throws Exception {
+        Category category = AttemptTestFactory.category(12L, "Architecture");
+        Question first = AttemptTestFactory.question(101L, "First?", category);
+        Question second = AttemptTestFactory.question(102L, "Second?", category);
+        Question third = AttemptTestFactory.question(103L, "Third?", category);
+        Quiz samplingQuiz = Quiz.create("Sampling Quiz", null, category, 30, 2, 3, 1440, List.of(first, second, third));
+        samplingQuiz.publish();
+        AttemptTestFactory.setId(samplingQuiz, 13L);
+        QuizAttemptAllowance samplingAllowance = QuizAttemptAllowance.initialize(user, samplingQuiz);
+        DefaultQuizAttemptCommandService samplingService = new DefaultQuizAttemptCommandService(
+                quizAttemptRepository,
+                allowanceRepository,
+                quizQueryService,
+                userQueryService,
+                scoringService,
+                reversingRandomizer(),
+                Clock.fixed(NOW, ZoneOffset.UTC)
+        );
+        when(userQueryService.getById(1L)).thenReturn(user);
+        when(quizQueryService.getPublishedByIdForAttempt(13L)).thenReturn(samplingQuiz);
+        when(quizAttemptRepository.findByUserIdAndQuizIdAndStatus(1L, 13L, AttemptStatus.IN_PROGRESS))
+                .thenReturn(Optional.empty());
+        when(allowanceRepository.findByUserIdAndQuizIdForUpdate(1L, 13L))
+                .thenReturn(Optional.of(samplingAllowance));
+
+        samplingService.startAttempt(13L, 1L);
+
+        ArgumentCaptor<QuizAttempt> captor = ArgumentCaptor.forClass(QuizAttempt.class);
+        verify(quizAttemptRepository).save(captor.capture());
+        QuizAttempt saved = captor.getValue();
+        assertThat(saved.getQuestions()).hasSize(2);
+        assertThat(saved.getQuestions()).extracting(AttemptQuestion::getOriginalQuestionId)
+                .containsExactly(102L, 103L);
+        assertThat(saved.getQuestions()).extracting(AttemptQuestion::getOriginalQuestionId)
+                .doesNotHaveDuplicates();
+        assertThat(saved.getQuestions().get(0).getOptions())
+                .extracting(option -> option.getOriginalAnswerOptionId())
+                .containsExactly(1022L, 1021L);
     }
 
     @Test
@@ -327,6 +520,17 @@ class DefaultQuizAttemptCommandServiceTest {
 
     private QuizAttempt persistedAttempt() throws Exception {
         return AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(60));
+    }
+
+    private AttemptRandomizer reversingRandomizer() {
+        return new AttemptRandomizer() {
+            @Override
+            public <T> List<T> shuffledCopy(List<T> source) {
+                List<T> copy = new ArrayList<>(source);
+                Collections.reverse(copy);
+                return copy;
+            }
+        };
     }
 
     private SubmitQuizRequest request(UserAnswerRequest... answers) {

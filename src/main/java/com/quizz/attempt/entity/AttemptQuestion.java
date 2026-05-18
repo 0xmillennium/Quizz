@@ -2,6 +2,7 @@ package com.quizz.attempt.entity;
 
 import com.quizz.common.entity.BaseEntity;
 import com.quizz.common.exception.BusinessRuleException;
+import com.quizz.question.entity.AnswerOption;
 import com.quizz.question.entity.Question;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -64,22 +65,46 @@ public class AttemptQuestion extends BaseEntity {
     protected AttemptQuestion() {
     }
 
-    private AttemptQuestion(QuizAttempt attempt, Question question, int displayOrder) {
+    private AttemptQuestion(
+            QuizAttempt attempt,
+            Question question,
+            int displayOrder,
+            List<AnswerOption> orderedOptions
+    ) {
         this.attempt = attempt;
         this.originalQuestionId = question.getId();
         this.questionText = question.getText();
         this.displayOrder = displayOrder;
         this.correct = null;
         this.answerRevision = 0;
-        question.getOptions().forEach(option -> options.add(AttemptAnswerOption.snapshotFrom(this, option)));
+        int optionDisplayOrder = 1;
+        for (AnswerOption option : orderedOptions) {
+            options.add(AttemptAnswerOption.snapshotFrom(this, option, optionDisplayOrder));
+            optionDisplayOrder++;
+        }
+    }
+
+    private AttemptQuestion(QuizAttempt attempt, AttemptQuestion source) {
+        this.attempt = attempt;
+        this.originalQuestionId = source.originalQuestionId;
+        this.questionText = source.questionText;
+        this.displayOrder = source.displayOrder;
+        this.correct = null;
+        this.answerRevision = 0;
+        source.options.forEach(option -> options.add(AttemptAnswerOption.copyForRestart(this, option)));
     }
 
     static AttemptQuestion snapshotFrom(
             QuizAttempt attempt,
             Question question,
-            int displayOrder
+            int displayOrder,
+            List<AnswerOption> orderedOptions
     ) {
-        return new AttemptQuestion(attempt, question, displayOrder);
+        return new AttemptQuestion(attempt, question, displayOrder, orderedOptions);
+    }
+
+    static AttemptQuestion copyForRestart(QuizAttempt attempt, AttemptQuestion source) {
+        return new AttemptQuestion(attempt, source);
     }
 
     void selectOption(Long selectedOptionId) {

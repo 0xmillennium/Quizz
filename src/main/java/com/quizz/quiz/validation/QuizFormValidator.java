@@ -30,22 +30,50 @@ public class QuizFormValidator {
     }
 
     public void validateCreate(QuizCreateRequest request, BindingResult bindingResult) {
-        validate(request.getCategoryId(), request.getDurationMinutes(), request.getQuestionIds(), bindingResult);
+        validate(
+                request.getCategoryId(),
+                request.getDurationMinutes(),
+                request.getQuestionCount(),
+                request.getAttemptLimit(),
+                request.getRetakeCooldownMinutes(),
+                request.getQuestionIds(),
+                bindingResult
+        );
     }
 
     public void validateUpdate(QuizUpdateRequest request, BindingResult bindingResult) {
-        validate(request.getCategoryId(), request.getDurationMinutes(), request.getQuestionIds(), bindingResult);
+        validate(
+                request.getCategoryId(),
+                request.getDurationMinutes(),
+                request.getQuestionCount(),
+                request.getAttemptLimit(),
+                request.getRetakeCooldownMinutes(),
+                request.getQuestionIds(),
+                bindingResult
+        );
     }
 
     private void validate(
             Long categoryId,
             Integer durationMinutes,
+            Integer questionCount,
+            Integer attemptLimit,
+            Integer retakeCooldownMinutes,
             List<Long> questionIds,
             BindingResult bindingResult
     ) {
         Category category = validateCategory(categoryId, bindingResult);
         validateDuration(durationMinutes, bindingResult);
+        validatePositive("questionCount", questionCount, "Questions per attempt must be at least 1.", bindingResult);
+        validatePositive("attemptLimit", attemptLimit, "Attempt limit must be at least 1.", bindingResult);
+        validatePositive(
+                "retakeCooldownMinutes",
+                retakeCooldownMinutes,
+                "Retake cooldown must be at least 1 minute.",
+                bindingResult
+        );
         List<Question> questions = validateQuestions(questionIds, bindingResult);
+        validateQuestionCount(questionCount, questions, bindingResult);
         validateQuestionCategories(category, questions, bindingResult);
     }
 
@@ -66,6 +94,20 @@ public class QuizFormValidator {
         }
     }
 
+    private void validatePositive(
+            String field,
+            Integer value,
+            String message,
+            BindingResult bindingResult
+    ) {
+        if (bindingResult.hasFieldErrors(field) || value == null) {
+            return;
+        }
+        if (value < 1) {
+            bindingResult.rejectValue(field, "quiz." + field + ".min", message);
+        }
+    }
+
     private void validateDuration(Integer durationMinutes, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors("durationMinutes") || durationMinutes == null) {
             return;
@@ -75,6 +117,26 @@ public class QuizFormValidator {
                     "durationMinutes",
                     "quiz.duration.range",
                     "Duration must be between 1 and 180 minutes."
+            );
+        }
+    }
+
+    private void validateQuestionCount(
+            Integer questionCount,
+            List<Question> questions,
+            BindingResult bindingResult
+    ) {
+        if (questionCount == null
+                || questions.isEmpty()
+                || bindingResult.hasFieldErrors("questionCount")
+                || bindingResult.hasFieldErrors("questionIds")) {
+            return;
+        }
+        if (questionCount > questions.size()) {
+            bindingResult.rejectValue(
+                    "questionCount",
+                    "quiz.questionCount.poolSize",
+                    "Questions per attempt cannot exceed the selected pool size."
             );
         }
     }
