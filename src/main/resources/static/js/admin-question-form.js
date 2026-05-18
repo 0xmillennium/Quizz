@@ -10,6 +10,13 @@
             return;
         }
 
+        const updateCorrectRows = () => {
+            container.querySelectorAll("[data-option-row]").forEach((row) => {
+                const correctInput = row.querySelector("[data-correct-option]");
+                row.classList.toggle("option-row-correct", Boolean(correctInput && correctInput.checked));
+            });
+        };
+
         const updateButtons = () => {
             const rows = container.querySelectorAll("[data-option-row]");
             addButton.disabled = rows.length >= MAX_OPTIONS;
@@ -25,6 +32,8 @@
             container.querySelectorAll("[data-option-row]").forEach((row, index) => {
                 const textInput = row.querySelector("input[type='text']");
                 const correctInput = row.querySelector("input[type='checkbox']");
+                const textLabel = row.querySelector(".option-row__field .field-label");
+                const correctLabel = row.querySelector(".option-row__correct");
 
                 if (textInput) {
                     textInput.name = `options[${index}].text`;
@@ -34,8 +43,16 @@
                     correctInput.name = `options[${index}].correct`;
                     correctInput.id = `options${index}.correct`;
                 }
+                if (textLabel) {
+                    textLabel.textContent = `Option ${index + 1}`;
+                    textLabel.htmlFor = `options${index}.text`;
+                }
+                if (correctLabel) {
+                    correctLabel.htmlFor = `options${index}.correct`;
+                }
             });
             updateButtons();
+            updateCorrectRows();
         };
 
         addButton.addEventListener("click", () => {
@@ -55,6 +72,21 @@
             newRow.querySelectorAll("p").forEach((error) => error.remove());
             container.appendChild(newRow);
             reindexRows();
+        });
+
+        container.addEventListener("change", (event) => {
+            const correctInput = event.target.closest("[data-correct-option]");
+            if (!correctInput || !correctInput.checked) {
+                updateCorrectRows();
+                return;
+            }
+
+            container.querySelectorAll("[data-correct-option]").forEach((input) => {
+                if (input !== correctInput) {
+                    input.checked = false;
+                }
+            });
+            updateCorrectRows();
         });
 
         container.addEventListener("click", (event) => {

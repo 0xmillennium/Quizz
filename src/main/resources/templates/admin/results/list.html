@@ -1,114 +1,151 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>User Results - Quizz Admin</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <th:block th:replace="~{layout/fragments :: adminHead('User Results - Quizz Admin')}"></th:block>
 </head>
 <body>
-<header th:replace="~{layout/fragments :: adminNav}"></header>
-<main>
-    <div th:replace="~{layout/fragments :: flash}"></div>
+<div class="admin-shell">
+<aside th:replace="~{layout/fragments :: adminNav}"></aside>
+<main class="admin-main">
+    <div class="page-container admin-page-container">
+    <th:block th:replace="~{layout/fragments :: flash}"></th:block>
 
-    <h1>User Results</h1>
+    <th:block th:replace="~{layout/fragments :: pageHeader('Attempt Results', 'Review submitted, auto-submitted, active, and abandoned attempts.')}"></th:block>
 
-    <form th:action="@{/admin/results}" method="get">
-        <label for="userId">User ID</label>
-        <input id="userId" name="userId" type="number" min="1" th:value="${filter.userId}">
+    <section class="card">
+        <div class="card-header">
+            <h2 class="card-title">Filters</h2>
+            <p class="card-subtitle">Use existing reporting filters to narrow attempt history.</p>
+        </div>
+        <div class="card-body">
+            <form class="filter-bar filter-bar--grid" th:action="@{/admin/results}" method="get">
+                <div class="field">
+                    <label class="field-label" for="userId">User ID</label>
+                    <input id="userId" name="userId" type="number" min="1" th:value="${filter.userId}">
+                </div>
 
-        <label for="quizId">Quiz</label>
-        <select id="quizId" name="quizId">
-            <option value="">All quizzes</option>
-            <option th:each="quiz : ${quizzes}"
-                    th:value="${quiz.id()}"
-                    th:selected="${filter.quizId != null && filter.quizId == quiz.id()}"
-                    th:text="${quiz.title()}">Quiz</option>
-        </select>
+                <div class="field">
+                    <label class="field-label" for="quizId">Quiz</label>
+                    <select id="quizId" name="quizId">
+                        <option value="">All quizzes</option>
+                        <option th:each="quiz : ${quizzes}"
+                                th:value="${quiz.id()}"
+                                th:selected="${filter.quizId != null && filter.quizId == quiz.id()}"
+                                th:text="${quiz.title()}">Quiz</option>
+                    </select>
+                </div>
 
-        <label for="categoryId">Category</label>
-        <select id="categoryId" name="categoryId">
-            <option value="">All categories</option>
-            <option th:each="category : ${categories}"
-                    th:value="${category.id()}"
-                    th:selected="${filter.categoryId != null && filter.categoryId == category.id()}"
-                    th:text="${category.name()}">Category</option>
-        </select>
+                <div class="field">
+                    <label class="field-label" for="categoryId">Category</label>
+                    <select id="categoryId" name="categoryId">
+                        <option value="">All categories</option>
+                        <option th:each="category : ${categories}"
+                                th:value="${category.id()}"
+                                th:selected="${filter.categoryId != null && filter.categoryId == category.id()}"
+                                th:text="${category.name()}">Category</option>
+                    </select>
+                </div>
 
-        <label for="status">Status</label>
-        <select id="status" name="status">
-            <option value="">All statuses</option>
-            <option th:each="status : ${statuses}"
-                    th:value="${status}"
-                    th:selected="${filter.status != null && filter.status == status}"
-                    th:text="${status}">COMPLETED</option>
-        </select>
+                <div class="field">
+                    <label class="field-label" for="status">Status</label>
+                    <select id="status" name="status">
+                        <option value="">All statuses</option>
+                        <option th:each="status : ${statuses}"
+                                th:value="${status}"
+                                th:selected="${filter.status != null && filter.status == status}"
+                                th:text="${status}">COMPLETED</option>
+                    </select>
+                </div>
 
-        <label for="startedFrom">Started From</label>
-        <input id="startedFrom" name="startedFrom" type="date" th:value="${filter.startedFrom}">
+                <div class="field">
+                    <label class="field-label" for="startedFrom">Started From</label>
+                    <input id="startedFrom" name="startedFrom" type="date" th:value="${filter.startedFrom}">
+                </div>
 
-        <label for="startedTo">Started To</label>
-        <input id="startedTo" name="startedTo" type="date" th:value="${filter.startedTo}">
+                <div class="field">
+                    <label class="field-label" for="startedTo">Started To</label>
+                    <input id="startedTo" name="startedTo" type="date" th:value="${filter.startedTo}">
+                </div>
 
-        <label for="size">Page Size</label>
-        <input id="size" name="size" type="number" min="1" max="100" th:value="${results.page().size()}">
+                <div class="field">
+                    <label class="field-label" for="size">Page Size</label>
+                    <input id="size" name="size" type="number" min="1" max="100" th:value="${results.page().size()}">
+                </div>
 
-        <button type="submit">Filter</button>
-        <a th:href="@{/admin/results}">Clear filters</a>
-    </form>
+                <div class="form-actions">
+                    <button class="button button-secondary" type="submit">Apply filters</button>
+                    <a class="button button-ghost" th:href="@{/admin/results}">Clear filters</a>
+                </div>
+            </form>
+        </div>
+    </section>
 
-    <p th:if="${#lists.isEmpty(results.results())}">No results found.</p>
+    <th:block th:if="${#lists.isEmpty(results.results())}"
+              th:replace="~{layout/fragments :: emptyState('No results found', 'Try changing the filters or wait for new attempts.', null, null)}"></th:block>
 
-    <table th:if="${!#lists.isEmpty(results.results())}">
-        <thead>
-        <tr>
-            <th>User</th>
-            <th>Quiz</th>
-            <th>Category</th>
-            <th>Status</th>
-            <th>Reason</th>
-            <th>Score %</th>
-            <th>Correct / Wrong / Unanswered</th>
-            <th>Started At</th>
-            <th>Submitted At</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="result : ${results.results()}">
-            <td th:text="${result.userFullName()}">Ada Lovelace</td>
-            <td th:text="${result.quizTitle()}">Science Quiz</td>
-            <td th:text="${result.categoryName()}">Science</td>
-            <td th:text="${result.status()}">COMPLETED</td>
-            <td th:text="${result.completionReason() ?: '-'}">MANUAL</td>
-            <td th:text="${result.scorePercentage()}">80</td>
-            <td>
-                <span th:text="${result.correctCount()}">4</span> /
-                <span th:text="${result.wrongCount()}">1</span> /
-                <span th:text="${result.unansweredCount()}">0</span>
-            </td>
-            <td th:text="${result.startedAt()}">2026-01-01T10:00:00Z</td>
-            <td th:text="${result.submittedAt() ?: '-'}">2026-01-01T10:15:00Z</td>
-            <td><a th:href="@{/admin/results/{attemptId}(attemptId=${result.attemptId()})}">Detail</a></td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="table-card section" th:if="${!#lists.isEmpty(results.results())}">
+        <div class="card-header">
+            <h2 class="card-title">Attempts</h2>
+            <p class="card-subtitle">Score and lifecycle status for matching attempts.</p>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Quiz</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Reason</th>
+                    <th>Score %</th>
+                    <th>Correct / Wrong / Unanswered</th>
+                    <th>Started</th>
+                    <th>Submitted / Abandoned</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="result : ${results.results()}">
+                    <td><strong th:text="${result.userFullName()}">Ada Lovelace</strong></td>
+                    <td class="table-cell-main" th:text="${result.quizTitle()}">Science Quiz</td>
+                    <td><span class="badge badge-primary" th:text="${result.categoryName()}">Science</span></td>
+                    <td><th:block th:replace="~{layout/fragments :: statusBadge(${result.status()}, ${result.completionReason()})}"></th:block></td>
+                    <td th:text="${result.completionReason() ?: '-'}">MANUAL</td>
+                    <td><strong th:text="${result.scorePercentage() + '%'}">80%</strong></td>
+                    <td>
+                        <span th:text="${result.correctCount()}">4</span> /
+                        <span th:text="${result.wrongCount()}">1</span> /
+                        <span th:text="${result.unansweredCount()}">0</span>
+                    </td>
+                    <td th:text="${result.startedAt()}">2026-01-01T10:00:00Z</td>
+                    <td>
+                        <span th:text="${result.submittedAt() ?: (result.abandonedAt() ?: '-')}">2026-01-01T10:15:00Z</span>
+                    </td>
+                    <td><a class="button button-secondary" th:href="@{/admin/results/{attemptId}(attemptId=${result.attemptId()})}">View</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-    <nav aria-label="Pagination" th:if="${results.page().totalPages() > 0}">
-        <a th:if="${results.page().hasPrevious()}"
+    <nav class="pagination" aria-label="Pagination" th:if="${results.page().totalPages() > 0}">
+        <a class="button button-secondary"
+           th:if="${results.page().hasPrevious()}"
            th:href="@{/admin/results(userId=${filter.userId},quizId=${filter.quizId},categoryId=${filter.categoryId},status=${filter.status},startedFrom=${filter.startedFrom},startedTo=${filter.startedTo},size=${results.page().size()},page=${results.page().page() - 1})}">Previous</a>
 
         <span>
-            Page <span th:text="${results.page().page()}">1</span> /
+            Page <span th:text="${results.page().page() + 1}">1</span> /
             <span th:text="${results.page().totalPages()}">1</span>
         </span>
 
-        <a th:if="${results.page().hasNext()}"
+        <a class="button button-secondary"
+           th:if="${results.page().hasNext()}"
            th:href="@{/admin/results(userId=${filter.userId},quizId=${filter.quizId},categoryId=${filter.categoryId},status=${filter.status},startedFrom=${filter.startedFrom},startedTo=${filter.startedTo},size=${results.page().size()},page=${results.page().page() + 1})}">Next</a>
     </nav>
 
-    <p><a th:href="@{/admin}">Back to dashboard</a></p>
+    <p class="mt-4"><a class="button button-secondary" th:href="@{/admin}">Back to dashboard</a></p>
+    </div>
 </main>
+</div>
 </body>
 </html>

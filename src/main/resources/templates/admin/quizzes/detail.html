@@ -1,66 +1,133 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${quiz.title()} + ' - Quizz Admin'">Quiz - Quizz Admin</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <th:block th:replace="~{layout/fragments :: adminHead(${quiz.title()} + ' - Quizz Admin')}"></th:block>
 </head>
 <body>
-<header th:replace="~{layout/fragments :: adminNav}"></header>
-<main>
-    <div th:replace="~{layout/fragments :: flash}"></div>
+<div class="admin-shell">
+<aside th:replace="~{layout/fragments :: adminNav}"></aside>
+<main class="admin-main">
+    <div class="page-container admin-page-container">
+    <th:block th:replace="~{layout/fragments :: flash}"></th:block>
 
-    <h1 th:text="${quiz.title()}">Quiz title</h1>
-    <p th:if="${quiz.description() != null}" th:text="${quiz.description()}">Description</p>
+    <section class="card quiz-admin-hero">
+        <div class="card-header">
+            <div>
+                <h1 class="page-title" th:text="${quiz.title()}">Quiz title</h1>
+                <p class="page-subtitle" th:if="${quiz.description() != null}" th:text="${quiz.description()}">Description</p>
+                <p class="page-subtitle" th:if="${quiz.description() == null}">No description provided.</p>
+            </div>
+            <th:block th:replace="~{layout/fragments :: statusBadge(${quiz.status()}, null)}"></th:block>
+        </div>
+        <div class="card-body admin-result-summary">
+            <div>
+                <span class="stat-label">Category</span>
+                <strong th:text="${quiz.categoryName()}">Category</strong>
+            </div>
+            <div>
+                <span class="stat-label">Question pool</span>
+                <strong th:text="${quiz.poolSize()}">12</strong>
+                <span class="table-meta">selected questions</span>
+            </div>
+        </div>
+    </section>
 
-    <dl>
-        <dt>Category</dt>
-        <dd th:text="${quiz.categoryName()}">Category</dd>
-        <dt>Duration</dt>
-        <dd th:text="${quiz.durationMinutes()} + ' minutes'">30 minutes</dd>
-        <dt>Status</dt>
-        <dd th:text="${quiz.status()}">DRAFT</dd>
-        <dt>Questions per attempt</dt>
-        <dd th:text="${quiz.questionCount()}">5</dd>
-        <dt>Question pool size</dt>
-        <dd th:text="${quiz.poolSize()}">12</dd>
-        <dt>Attempt limit per cooldown window</dt>
-        <dd th:text="${quiz.attemptLimit()}">3</dd>
-        <dt>Cooldown minutes after attempts are used</dt>
-        <dd th:text="${quiz.retakeCooldownMinutes()}">1440</dd>
-    </dl>
+    <section class="stat-grid section" aria-label="Quiz settings">
+        <article class="stat-card">
+            <span class="stat-label">Duration</span>
+            <strong th:text="${quiz.durationMinutes()}">30</strong>
+            <p>minutes</p>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Pool size</span>
+            <strong th:text="${quiz.poolSize()}">12</strong>
+            <p>selected questions</p>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Questions per attempt</span>
+            <strong th:text="${quiz.questionCount()}">5</strong>
+            <p>randomized subset</p>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Attempt limit</span>
+            <strong th:text="${quiz.attemptLimit()}">3</strong>
+            <p>per cooldown window</p>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Cooldown</span>
+            <strong th:text="${quiz.retakeCooldownMinutes()}">1440</strong>
+            <p>minutes after rights are used</p>
+        </article>
+    </section>
 
-    <h2>Question pool</h2>
-    <ol>
-        <li th:each="question : ${quiz.questions()}"
-            th:text="${question.text()}">Question text</li>
-    </ol>
+    <section class="card section" th:if="${quiz.status() == 'DRAFT'}">
+        <div class="card-header">
+            <h2 class="card-title">Publish readiness</h2>
+            <p class="card-subtitle">Selected questions form the pool. Each attempt receives a randomized subset.</p>
+        </div>
+        <div class="card-body">
+            <div th:class="${quiz.poolSize() >= quiz.questionCount()} ? 'pool-health pool-health-ready' : 'pool-health pool-health-warning'">
+                <strong th:if="${quiz.poolSize() >= quiz.questionCount()}">Pool ready</strong>
+                <strong th:if="${quiz.poolSize() < quiz.questionCount()}">Pool needs attention</strong>
+                <span th:if="${quiz.poolSize() >= quiz.questionCount()}"
+                      th:text="${quiz.poolSize()} + ' selected for ' + ${quiz.questionCount()} + ' questions per attempt.'">12 selected for 5 questions per attempt.</span>
+                <span th:if="${quiz.poolSize() < quiz.questionCount()}"
+                      th:text="'Select at least ' + ${quiz.questionCount()} + ' questions for this quiz.'">Select enough questions.</span>
+            </div>
+        </div>
+    </section>
 
-    <p>
-        <a th:if="${quiz.status() == 'DRAFT'}"
+    <section class="table-card section">
+        <div class="card-header">
+            <h2 class="card-title">Question pool</h2>
+            <p class="card-subtitle">Selected questions form the pool. Each attempt receives a randomized subset.</p>
+        </div>
+        <div class="card-body" th:if="${#lists.isEmpty(quiz.questions())}">
+            <th:block th:if="${#lists.isEmpty(quiz.questions())}"
+                      th:replace="~{layout/fragments :: emptyState('No questions selected', 'Add questions to this draft before publishing.', null, null)}"></th:block>
+        </div>
+        <div class="table-responsive" th:if="${!#lists.isEmpty(quiz.questions())}">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>Question text</th>
+                    <th>Category</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="question : ${quiz.questions()}">
+                    <td th:text="${question.displayOrder()}">1</td>
+                    <td class="table-cell-main" th:text="${question.text()}">Question text</td>
+                    <td><span class="badge badge-primary" th:text="${question.categoryName()}">Category</span></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <div class="toolbar section" aria-label="Quiz actions">
+        <a class="button button-secondary"
+           th:if="${quiz.status() == 'DRAFT'}"
            th:href="@{/admin/quizzes/{id}/edit(id=${quiz.id()})}">Edit</a>
-        <a th:href="@{/admin/quizzes}">Back to quizzes</a>
-    </p>
+        <a class="button button-secondary" th:href="@{/admin/quizzes}">Back to quizzes</a>
 
-    <form th:if="${quiz.status() == 'DRAFT'}"
-          th:action="@{/admin/quizzes/{id}/publish(id=${quiz.id()})}"
-          method="post">
-        <input type="hidden"
-               th:name="${_csrf.parameterName}"
-               th:value="${_csrf.token}">
-        <button type="submit">Publish</button>
-    </form>
+        <form th:if="${quiz.status() == 'DRAFT'}"
+              th:action="@{/admin/quizzes/{id}/publish(id=${quiz.id()})}"
+              method="post">
+            <th:block th:replace="~{layout/fragments :: csrf}"></th:block>
+            <button class="button button-primary" type="submit">Publish</button>
+        </form>
 
-    <form th:if="${quiz.status() != 'ARCHIVED'}"
-          th:action="@{/admin/quizzes/{id}/archive(id=${quiz.id()})}"
-          method="post">
-        <input type="hidden"
-               th:name="${_csrf.parameterName}"
-               th:value="${_csrf.token}">
-        <button type="submit">Archive</button>
-    </form>
+        <form th:if="${quiz.status() != 'ARCHIVED'}"
+              th:action="@{/admin/quizzes/{id}/archive(id=${quiz.id()})}"
+              method="post">
+            <th:block th:replace="~{layout/fragments :: csrf}"></th:block>
+            <button class="button button-danger" type="submit">Archive</button>
+        </form>
+    </div>
+    </div>
 </main>
+</div>
 </body>
 </html>

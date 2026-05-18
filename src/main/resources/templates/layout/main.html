@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${pageTitle ?: 'Quizz'}">Quizz</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <th:block th:replace="~{layout/fragments :: head(${pageTitle ?: 'Quizz'})}"></th:block>
 </head>
-<body>
+<body class="app-shell">
 <header th:replace="~{layout/fragments :: userNav}"></header>
-<main>
-    <div th:replace="~{layout/fragments :: flash}"></div>
+<main class="page-container">
+    <th:block th:replace="~{layout/fragments :: flash}"></th:block>
     <section th:fragment="content"></section>
 </main>
 </body>

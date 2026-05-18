@@ -1,54 +1,52 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Available Quizzes - Quizz</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <th:block th:replace="~{layout/fragments :: head('Available Quizzes - Quizz')}"></th:block>
 </head>
-<body>
+<body class="app-shell">
 <header th:replace="~{layout/fragments :: userNav}"></header>
-<main>
-    <div th:replace="~{layout/fragments :: flash}"></div>
+<main class="page-container">
+    <th:block th:replace="~{layout/fragments :: flash}"></th:block>
 
-    <h1>Available Quizzes</h1>
+    <th:block th:replace="~{layout/fragments :: pageHeader('Available Quizzes', 'Choose a published quiz, review its rules, and start from the detail page.')}"></th:block>
 
-    <form th:action="@{/quizzes}" method="get">
-        <label for="categoryId">Category</label>
-        <select id="categoryId" name="categoryId">
-            <option value="">All categories</option>
-            <option th:each="category : ${categories}"
-                    th:value="${category.id()}"
-                    th:selected="${selectedCategoryId != null and selectedCategoryId == category.id()}"
-                    th:text="${category.name()}">Category</option>
-        </select>
-        <button type="submit">Filter</button>
+    <form class="filter-bar filter-bar--grid" th:action="@{/quizzes}" method="get">
+        <div class="field">
+            <label class="field-label" for="categoryId">Category</label>
+            <select id="categoryId" name="categoryId">
+                <option value="">All categories</option>
+                <option th:each="category : ${categories}"
+                        th:value="${category.id()}"
+                        th:selected="${selectedCategoryId != null and selectedCategoryId == category.id()}"
+                        th:text="${category.name()}">Category</option>
+            </select>
+        </div>
+        <div class="form-actions">
+            <button class="button button-secondary" type="submit">Filter</button>
+            <a class="button button-ghost" th:href="@{/quizzes}">Clear</a>
+        </div>
     </form>
 
-    <p th:if="${#lists.isEmpty(quizzes)}">No quizzes found.</p>
+    <th:block th:if="${#lists.isEmpty(quizzes)}"
+              th:replace="~{layout/fragments :: emptyState('No quizzes available', 'There are no published quizzes for this selection.', null, null)}"></th:block>
 
-    <table th:if="${!#lists.isEmpty(quizzes)}">
-        <thead>
-        <tr>
-            <th>Title</th>
-            <th>Category</th>
-            <th>Duration</th>
-            <th>Questions</th>
-            <th>Attempts</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="quiz : ${quizzes}">
-            <td th:text="${quiz.title()}">Quiz title</td>
-            <td th:text="${quiz.categoryName()}">Category</td>
-            <td th:text="${quiz.durationMinutes()} + ' minutes'">30 minutes</td>
-            <td th:text="${quiz.questionCount()}">5</td>
-            <td th:text="${quiz.attemptLimit()} + ', cooldown ' + ${quiz.retakeCooldownMinutes()} + ' min'">3, cooldown 1440 min</td>
-            <td><a th:href="@{/quizzes/{id}(id=${quiz.id()})}">Details</a></td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="quiz-grid" th:if="${!#lists.isEmpty(quizzes)}">
+        <article class="quiz-card" th:each="quiz : ${quizzes}">
+            <div>
+                <span class="badge badge-primary" th:text="${quiz.categoryName()}">Category</span>
+                <h2 class="quiz-card__title mt-4" th:text="${quiz.title()}">Quiz title</h2>
+            </div>
+            <div class="quiz-meta">
+                <span th:text="${quiz.durationMinutes()} + ' min'">30 min</span>
+                <span th:text="${quiz.questionCount()} + ' questions'">5 questions</span>
+                <span th:text="${quiz.attemptLimit()} + ' attempts'">3 attempts</span>
+            </div>
+            <p class="text-muted mb-0" th:text="'Cooldown: ' + ${quiz.retakeCooldownMinutes()} + ' minutes after attempts are used'">Cooldown policy</p>
+            <div class="form-actions">
+                <a class="button button-secondary" th:href="@{/quizzes/{id}(id=${quiz.id()})}">View details</a>
+            </div>
+        </article>
+    </div>
 </main>
 </body>
 </html>

@@ -1,65 +1,92 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${attempt.quizTitle()} + ' - Quizz'">Quiz - Quizz</title>
+    <th:block th:replace="~{layout/fragments :: head(${attempt.quizTitle()} + ' - Quizz')}"></th:block>
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
-    <link rel="stylesheet" th:href="@{/css/app.css}">
     <script defer th:src="@{/js/quiz-timer.js}"></script>
     <script defer th:src="@{/js/attempt-autosave.js}"></script>
 </head>
-<body>
+<body class="app-shell">
 <header th:replace="~{layout/fragments :: userNav}"></header>
-<main>
-    <div th:replace="~{layout/fragments :: flash}"></div>
+<main class="page-container attempt-shell">
+    <th:block th:replace="~{layout/fragments :: flash}"></th:block>
 
-    <h1 th:text="${attempt.quizTitle()}">Quiz title</h1>
-    <p th:text="${attempt.categoryName()}">Category</p>
+    <header class="attempt-topbar">
+        <div>
+            <h1 class="page-title" th:text="${attempt.quizTitle()}">Quiz title</h1>
+            <p class="page-subtitle" th:text="${attempt.categoryName()}">Category</p>
+            <p class="field-help">Your answers are saved automatically. You can leave and continue while time remains.</p>
+        </div>
 
-    <section>
-        <h2>Time remaining</h2>
-        <p id="quiz-timer"
-           th:attr="data-expires-at=${attempt.expiresAt()}"
-           aria-live="polite">--:--</p>
-        <p id="quiz-timer-message" aria-live="polite"></p>
-    </section>
+        <section class="state-panel" aria-label="Time remaining">
+            <h2>Time remaining</h2>
+            <p class="timer"
+               id="quiz-timer"
+               th:attr="data-expires-at=${attempt.expiresAt()}"
+               aria-live="polite">--:--</p>
+            <p id="quiz-timer-message" aria-live="polite"></p>
+            <p class="autosave-status" data-global-autosave-status aria-live="polite">Autosave ready</p>
+        </section>
+    </header>
 
     <form id="quiz-submit-form"
           th:action="@{/attempts/{attemptId}/submit(attemptId=${attempt.attemptId()})}"
           th:attr="data-auto-submit-url=@{/attempts/{attemptId}/auto-submit(attemptId=${attempt.attemptId()})}"
           th:object="${submitQuizRequest}"
           method="post">
-        <input type="hidden"
-               th:name="${_csrf.parameterName}"
-               th:value="${_csrf.token}">
+        <th:block th:replace="~{layout/fragments :: csrf}"></th:block>
 
-        <ol>
-            <li th:each="question, questionStat : ${attempt.questions()}">
-                <h2 th:text="${question.displayOrder()} + '. ' + ${question.questionText()}">Question</h2>
-                <p>Your answers are saved automatically. You can leave and continue while time remains.</p>
-                <input type="hidden"
-                       th:field="*{answers[__${questionStat.index}__].attemptQuestionId}">
-                <p class="autosave-status"
-                   aria-live="polite"
-                   th:attr="data-autosave-status-for=${question.id()}">Saved</p>
-                <div th:each="option : ${question.options()}">
-                    <label>
-                        <input type="radio"
-                               th:field="*{answers[__${questionStat.index}__].selectedOptionId}"
-                               th:value="${option.id()}"
-                               th:checked="${option.id() == question.selectedOptionId()}"
-                               th:attr="data-autosave-url=@{/attempts/{attemptId}/questions/{attemptQuestionId}/answer(attemptId=${attempt.attemptId()},attemptQuestionId=${question.id()})},
-                                        data-attempt-question-id=${question.id()},
-                                        data-answer-revision=${question.answerRevision()}">
-                        <span th:text="${option.optionText()}">Option</span>
-                    </label>
+        <div class="attempt-layout">
+            <div class="attempt-main">
+                <ol class="stack">
+                    <li class="question-card" th:each="question, questionStat : ${attempt.questions()}" data-question-card>
+                        <div class="section-header">
+                            <h2 th:text="'Question ' + ${question.displayOrder()}">Question 1</h2>
+                            <p class="autosave-status"
+                               aria-live="polite"
+                               th:attr="data-autosave-status-for=${question.id()}">Saved</p>
+                        </div>
+                        <p th:text="${question.questionText()}">Question</p>
+                        <input type="hidden"
+                               th:field="*{answers[__${questionStat.index}__].attemptQuestionId}">
+                        <div th:each="option : ${question.options()}">
+                            <label class="option-card">
+                                <input type="radio"
+                                       th:field="*{answers[__${questionStat.index}__].selectedOptionId}"
+                                       th:value="${option.id()}"
+                                       th:checked="${option.id() == question.selectedOptionId()}"
+                                       th:attr="data-autosave-url=@{/attempts/{attemptId}/questions/{attemptQuestionId}/answer(attemptId=${attempt.attemptId()},attemptQuestionId=${question.id()})},
+                                                data-attempt-question-id=${question.id()},
+                                                data-answer-revision=${question.answerRevision()}">
+                                <span th:text="${option.optionText()}">Option</span>
+                            </label>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+
+            <aside class="attempt-progress-panel" aria-label="Attempt progress"
+                   th:attr="data-progress-total=${#lists.size(attempt.questions())}">
+                <h2>Progress</h2>
+                <div class="metric-row">
+                    <span>Answered</span>
+                    <strong data-progress-answered>0</strong>
                 </div>
-            </li>
-        </ol>
-
-        <button type="submit">Submit Quiz</button>
+                <div class="metric-row">
+                    <span>Unanswered</span>
+                    <strong data-progress-unanswered th:text="${#lists.size(attempt.questions())}">0</strong>
+                </div>
+                <div class="metric-row">
+                    <span>Total</span>
+                    <strong data-progress-total-text th:text="${#lists.size(attempt.questions())}">0</strong>
+                </div>
+                <p class="field-help">Selections save automatically, and final submission records your attempt.</p>
+                <div class="form-actions">
+                    <button class="button button-primary" type="submit">Submit Quiz</button>
+                </div>
+            </aside>
+        </div>
     </form>
 </main>
 </body>

@@ -1,86 +1,146 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Result Detail - Quizz Admin</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <th:block th:replace="~{layout/fragments :: adminHead('Result Detail - Quizz Admin')}"></th:block>
 </head>
 <body>
-<header th:replace="~{layout/fragments :: adminNav}"></header>
-<main>
-    <div th:replace="~{layout/fragments :: flash}"></div>
+<div class="admin-shell">
+<aside th:replace="~{layout/fragments :: adminNav}"></aside>
+<main class="admin-main">
+    <div class="page-container admin-page-container">
+    <th:block th:replace="~{layout/fragments :: flash}"></th:block>
 
-    <h1>Result Detail</h1>
+    <th:block th:replace="~{layout/fragments :: pageHeader('Result Detail', 'Administrative result review with selected and correct options.')}"></th:block>
 
-    <p><a th:href="@{/admin/results}">Back to results</a></p>
+    <p><a class="button button-secondary" th:href="@{/admin/results}">Back to results</a></p>
 
-    <section aria-label="Result summary">
-        <h2 th:text="${result.quizTitle()}">Science Quiz</h2>
-        <dl>
-            <dt>User</dt>
-            <dd th:text="${result.userFullName()}">Ada Lovelace</dd>
-            <dt>Category</dt>
-            <dd th:text="${result.categoryName()}">Science</dd>
-            <dt>Status</dt>
-            <dd th:text="${result.status()}">COMPLETED</dd>
-            <dt>Completion Reason</dt>
-            <dd th:text="${result.completionReason() ?: '-'}">MANUAL</dd>
-            <dt>Score percentage</dt>
-            <dd th:text="${result.scorePercentage() + '%'}">80%</dd>
-            <dt>Correct / Wrong / Unanswered</dt>
-            <dd>
-                <span th:text="${result.correctCount()}">4</span> /
-                <span th:text="${result.wrongCount()}">1</span> /
-                <span th:text="${result.unansweredCount()}">0</span>
-            </dd>
-            <dt>Scoring version</dt>
-            <dd th:text="${result.scoringVersion()}">v1</dd>
-            <dt>Started At</dt>
-            <dd th:text="${result.startedAt()}">2026-01-01T10:00:00Z</dd>
-            <dt>Expires At</dt>
-            <dd th:text="${result.expiresAt()}">2026-01-01T10:30:00Z</dd>
-            <dt>Submitted At</dt>
-            <dd th:text="${result.submittedAt() ?: '-'}">2026-01-01T10:15:00Z</dd>
-            <dt>Abandoned At</dt>
-            <dd th:text="${result.abandonedAt() ?: '-'}">-</dd>
-        </dl>
+    <section class="card" aria-label="Result summary">
+        <div class="card-header">
+            <h2 class="card-title" th:text="${result.quizTitle()}">Science Quiz</h2>
+            <p class="card-subtitle">Attempt summary and lifecycle timestamps.</p>
+        </div>
+        <div class="card-body">
+            <dl class="admin-result-summary">
+                <div>
+                    <dt>User</dt>
+                    <dd th:text="${result.userFullName()}">Ada Lovelace</dd>
+                </div>
+                <div>
+                    <dt>Quiz</dt>
+                    <dd th:text="${result.quizTitle()}">Science Quiz</dd>
+                </div>
+                <div>
+                    <dt>Category</dt>
+                    <dd th:text="${result.categoryName()}">Science</dd>
+                </div>
+                <div>
+                    <dt>Status</dt>
+                    <dd><th:block th:replace="~{layout/fragments :: statusBadge(${result.status()}, ${result.completionReason()})}"></th:block></dd>
+                </div>
+                <div>
+                    <dt>Completion reason</dt>
+                    <dd th:text="${result.completionReason() ?: '-'}">MANUAL</dd>
+                </div>
+                <div>
+                    <dt>Started</dt>
+                    <dd th:text="${result.startedAt()}">2026-01-01T10:00:00Z</dd>
+                </div>
+                <div>
+                    <dt>Expires</dt>
+                    <dd th:text="${result.expiresAt()}">2026-01-01T10:30:00Z</dd>
+                </div>
+                <div>
+                    <dt>Submitted</dt>
+                    <dd th:text="${result.submittedAt() ?: '-'}">2026-01-01T10:15:00Z</dd>
+                </div>
+                <div>
+                    <dt>Abandoned</dt>
+                    <dd th:text="${result.abandonedAt() ?: '-'}">-</dd>
+                </div>
+                <div>
+                    <dt>Scoring version</dt>
+                    <dd th:text="${result.scoringVersion()}">v1</dd>
+                </div>
+            </dl>
+        </div>
     </section>
 
-    <section aria-label="Question results">
-        <h2>Questions</h2>
-        <article th:each="question : ${result.questions()}">
-            <h3>
-                <span th:text="${question.displayOrder()}">1</span>.
-                <span th:text="${question.questionText()}">Question text</span>
-            </h3>
-
-            <p>
-                Selected option:
-                <span th:each="option : ${question.options()}"
-                      th:if="${option.selected()}"
-                      th:text="${option.optionText()}">Selected answer</span>
-                <span th:if="${question.selectedOptionId() == null}">Unanswered</span>
-            </p>
-
-            <p>
-                Correct option:
-                <span th:each="option : ${question.options()}"
-                      th:if="${option.correct()}"
-                      th:text="${option.optionText()}">Correct answer</span>
-            </p>
-
-            <ul>
-                <li th:each="option : ${question.options()}">
-                    <span th:text="${option.displayOrder()}">1</span>.
-                    <span th:text="${option.optionText()}">Option text</span>
-                    <span th:if="${option.selected()}">Selected</span>
-                    <span th:if="${option.correct()}">Correct</span>
-                </li>
-            </ul>
+    <section class="stat-grid section" aria-label="Result stats">
+        <article class="stat-card">
+            <span class="stat-label">Score</span>
+            <strong th:text="${result.scorePercentage() + '%'}">80%</strong>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Correct</span>
+            <strong th:text="${result.correctCount()}">4</strong>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Wrong</span>
+            <strong th:text="${result.wrongCount()}">1</strong>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Unanswered</span>
+            <strong th:text="${result.unansweredCount()}">0</strong>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Total</span>
+            <strong th:text="${result.totalQuestions()}">5</strong>
         </article>
     </section>
+
+    <section class="section admin-result-review" aria-label="Question results">
+        <div class="section-header">
+            <h2>Question review</h2>
+        </div>
+        <article class="review-card" th:each="question : ${result.questions()}">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <span th:text="${question.displayOrder()}">1</span>.
+                    <span th:text="${question.questionText()}">Question text</span>
+                </h3>
+                <span class="badge badge-success" th:if="${question.correct() == true}">Correct</span>
+                <span class="badge badge-danger" th:if="${question.correct() == false}">Wrong</span>
+                <span class="badge badge-muted" th:if="${question.correct() == null}">Unanswered</span>
+            </div>
+
+            <div class="card-body">
+                <dl class="admin-result-summary admin-result-summary--compact">
+                    <div>
+                        <dt>Selected answer</dt>
+                        <dd>
+                            <span th:each="option : ${question.options()}"
+                                  th:if="${option.selected()}"
+                                  th:text="${option.optionText()}">Selected answer</span>
+                            <span th:if="${question.selectedOptionId() == null}">Unanswered</span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt>Correct answer</dt>
+                        <dd>
+                            <span th:each="option : ${question.options()}"
+                                  th:if="${option.correct()}"
+                                  th:text="${option.optionText()}">Correct answer</span>
+                        </dd>
+                    </div>
+                </dl>
+
+                <ul class="answer-review-list">
+                    <li th:each="option : ${question.options()}">
+                        <span class="answer-review-list__text">
+                            <span th:text="${option.displayOrder()}">1</span>.
+                            <span th:text="${option.optionText()}">Option text</span>
+                        </span>
+                        <span class="table-actions">
+                            <span class="badge badge-primary" th:if="${option.selected()}">Selected</span>
+                            <span class="badge badge-success" th:if="${option.correct()}">Correct</span>
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </article>
+    </section>
+    </div>
 </main>
+</div>
 </body>
 </html>

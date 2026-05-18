@@ -29,6 +29,7 @@ class AdminQuizRef:
 class _TableRow:
     cells: list[str]
     hrefs: list[str]
+    strongs: list[str]
 
 
 @dataclass(frozen=True)
@@ -173,18 +174,7 @@ class AdminCatalogClient:
 
     def _quiz_refs_by_title(self) -> dict[str, AdminQuizRef]:
         response = self.http.get("/admin/quizzes")
-        refs: dict[str, AdminQuizRef] = {}
-        for row in _extract_table_rows(response.body):
-            if len(row.cells) < 4:
-                continue
-            quiz_id = None
-            for href in row.hrefs:
-                quiz_id = extract_entity_id_from_href(_path_only(href), "/admin/quizzes/")
-                if quiz_id is not None:
-                    break
-            if quiz_id is not None:
-                refs[row.cells[0]] = AdminQuizRef(id=quiz_id, title=row.cells[0], status=row.cells[3])
-        return refs
+        return _quiz_refs_from_admin_list(response.body)
 
     def _question_choices_from_create_form(self, html: str) -> dict[str, str]:
         parser = _QuestionChoiceParser()
@@ -205,15 +195,44 @@ class AdminCatalogClient:
                 raise RemoteOperationError(f"Quiz was not published: {title}")
 
 
+def _quiz_refs_from_admin_list(html: str) -> dict[str, AdminQuizRef]:
+    refs: dict[str, AdminQuizRef] = {}
+    for row in _extract_table_rows(html):
+        if len(row.cells) < 3:
+            continue
+        quiz_id = None
+        for href in row.hrefs:
+            quiz_id = extract_entity_id_from_href(_path_only(href), "/admin/quizzes/")
+            if quiz_id is not None:
+                break
+        if quiz_id is not None:
+            title = row.strongs[0] if row.strongs else row.cells[0]
+            status = _quiz_status_from_cells(row.cells)
+            if status is not None:
+                refs[title] = AdminQuizRef(id=quiz_id, title=title, status=status)
+    return refs
+
+
+def _quiz_status_from_cells(cells: list[str]) -> str | None:
+    for cell in cells:
+        normalized = cell.strip().upper()
+        if normalized in {"DRAFT", "PUBLISHED", "ARCHIVED"}:
+            return normalized
+    return None
+
+
 class _TableParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
         self.rows: list[_TableRow] = []
         self.in_row = False
         self.in_cell = False
+        self.in_strong = False
         self.current_cells: list[str] = []
         self.current_hrefs: list[str] = []
+        self.current_strongs: list[str] = []
         self.current_cell_text: list[str] = []
+        self.current_strong_text: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         lowered = tag.lower()
@@ -222,15 +241,21 @@ class _TableParser(HTMLParser):
             self.in_row = True
             self.current_cells = []
             self.current_hrefs = []
+            self.current_strongs = []
         elif self.in_row and lowered == "td":
             self.in_cell = True
             self.current_cell_text = []
+        elif self.in_row and lowered == "strong":
+            self.in_strong = True
+            self.current_strong_text = []
         elif self.in_row and lowered == "a" and values.get("href"):
             self.current_hrefs.append(values["href"])
 
     def handle_data(self, data: str) -> None:
         if self.in_cell:
             self.current_cell_text.append(data)
+        if self.in_strong:
+            self.current_strong_text.append(data)
 
     def handle_endtag(self, tag: str) -> None:
         lowered = tag.lower()
@@ -239,9 +264,19 @@ class _TableParser(HTMLParser):
             self.current_cells.append(text)
             self.in_cell = False
             self.current_cell_text = []
+        elif lowered == "strong" and self.in_strong:
+            text = " ".join("".join(self.current_strong_text).split())
+            if text:
+                self.current_strongs.append(text)
+            self.in_strong = False
+            self.current_strong_text = []
         elif lowered == "tr" and self.in_row:
             if self.current_cells:
-                self.rows.append(_TableRow(cells=self.current_cells, hrefs=self.current_hrefs))
+                self.rows.append(_TableRow(
+                    cells=self.current_cells,
+                    hrefs=self.current_hrefs,
+                    strongs=self.current_strongs
+                ))
             self.in_row = False
 
 

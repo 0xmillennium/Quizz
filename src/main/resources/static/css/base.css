@@ -1,0 +1,138 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+}
+
+body {
+    min-height: 100%;
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height);
+    color: var(--color-text);
+    background: var(--color-bg);
+}
+
+h1,
+h2,
+h3,
+h4 {
+    margin: 0 0 var(--space-3);
+    line-height: 1.2;
+    color: var(--color-text);
+}
+
+h1 {
+    font-size: var(--font-size-2xl);
+}
+
+h2 {
+    font-size: var(--font-size-xl);
+}
+
+h3 {
+    font-size: var(--font-size-lg);
+}
+
+p {
+    margin: 0 0 var(--space-4);
+}
+
+a {
+    color: var(--color-link);
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.18em;
+}
+
+a:hover {
+    color: var(--color-primary-hover);
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+legend {
+    margin-bottom: var(--space-3);
+    font-weight: 700;
+}
+
+dl {
+    display: grid;
+    grid-template-columns: minmax(9rem, 14rem) 1fr;
+    gap: var(--space-2) var(--space-4);
+    margin: 0 0 var(--space-6);
+}
+
+dt {
+    font-weight: 700;
+    color: var(--color-text-muted);
+}
+
+dd {
+    margin: 0;
+}
+
+::selection {
+    color: var(--color-text);
+    background: var(--color-primary-soft);
+}
+
+:focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
+
+@media (max-width: 640px) {
+    dl {
+        grid-template-columns: 1fr;
+        gap: var(--space-1);
+    }
+}

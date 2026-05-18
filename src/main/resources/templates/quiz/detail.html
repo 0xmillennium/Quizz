@@ -1,33 +1,46 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${quiz.title()} + ' - Quizz'">Quiz - Quizz</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <th:block th:replace="~{layout/fragments :: head(${quiz.title()} + ' - Quizz')}"></th:block>
 </head>
-<body>
+<body class="app-shell">
 <header th:replace="~{layout/fragments :: userNav}"></header>
-<main>
-    <div th:replace="~{layout/fragments :: flash}"></div>
+<main class="page-container">
+    <th:block th:replace="~{layout/fragments :: flash}"></th:block>
 
-    <h1 th:text="${quiz.title()}">Quiz title</h1>
-    <p th:if="${quiz.description() != null}" th:text="${quiz.description()}">Description</p>
+    <section class="quiz-detail-hero">
+        <span class="badge badge-primary" th:text="${quiz.categoryName()}">Category</span>
+        <h1 class="page-title mt-4" th:text="${quiz.title()}">Quiz title</h1>
+        <p class="page-subtitle" th:if="${quiz.description() != null}" th:text="${quiz.description()}">Description</p>
+    </section>
 
-    <dl>
-        <dt>Category</dt>
-        <dd th:text="${quiz.categoryName()}">Category</dd>
-        <dt>Duration</dt>
-        <dd th:text="${quiz.durationMinutes()} + ' minutes'">30 minutes</dd>
-        <dt>Questions per attempt</dt>
-        <dd th:text="${quiz.questionCount()}">5</dd>
-        <dt>Attempt limit</dt>
-        <dd th:text="${quiz.attemptLimit()} + ' per cooldown window'">3 per cooldown window</dd>
-        <dt>Retake cooldown</dt>
-        <dd th:text="${quiz.retakeCooldownMinutes()} + ' minutes after attempts are used'">1440 minutes after attempts are used</dd>
-    </dl>
+    <section class="section">
+        <div class="quiz-facts">
+            <div class="quiz-fact">
+                <span class="quiz-fact__label">Questions per attempt</span>
+                <span class="quiz-fact__value" th:text="${quiz.questionCount()}">5</span>
+            </div>
+            <div class="quiz-fact">
+                <span class="quiz-fact__label">Duration</span>
+                <span class="quiz-fact__value" th:text="${quiz.durationMinutes()} + ' min'">30 min</span>
+            </div>
+            <div class="quiz-fact">
+                <span class="quiz-fact__label">Attempt limit</span>
+                <span class="quiz-fact__value" th:text="${quiz.attemptLimit()}">3</span>
+            </div>
+            <div class="quiz-fact">
+                <span class="quiz-fact__label">Cooldown</span>
+                <span class="quiz-fact__value" th:text="${quiz.retakeCooldownMinutes()} + ' min'">1440 min</span>
+            </div>
+            <div class="quiz-fact">
+                <span class="quiz-fact__label">Question pool</span>
+                <span class="quiz-fact__value" th:text="${quiz.poolSize()} + ' total'">12 total</span>
+            </div>
+        </div>
+        <p class="field-help">Each attempt receives a randomized set of questions from the pool.</p>
+    </section>
 
-    <section th:if="${attemptState.hasActiveAttempt()}">
+    <section class="attempt-state-panel section" th:if="${attemptState.hasActiveAttempt()}">
         <h2>You have an active attempt.</h2>
         <p>
             Started <span th:text="${attemptState.activeStartedAt()}">Started</span>,
@@ -38,51 +51,50 @@
             <span th:text="${attemptState.remainingAttempts()}">0</span> /
             <span th:text="${attemptState.attemptLimit()}">3</span>
         </p>
-        <a th:href="@{/attempts/{attemptId}(attemptId=${attemptState.activeAttemptId()})}">Continue</a>
-        <p th:if="${attemptState.canRestart()}">Restart will abandon your current attempt, consume one additional attempt right, and restart with the same question set.</p>
-        <form th:if="${attemptState.canRestart()}"
-              th:action="@{/attempts/{attemptId}/restart(attemptId=${attemptState.activeAttemptId()})}" method="post">
-            <input type="hidden"
-                   th:name="${_csrf.parameterName}"
-                   th:value="${_csrf.token}">
-            <button type="submit">Restart</button>
-        </form>
-        <p th:if="${!attemptState.canRestart()}">No restart attempts remaining.</p>
+        <div class="form-actions">
+            <a class="button button-primary" th:href="@{/attempts/{attemptId}(attemptId=${attemptState.activeAttemptId()})}">Continue</a>
+            <form th:if="${attemptState.canRestart()}"
+                  th:action="@{/attempts/{attemptId}/restart(attemptId=${attemptState.activeAttemptId()})}" method="post">
+                <th:block th:replace="~{layout/fragments :: csrf}"></th:block>
+                <button class="button button-secondary" type="submit">Restart</button>
+            </form>
+        </div>
+        <p class="field-help" th:if="${attemptState.canRestart()}">Restart will abandon your current attempt, consume one additional attempt right, and restart with the same question set.</p>
+        <p class="field-help" th:if="${!attemptState.canRestart()}">No restart attempts remaining. You can still continue your active attempt.</p>
     </section>
 
-    <section th:if="${attemptState.hasAutoSubmittedAttempt()}">
+    <section class="state-panel section" th:if="${attemptState.hasAutoSubmittedAttempt()}">
         <p>Your previous attempt was automatically submitted because time expired.</p>
         <p>
-            <a th:href="@{/attempts/{attemptId}/result(attemptId=${attemptState.autoSubmittedAttemptId()})}">View Result</a>
+            <a class="button button-secondary" th:href="@{/attempts/{attemptId}/result(attemptId=${attemptState.autoSubmittedAttemptId()})}">View Result</a>
         </p>
     </section>
 
-    <section th:if="${!attemptState.hasActiveAttempt() and attemptState.isInCooldown()}">
+    <section class="cooldown-panel section" th:if="${!attemptState.hasActiveAttempt() and attemptState.isInCooldown()}">
         <p>No attempts remaining.</p>
         <p>You can try again after: <span th:text="${attemptState.cooldownUntil()}">Cooldown</span></p>
         <p>Cooldown remaining until <span th:text="${attemptState.cooldownUntil()}">Cooldown</span></p>
         <p th:if="${attemptState.latestCompletedAttemptId() != null}">
-            <a th:href="@{/attempts/{attemptId}/result(attemptId=${attemptState.latestCompletedAttemptId()})}">View Last Result</a>
+            <a class="button button-secondary" th:href="@{/attempts/{attemptId}/result(attemptId=${attemptState.latestCompletedAttemptId()})}">View Last Result</a>
         </p>
     </section>
 
-    <section th:if="${!attemptState.hasActiveAttempt() and !attemptState.isInCooldown()}">
+    <section class="attempt-rights section" th:if="${attemptState.canStart()}">
         <p>
             Attempts remaining:
             <span th:text="${attemptState.remainingAttempts()}">3</span> /
             <span th:text="${attemptState.attemptLimit()}">3</span>
         </p>
+        <p class="field-help">Each attempt receives a randomized set of questions.</p>
     </section>
 
     <form th:if="${attemptState.canStart()}" th:action="@{/attempts/start}" method="post">
         <input type="hidden" name="quizId" th:value="${quiz.id()}">
-        <input type="hidden"
-               th:name="${_csrf.parameterName}"
-               th:value="${_csrf.token}">
-        <button type="submit">Start Quiz</button>
+        <th:block th:replace="~{layout/fragments :: csrf}"></th:block>
+        <button class="button button-primary" type="submit">Start Quiz</button>
     </form>
 
-    <p><a th:href="@{/quizzes}">Back to quizzes</a></p>
+    <p class="mt-4"><a class="button button-secondary" th:href="@{/quizzes}">Back to quizzes</a></p>
 </main>
 </body>
 </html>

@@ -1,40 +1,46 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login - Quizz</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <th:block th:replace="~{layout/fragments :: head('Login - Quizz')}"></th:block>
 </head>
-<body>
-<header class="site-header">
-    <a th:href="@{/}">Quizz</a>
+<body class="auth-shell">
+<header class="app-header">
+    <div class="app-header__inner">
+        <a class="brand" th:href="@{/quizzes}">Quizz</a>
+    </div>
 </header>
-<main>
-    <div th:replace="~{layout/fragments :: flash}"></div>
+<main class="page-container">
+    <th:block th:replace="~{layout/fragments :: flash}"></th:block>
 
-    <h1>Login</h1>
+    <section class="form-card auth-card">
+        <header class="page-header">
+            <p class="badge badge-primary">Quizz</p>
+            <h1 class="page-title">Sign in to continue your learning</h1>
+            <p class="page-subtitle">Pick up active attempts, review your results, and keep climbing the leaderboard.</p>
+        </header>
 
-    <p th:if="${param.error}">Invalid email or password.</p>
-    <p th:if="${param.logout}">You have been logged out.</p>
+        <p class="alert alert-error" th:if="${param.error}" role="alert">Invalid email or password.</p>
+        <p class="alert alert-info" th:if="${param.logout}" role="status">You have been logged out.</p>
 
-    <form th:action="@{/login}" method="post">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <form th:action="@{/login}" method="post">
+            <th:block th:replace="~{layout/fragments :: csrf}"></th:block>
 
-        <div>
-            <label for="email">Email</label>
-            <input id="email" type="email" name="email" autocomplete="username" required>
-        </div>
+            <div class="field">
+                <label class="field-label" for="email">Email</label>
+                <input id="email" type="email" name="email" autocomplete="username" required>
+            </div>
 
-        <div>
-            <label for="password">Password</label>
-            <input id="password" type="password" name="password" autocomplete="current-password" required>
-        </div>
+            <div class="field">
+                <label class="field-label" for="password">Password</label>
+                <input id="password" type="password" name="password" autocomplete="current-password" required>
+            </div>
 
-        <button type="submit">Log in</button>
-    </form>
-
-    <p><a th:href="@{/register}">Create an account</a></p>
+            <div class="form-actions form-actions--between">
+                <button class="button button-primary" type="submit">Log in</button>
+                <a th:href="@{/register}">Create an account</a>
+            </div>
+        </form>
+    </section>
 </main>
 </body>
 </html>

@@ -1,76 +1,92 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Edit Question - Quizz Admin</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <th:block th:replace="~{layout/fragments :: adminHead('Edit Question - Quizz Admin')}"></th:block>
 </head>
 <body>
-<header th:replace="~{layout/fragments :: adminNav}"></header>
-<main>
-    <div th:replace="~{layout/fragments :: flash}"></div>
+<div class="admin-shell">
+<aside th:replace="~{layout/fragments :: adminNav}"></aside>
+<main class="admin-main">
+    <div class="page-container admin-page-container">
+    <th:block th:replace="~{layout/fragments :: flash}"></th:block>
 
-    <h1>Edit Question</h1>
+    <th:block th:replace="~{layout/fragments :: pageHeader('Edit Question', 'Update question text and answer options.')}"></th:block>
 
-    <form th:action="@{/admin/questions/{id}(id=${questionId})}"
+    <form class="form-card"
+          th:action="@{/admin/questions/{id}(id=${questionId})}"
           th:object="${questionUpdateRequest}"
           method="post"
           data-question-form>
-        <input type="hidden"
-               th:name="${_csrf.parameterName}"
-               th:value="${_csrf.token}">
+        <th:block th:replace="~{layout/fragments :: csrf}"></th:block>
 
-        <div>
-            <label for="categoryId">Category</label>
-            <select id="categoryId" th:field="*{categoryId}" required>
-                <option value="">Select category</option>
-                <option th:each="category : ${categories}"
-                        th:value="${category.id()}"
-                        th:text="${category.name()}">Category</option>
-            </select>
-            <p th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></p>
-        </div>
+        <section class="admin-form-section">
+            <div class="admin-form-section-header">
+                <h2>Question details</h2>
+                <p class="field-help">Choose the category used to group this question into quiz pools.</p>
+            </div>
 
-        <div>
-            <label for="text">Question text</label>
-            <textarea id="text" th:field="*{text}" maxlength="1000" required></textarea>
-            <p th:if="${#fields.hasErrors('text')}" th:errors="*{text}"></p>
-        </div>
+            <div class="field">
+                <label class="field-label" for="categoryId">Category</label>
+                <select id="categoryId" th:field="*{categoryId}" required>
+                    <option value="">Select category</option>
+                    <option th:each="category : ${categories}"
+                            th:value="${category.id()}"
+                            th:text="${category.name()}">Category</option>
+                </select>
+                <p class="field-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></p>
+            </div>
 
-        <div>
-            <h2>Answer options</h2>
-            <p th:if="${#fields.hasErrors('options')}" th:errors="*{options}"></p>
+            <div class="field">
+                <label class="field-label" for="text">Question text</label>
+                <textarea id="text" th:field="*{text}" maxlength="1000" required></textarea>
+                <p class="field-help">Keep the wording complete enough to stand on its own in randomized attempts.</p>
+                <p class="field-error" th:if="${#fields.hasErrors('text')}" th:errors="*{text}"></p>
+            </div>
+        </section>
+
+        <section class="admin-form-section">
+            <div class="admin-form-section-header">
+                <h2>Answer options</h2>
+                <p class="field-help">At least two options are required. Exactly one option must be marked correct.</p>
+            </div>
+            <p class="field-error" th:if="${#fields.hasErrors('options')}" th:errors="*{options}"></p>
 
             <div data-options-container>
-                <div th:each="option, stat : *{options}" data-option-row>
-                    <label th:for="${'options' + stat.index + '.text'}">Option</label>
-                    <input th:id="${'options' + stat.index + '.text'}"
-                           type="text"
-                           th:field="*{options[__${stat.index}__].text}"
-                           maxlength="500"
-                           required>
-                    <label>
+                <div class="option-row" th:each="option, stat : *{options}" th:classappend="${option.correct} ? ' option-row-correct' : ''" data-option-row>
+                    <div class="option-row__field">
+                        <label class="field-label" th:for="${'options' + stat.index + '.text'}" th:text="${'Option ' + (stat.index + 1)}">Option 1</label>
+                        <input th:id="${'options' + stat.index + '.text'}"
+                               type="text"
+                               th:field="*{options[__${stat.index}__].text}"
+                               maxlength="500"
+                               required>
+                    </div>
+                    <label class="checkbox-card option-row__correct" th:for="${'options' + stat.index + '.correct'}">
                         <input type="checkbox"
+                               th:id="${'options' + stat.index + '.correct'}"
                                th:name="${'options[' + stat.index + '].correct'}"
-                               th:checked="${option.correct}">
-                        Correct
+                               th:checked="${option.correct}"
+                               data-correct-option>
+                        Correct answer
                     </label>
-                    <button type="button" data-remove-option>Remove</button>
-                    <p th:if="${#fields.hasErrors('options[' + stat.index + '].text')}"
+                    <button class="button button-ghost option-row__remove" type="button" data-remove-option>Remove</button>
+                    <p class="field-error"
+                       th:if="${#fields.hasErrors('options[' + stat.index + '].text')}"
                        th:errors="*{options[__${stat.index}__].text}"></p>
                 </div>
             </div>
 
-            <button type="button" data-add-option>Add option</button>
+            <button class="button button-secondary mt-4" type="button" data-add-option>Add option</button>
+        </section>
+
+        <div class="form-actions">
+            <button class="button button-primary" type="submit">Update question</button>
+            <a class="button button-secondary" th:href="@{/admin/questions}">Cancel</a>
         </div>
-
-        <button type="submit">Update question</button>
     </form>
-
-    <p><a th:href="@{/admin/questions}">Back to questions</a></p>
+    </div>
 </main>
+</div>
 <script th:src="@{/js/admin-question-form.js}"></script>
 </body>
 </html>

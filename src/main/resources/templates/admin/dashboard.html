@@ -1,102 +1,122 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dashboard - Quizz Admin</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <th:block th:replace="~{layout/fragments :: adminHead('Dashboard - Quizz Admin')}"></th:block>
 </head>
 <body>
-<header th:replace="~{layout/fragments :: adminNav}"></header>
-<main>
-    <div th:replace="~{layout/fragments :: flash}"></div>
+<div class="admin-shell">
+<aside th:replace="~{layout/fragments :: adminNav}"></aside>
+<main class="admin-main">
+    <div class="page-container admin-page-container">
+    <th:block th:replace="~{layout/fragments :: flash}"></th:block>
 
-    <h1>Dashboard</h1>
+    <th:block th:replace="~{layout/fragments :: pageHeader('Dashboard', 'High-level overview of Quizz activity.')}"></th:block>
 
-    <nav aria-label="Admin navigation">
-        <a th:href="@{/admin/categories}">Manage Categories</a>
-        <a th:href="@{/admin/questions}">Manage Questions</a>
-        <a th:href="@{/admin/quizzes}">Manage Quizzes</a>
-        <a th:href="@{/admin/results}">View Results</a>
-        <a th:href="@{/leaderboard}">Leaderboard</a>
-    </nav>
-
-    <section aria-label="Admin metrics">
-        <article>
-            <h2>Users</h2>
-            <p><strong th:text="${dashboard.totalUsers()}">0</strong> total</p>
-            <p><span th:text="${dashboard.enabledUsers()}">0</span> enabled users</p>
+    <section class="stat-grid admin-dashboard-grid" aria-label="Admin metrics">
+        <article class="stat-card">
+            <span class="stat-label">Total users</span>
+            <strong th:text="${dashboard.totalUsers()}">0</strong>
+            <p><span th:text="${dashboard.enabledUsers()}">0</span> enabled</p>
         </article>
-        <article>
-            <h2>Categories</h2>
-            <p><strong th:text="${dashboard.totalCategories()}">0</strong> total</p>
-            <p><span th:text="${dashboard.activeCategories()}">0</span> active categories</p>
+        <article class="stat-card">
+            <span class="stat-label">Categories</span>
+            <strong th:text="${dashboard.totalCategories()}">0</strong>
+            <p><span th:text="${dashboard.activeCategories()}">0</span> active</p>
         </article>
-        <article>
-            <h2>Questions</h2>
-            <p><strong th:text="${dashboard.totalQuestions()}">0</strong> total</p>
-            <p><span th:text="${dashboard.activeQuestions()}">0</span> active questions</p>
+        <article class="stat-card">
+            <span class="stat-label">Questions</span>
+            <strong th:text="${dashboard.totalQuestions()}">0</strong>
+            <p><span th:text="${dashboard.activeQuestions()}">0</span> active</p>
         </article>
-        <article>
-            <h2>Quizzes</h2>
-            <p><strong th:text="${dashboard.totalQuizzes()}">0</strong> total</p>
+        <article class="stat-card">
+            <span class="stat-label">Published quizzes</span>
+            <strong th:text="${dashboard.publishedQuizzes()}">0</strong>
             <p>
-                Draft <span th:text="${dashboard.draftQuizzes()}">0</span>,
-                Published <span th:text="${dashboard.publishedQuizzes()}">0</span>,
-                Archived <span th:text="${dashboard.archivedQuizzes()}">0</span>
+                <span th:text="${dashboard.draftQuizzes()}">0</span> draft,
+                <span th:text="${dashboard.archivedQuizzes()}">0</span> archived
             </p>
         </article>
-        <article>
-            <h2>Attempts</h2>
-            <p><strong th:text="${dashboard.totalAttempts()}">0</strong> total</p>
-            <p>
-                In Progress <span th:text="${dashboard.inProgressAttempts()}">0</span>,
-                Completed <span th:text="${dashboard.completedAttempts()}">0</span>,
-                Abandoned <span th:text="${dashboard.abandonedAttempts()}">0</span>
-            </p>
-            <p>
-                Manual <span th:text="${dashboard.manualCompletedAttempts()}">0</span>,
-                Time Expired <span th:text="${dashboard.timeExpiredCompletedAttempts()}">0</span>
-            </p>
+        <article class="stat-card">
+            <span class="stat-label">Completed attempts</span>
+            <strong th:text="${dashboard.completedAttempts()}">0</strong>
+            <p><span th:text="${dashboard.manualCompletedAttempts()}">0</span> manual completions</p>
         </article>
-        <article>
-            <h2>Average score</h2>
-            <p><strong th:text="${#numbers.formatDecimal(dashboard.averageScorePercentage(), 1, 1)}">0.0</strong>%</p>
+        <article class="stat-card">
+            <span class="stat-label">In-progress attempts</span>
+            <strong th:text="${dashboard.inProgressAttempts()}">0</strong>
+            <p><span th:text="${dashboard.abandonedAttempts()}">0</span> abandoned</p>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Auto-submitted attempts</span>
+            <strong th:text="${dashboard.timeExpiredCompletedAttempts()}">0</strong>
+            <p>Completed by time expiry</p>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Average score</span>
+            <strong><span th:text="${#numbers.formatDecimal(dashboard.averageScorePercentage(), 1, 1)}">0.0</span>%</strong>
+            <p>Across completed attempts</p>
         </article>
     </section>
 
-    <h2>Recent Attempts</h2>
-    <p th:if="${#lists.isEmpty(dashboard.recentAttempts())}">No recent attempts found.</p>
+    <section class="admin-dashboard-layout section">
+        <div class="card admin-quick-actions">
+            <div class="card-header">
+                <h2 class="card-title">Quick actions</h2>
+                <p class="card-subtitle">Jump into common admin workflows.</p>
+            </div>
+            <div class="card-body admin-quick-actions__body">
+                <a class="button button-secondary" th:href="@{/admin/categories/new}">Create Category</a>
+                <a class="button button-secondary" th:href="@{/admin/questions/new}">Create Question</a>
+                <a class="button button-primary" th:href="@{/admin/quizzes/new}">Create Quiz</a>
+                <a class="button button-secondary" th:href="@{/admin/results}">View Results</a>
+            </div>
+        </div>
 
-    <table th:if="${!#lists.isEmpty(dashboard.recentAttempts())}">
-        <thead>
-        <tr>
-            <th>User</th>
-            <th>Quiz</th>
-            <th>Category</th>
-            <th>Status</th>
-            <th>Reason</th>
-            <th>Score</th>
-            <th>Started At</th>
-            <th>Submitted At</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="attempt : ${dashboard.recentAttempts()}">
-            <td th:text="${attempt.userFullName()}">Ada Lovelace</td>
-            <td th:text="${attempt.quizTitle()}">Science Quiz</td>
-            <td th:text="${attempt.categoryName()}">Science</td>
-            <td th:text="${attempt.status()}">COMPLETED</td>
-            <td th:text="${attempt.completionReason() ?: '-'}">MANUAL</td>
-            <td th:text="${attempt.scorePercentage() + '%'}">80%</td>
-            <td th:text="${attempt.startedAt()}">2026-01-01T10:00:00Z</td>
-            <td th:text="${attempt.submittedAt() ?: '-'}">2026-01-01T10:15:00Z</td>
-            <td><a th:href="@{/admin/results/{attemptId}(attemptId=${attempt.attemptId()})}">Detail</a></td>
-        </tr>
-        </tbody>
-    </table>
+        <section class="table-card admin-dashboard-recent" aria-labelledby="recent-attempts-title">
+            <div class="card-header">
+                <h2 id="recent-attempts-title" class="card-title">Recent attempts</h2>
+                <p class="card-subtitle">Latest attempt activity across quizzes.</p>
+            </div>
+            <th:block th:if="${#lists.isEmpty(dashboard.recentAttempts())}"
+                      th:replace="~{layout/fragments :: emptyState('No recent attempts found', 'Attempts will appear here as users start quizzes.', null, null)}"></th:block>
+
+            <div class="table-responsive" th:if="${!#lists.isEmpty(dashboard.recentAttempts())}">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Quiz</th>
+                        <th>Status</th>
+                        <th>Reason</th>
+                        <th>Score</th>
+                        <th>Started</th>
+                        <th>Submitted</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="attempt : ${dashboard.recentAttempts()}">
+                        <td>
+                            <strong th:text="${attempt.userFullName()}">Ada Lovelace</strong>
+                        </td>
+                        <td>
+                            <span th:text="${attempt.quizTitle()}">Science Quiz</span>
+                            <span class="table-meta" th:text="${attempt.categoryName()}">Science</span>
+                        </td>
+                        <td><th:block th:replace="~{layout/fragments :: statusBadge(${attempt.status()}, ${attempt.completionReason()})}"></th:block></td>
+                        <td th:text="${attempt.completionReason() ?: '-'}">MANUAL</td>
+                        <td><strong th:text="${attempt.scorePercentage() + '%'}">80%</strong></td>
+                        <td th:text="${attempt.startedAt()}">2026-01-01T10:00:00Z</td>
+                        <td th:text="${attempt.submittedAt() ?: '-'}">2026-01-01T10:15:00Z</td>
+                        <td><a class="button button-secondary" th:href="@{/admin/results/{attemptId}(attemptId=${attempt.attemptId()})}">View</a></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </section>
+    </div>
 </main>
+</div>
 </body>
 </html>

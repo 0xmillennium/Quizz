@@ -9,14 +9,19 @@ document.addEventListener("DOMContentLoaded", () => {
     fetch(container.dataset.chartUrl)
         .then(response => response.json())
         .then(data => drawChart(canvas, [
-            ["Correct", data.correctCount, "#2f855a"],
-            ["Wrong", data.wrongCount, "#c53030"],
-            ["Unanswered", data.unansweredCount, "#718096"]
+            ["Correct", data.correctCount, cssColor("--color-success", "#16a34a")],
+            ["Wrong", data.wrongCount, cssColor("--color-danger", "#dc2626")],
+            ["Unanswered", data.unansweredCount, cssColor("--color-text-muted", "#64748b")]
         ]))
         .catch(() => {
             container.textContent = "Chart unavailable.";
         });
 });
+
+function cssColor(name, fallback) {
+    const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return value || fallback;
+}
 
 function drawChart(canvas, rows) {
     const context = canvas.getContext("2d");
@@ -28,7 +33,7 @@ function drawChart(canvas, rows) {
     const max = Math.max(...rows.map(row => row[1]), 1);
 
     context.clearRect(0, 0, width, height);
-    context.font = "14px Arial, sans-serif";
+    context.font = "14px Inter, Arial, sans-serif";
     context.textBaseline = "middle";
 
     rows.forEach((row, index) => {

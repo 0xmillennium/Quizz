@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${pageTitle ?: 'Quizz Admin'}">Quizz Admin</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <th:block th:replace="~{layout/fragments :: adminHead(${pageTitle ?: 'Quizz Admin'})}"></th:block>
 </head>
 <body>
-<header th:replace="~{layout/fragments :: adminNav}"></header>
-<main>
-    <div th:replace="~{layout/fragments :: flash}"></div>
-    <section th:fragment="content"></section>
-</main>
+<div class="admin-shell">
+    <aside th:replace="~{layout/fragments :: adminNav}"></aside>
+    <main class="admin-main">
+        <th:block th:replace="~{layout/fragments :: flash}"></th:block>
+        <section th:fragment="content"></section>
+    </main>
+</div>
 </body>
 </html>

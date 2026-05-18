@@ -1,0 +1,219 @@
+.app-shell,
+.public-shell,
+.auth-shell {
+    min-height: 100vh;
+}
+
+.auth-shell {
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+
+.auth-shell .page-container,
+.public-shell .page-container {
+    display: grid;
+    align-items: center;
+}
+
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    background: rgba(255, 255, 255, 0.94);
+    border-bottom: 1px solid var(--color-border);
+    backdrop-filter: blur(12px);
+}
+
+.app-header__inner {
+    width: min(100% - 2rem, var(--container-max));
+    margin: 0 auto;
+    padding: var(--space-4) 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+}
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    color: var(--color-text);
+    font-weight: 800;
+    letter-spacing: 0;
+    text-decoration: none;
+}
+
+.nav-tabs,
+.admin-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.nav-link,
+.admin-nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.25rem;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    text-decoration: none;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.nav-link:hover,
+.admin-nav-link:hover,
+.nav-link-active {
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+}
+
+.page-container {
+    width: min(100% - 2rem, var(--container-max));
+    margin: 0 auto;
+    padding: var(--space-8) 0;
+}
+
+.page-header {
+    margin-bottom: var(--space-6);
+}
+
+.page-header--with-action {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+}
+
+.page-title {
+    margin-bottom: var(--space-2);
+}
+
+.page-subtitle {
+    max-width: 48rem;
+    margin: 0;
+    color: var(--color-text-muted);
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: var(--space-5);
+}
+
+.section {
+    margin-top: var(--space-6);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+    flex-wrap: wrap;
+}
+
+.admin-shell {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: var(--admin-sidebar-width) minmax(0, 1fr);
+}
+
+.admin-sidebar {
+    background: var(--color-admin-sidebar-bg);
+    color: var(--color-admin-sidebar-text);
+    padding: var(--space-5);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-sidebar__brand {
+    display: inline-flex;
+    margin-bottom: var(--space-5);
+    color: var(--color-on-strong);
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.admin-nav {
+    align-items: stretch;
+    flex-direction: column;
+}
+
+.admin-nav-link {
+    justify-content: flex-start;
+    color: var(--color-admin-sidebar-link);
+}
+
+.admin-nav-link:hover,
+.admin-nav-link.nav-link-active {
+    color: var(--color-on-strong);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.admin-main {
+    min-width: 0;
+    padding: var(--space-8);
+}
+
+.admin-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+    flex-wrap: wrap;
+}
+
+@media (max-width: 840px) {
+    .admin-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-sidebar {
+        position: static;
+        padding: var(--space-4);
+    }
+
+    .admin-sidebar__brand {
+        margin-bottom: var(--space-3);
+    }
+
+    .admin-nav {
+        flex-direction: row;
+    }
+
+    .admin-main {
+        padding: var(--space-5) var(--space-4);
+    }
+}
+
+@media (max-width: 640px) {
+    .app-header__inner,
+    .page-container {
+        width: min(100% - 1rem, var(--container-max));
+    }
+
+    .app-header__inner {
+        align-items: flex-start;
+    }
+
+    .nav-tabs {
+        width: 100%;
+    }
+
+    .nav-tabs .nav-link,
+    .nav-tabs .nav-logout,
+    .nav-tabs .nav-logout .button {
+        flex: 1 1 100%;
+        justify-content: flex-start;
+    }
+}

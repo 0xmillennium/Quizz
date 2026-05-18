@@ -1,75 +1,8 @@
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    color: #1f2933;
-    background: #f8fafc;
-}
-
-a {
-    color: #1d4ed8;
-}
-
-.site-header,
-.admin-header {
-    padding: 1rem;
-    background: #ffffff;
-    border-bottom: 1px solid #d9e2ec;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.site-header nav,
-.admin-header nav {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-}
-
-.nav-logout {
-    display: inline;
-    margin: 0;
-}
-
-.nav-logout button {
-    border: 0;
-    padding: 0;
-    color: #1d4ed8;
-    background: transparent;
-    font: inherit;
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-main {
-    padding: 1rem;
-}
-
-.flash {
-    margin-bottom: 1rem;
-    padding: 0.75rem 1rem;
-    border: 1px solid #bcccdc;
-    background: #ffffff;
-}
-
-.flash-success {
-    border-color: #2f855a;
-}
-
-.flash-error {
-    border-color: #c53030;
-}
-
-.flash-warning {
-    border-color: #b7791f;
-}
-
-.flash-info {
-    border-color: #2b6cb0;
-}
-
-.error-page {
-    max-width: 42rem;
-}
+@import url("./tokens.css");
+@import url("./base.css");
+@import url("./layout.css");
+@import url("./components.css");
+@import url("./forms.css");
+@import url("./tables.css");
+@import url("./quiz.css");
+@import url("./utilities.css");

@@ -1,55 +1,64 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Attempt History - Quizz</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <th:block th:replace="~{layout/fragments :: head('Attempt History - Quizz')}"></th:block>
 </head>
-<body>
+<body class="app-shell">
 <header th:replace="~{layout/fragments :: userNav}"></header>
-<main>
-    <div th:replace="~{layout/fragments :: flash}"></div>
+<main class="page-container">
+    <th:block th:replace="~{layout/fragments :: flash}"></th:block>
 
-    <h1>Attempt History</h1>
+    <th:block th:replace="~{layout/fragments :: pageHeader('Attempt History', 'Review your attempts and continue any quiz that is still in progress.')}"></th:block>
 
-    <table>
-        <thead>
-        <tr>
-            <th>Quiz</th>
-            <th>Category</th>
-            <th>Status</th>
-            <th>Reason</th>
-            <th>Score</th>
-            <th>Correct</th>
-            <th>Started</th>
-            <th>Expires</th>
-            <th>Submitted</th>
-            <th>Result</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="attempt : ${history}">
-            <td th:text="${attempt.quizTitle()}">Quiz</td>
-            <td th:text="${attempt.categoryName()}">Category</td>
-            <td th:text="${attempt.status() == 'COMPLETED' && attempt.completionReason() == 'MANUAL' ? 'Completed manually' : (attempt.status() == 'COMPLETED' && attempt.completionReason() == 'TIME_EXPIRED' ? 'Auto-submitted when time expired' : (attempt.status() == 'ABANDONED' ? 'Abandoned' : attempt.status()))}">COMPLETED</td>
-            <td th:text="${attempt.completionReason() ?: '-'}">MANUAL</td>
-            <td th:text="${attempt.scorePercentage()} + '%'">80%</td>
-            <td th:text="${attempt.correctCount()} + ' / ' + ${attempt.totalQuestions()}">4 / 5</td>
-            <td th:text="${attempt.startedAt()}">Started</td>
-            <td th:text="${attempt.expiresAt()}">Expires</td>
-            <td th:text="${attempt.submittedAt()} ?: '-'">Submitted</td>
-            <td>
-                <a th:if="${attempt.status() == 'COMPLETED'}"
-                   th:href="@{/attempts/{attemptId}/result(attemptId=${attempt.attemptId()})}">View</a>
-                <a th:if="${attempt.status() == 'IN_PROGRESS'}"
-                   th:href="@{/attempts/{attemptId}(attemptId=${attempt.attemptId()})}">Continue</a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+    <th:block th:if="${#lists.isEmpty(history)}"
+              th:replace="~{layout/fragments :: emptyState('No attempts yet', 'Start a quiz to see your history here.', 'Browse quizzes', @{/quizzes})}"></th:block>
 
-    <p><a th:href="@{/quizzes}">Back to quizzes</a></p>
+    <div class="table-card" th:if="${!#lists.isEmpty(history)}">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Quiz</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Score</th>
+                    <th>Started</th>
+                    <th>Submitted / Abandoned</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="attempt : ${history}">
+                    <td th:text="${attempt.quizTitle()}">Quiz</td>
+                    <td th:text="${attempt.categoryName()}">Category</td>
+                    <td class="history-status"><th:block th:replace="~{layout/fragments :: statusBadge(${attempt.status()}, ${attempt.completionReason()})}"></th:block></td>
+                    <td>
+                        <span th:if="${attempt.status() == 'COMPLETED'}" th:text="${attempt.scorePercentage()} + '%'">80%</span>
+                        <span class="text-muted" th:if="${attempt.status() != 'COMPLETED'}">-</span>
+                        <span class="text-muted" th:if="${attempt.status() == 'COMPLETED'}" th:text="' (' + ${attempt.correctCount()} + ' / ' + ${attempt.totalQuestions()} + ')'">(4 / 5)</span>
+                    </td>
+                    <td th:text="${attempt.startedAt()}">Started</td>
+                    <td>
+                        <span th:if="${attempt.submittedAt() != null}" th:text="${attempt.submittedAt()}">Submitted</span>
+                        <span th:if="${attempt.abandonedAt() != null}" th:text="${attempt.abandonedAt()}">Abandoned</span>
+                        <span class="text-muted" th:if="${attempt.submittedAt() == null and attempt.abandonedAt() == null}">-</span>
+                    </td>
+                    <td>
+                        <a class="button button-secondary"
+                           th:if="${attempt.status() == 'COMPLETED'}"
+                           th:href="@{/attempts/{attemptId}/result(attemptId=${attempt.attemptId()})}">View result</a>
+                        <a class="button button-primary"
+                           th:if="${attempt.status() == 'IN_PROGRESS'}"
+                           th:href="@{/attempts/{attemptId}(attemptId=${attempt.attemptId()})}">Continue</a>
+                        <span class="text-muted" th:if="${attempt.status() == 'ABANDONED'}">No action</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <p class="mt-4"><a class="button button-secondary" th:href="@{/quizzes}">Back to quizzes</a></p>
 </main>
 </body>
 </html>

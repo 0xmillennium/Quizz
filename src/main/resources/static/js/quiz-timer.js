@@ -38,6 +38,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const remainingMs = expiresAt - Date.now();
         if (remainingMs <= 0) {
             timer.textContent = "00:00";
+            timer.classList.remove("timer-warning");
+            timer.classList.add("timer-danger");
             if (message) {
                 message.textContent = "Time is up. Submitting your quiz.";
             }
@@ -49,12 +51,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const minutes = Math.floor(totalSeconds / 60);
         const seconds = totalSeconds % 60;
         timer.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+        timer.classList.toggle("timer-warning", totalSeconds <= 300 && totalSeconds > 60);
+        timer.classList.toggle("timer-danger", totalSeconds <= 60);
         window.setTimeout(render, 1000);
     }
 
     if (form) {
-        form.addEventListener("submit", () => {
-            submitted = true;
+        form.addEventListener("submit", (event) => {
+            window.setTimeout(() => {
+                if (!event.defaultPrevented) {
+                    submitted = true;
+                }
+            }, 0);
         });
     }
 

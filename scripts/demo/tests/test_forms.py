@@ -7,6 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from quizz_http.forms import contains_text, extract_entity_id_from_href, extract_select_options
+from quizz_http.admin_catalog import _quiz_refs_from_admin_list
 
 
 class FormParserTests(unittest.TestCase):
@@ -38,6 +39,31 @@ class FormParserTests(unittest.TestCase):
     def test_contains_text_works_with_html_body(self) -> None:
         self.assertTrue(contains_text("<body><h1>Demo &amp; Test</h1></body>", "Demo & Test"))
         self.assertFalse(contains_text("<body><h1>Demo</h1></body>", "demo"))
+
+    def test_extracts_quiz_refs_from_admin_table_with_description(self) -> None:
+        html = """
+        <table>
+            <tbody>
+                <tr>
+                    <td>
+                        <strong>Demo Java Pool Quiz</strong>
+                        <span class="table-meta">A randomized demo quiz.</span>
+                    </td>
+                    <td><span class="badge badge-primary">Demo Java</span></td>
+                    <td><span class="badge badge-success">Published</span></td>
+                    <td>12</td>
+                    <td>6</td>
+                    <td><a href="/admin/quizzes/42">View</a></td>
+                </tr>
+            </tbody>
+        </table>
+        """
+
+        refs = _quiz_refs_from_admin_list(html)
+
+        self.assertIn("Demo Java Pool Quiz", refs)
+        self.assertEqual(42, refs["Demo Java Pool Quiz"].id)
+        self.assertEqual("PUBLISHED", refs["Demo Java Pool Quiz"].status)
 
 
 if __name__ == "__main__":

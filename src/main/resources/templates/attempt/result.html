@@ -1,76 +1,116 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${result.quizTitle()} + ' Result - Quizz'">Result - Quizz</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <th:block th:replace="~{layout/fragments :: head(${result.quizTitle()} + ' Result - Quizz')}"></th:block>
     <script defer th:src="@{/js/result-chart.js}"></script>
 </head>
-<body>
+<body class="app-shell">
 <header th:replace="~{layout/fragments :: userNav}"></header>
-<main>
-    <div th:replace="~{layout/fragments :: flash}"></div>
+<main class="page-container">
+    <th:block th:replace="~{layout/fragments :: flash}"></th:block>
 
-    <h1 th:text="${result.quizTitle()}">Quiz title</h1>
-    <p th:text="${result.categoryName()}">Category</p>
-
-    <section>
-        <h2>Result</h2>
-        <dl>
-            <dt>Status</dt>
-            <dd th:text="${result.status() == 'COMPLETED' && result.completionReason() == 'MANUAL' ? 'Completed manually' : (result.status() == 'COMPLETED' && result.completionReason() == 'TIME_EXPIRED' ? 'Auto-submitted when time expired' : (result.status() == 'ABANDONED' ? 'Abandoned' : result.status()))}">COMPLETED</dd>
-            <dt>Completion Reason</dt>
-            <dd th:text="${result.completionReason() ?: '-'}">MANUAL</dd>
-            <dt>Score</dt>
-            <dd th:text="${result.scorePercentage()} + '%'">80%</dd>
-            <dt>Correct</dt>
-            <dd th:text="${result.correctCount()}">4</dd>
-            <dt>Wrong</dt>
-            <dd th:text="${result.wrongCount()}">1</dd>
-            <dt>Unanswered</dt>
-            <dd th:text="${result.unansweredCount()}">0</dd>
-            <dt>Scoring version</dt>
-            <dd th:text="${result.scoringVersion()}">DEFAULT_V1</dd>
-            <dt>Started</dt>
-            <dd th:text="${result.startedAt()}">Started</dd>
-            <dt th:if="${result.submittedAt() != null}">Submitted</dt>
-            <dd th:if="${result.submittedAt() != null}" th:text="${result.submittedAt()}">Submitted</dd>
-            <dt th:if="${result.abandonedAt() != null}">Abandoned</dt>
-            <dd th:if="${result.abandonedAt() != null}" th:text="${result.abandonedAt()}">Abandoned</dd>
-        </dl>
-    </section>
-
-    <section>
-        <h2>Breakdown</h2>
-        <div id="result-chart"
-             th:attr="data-chart-url=@{/attempts/{attemptId}/chart-data(attemptId=${result.attemptId()})}">
-            <canvas width="480" height="220" aria-label="Result chart"></canvas>
+    <section class="result-hero">
+        <div>
+            <span class="badge badge-primary" th:text="${result.categoryName()}">Category</span>
+            <h1 class="page-title mt-4" th:text="${result.quizTitle()}">Quiz title</h1>
+            <p class="page-subtitle"
+               th:text="${result.completionReason() == 'TIME_EXPIRED' ? 'Auto-submitted when time expired' : (result.completionReason() == 'MANUAL' ? 'Completed manually' : (result.completionReason() ?: result.status()))}">
+                Completed manually
+            </p>
+        </div>
+        <div class="score-pill">
+            <strong th:text="${result.scorePercentage()}">80</strong><span>%</span>
         </div>
     </section>
 
-    <section>
+    <section class="result-stat-grid section" aria-label="Result statistics">
+        <article class="stat-card">
+            <span class="quiz-fact__label">Status</span>
+            <p class="mb-0"><th:block th:replace="~{layout/fragments :: statusBadge(${result.status()}, ${result.completionReason()})}"></th:block></p>
+        </article>
+        <article class="stat-card">
+            <span class="quiz-fact__label">Correct</span>
+            <strong th:text="${result.correctCount()}">4</strong>
+        </article>
+        <article class="stat-card">
+            <span class="quiz-fact__label">Wrong</span>
+            <strong th:text="${result.wrongCount()}">1</strong>
+        </article>
+        <article class="stat-card">
+            <span class="quiz-fact__label">Unanswered</span>
+            <strong th:text="${result.unansweredCount()}">0</strong>
+        </article>
+        <article class="stat-card">
+            <span class="quiz-fact__label">Total</span>
+            <strong th:text="${result.totalQuestions()}">5</strong>
+        </article>
+    </section>
+
+    <section class="card section">
+        <div class="card-body">
+            <h2>Attempt details</h2>
+            <dl>
+                <dt>Scoring version</dt>
+                <dd th:text="${result.scoringVersion()}">DEFAULT_V1</dd>
+                <dt>Started</dt>
+                <dd th:text="${result.startedAt()}">Started</dd>
+                <dt th:if="${result.submittedAt() != null}">Submitted</dt>
+                <dd th:if="${result.submittedAt() != null}" th:text="${result.submittedAt()}">Submitted</dd>
+                <dt th:if="${result.abandonedAt() != null}">Abandoned</dt>
+                <dd th:if="${result.abandonedAt() != null}" th:text="${result.abandonedAt()}">Abandoned</dd>
+            </dl>
+        </div>
+    </section>
+
+    <section class="card section">
+        <div class="card-body">
+        <h2>Breakdown</h2>
+        <div id="result-chart"
+             th:attr="data-chart-url=@{/attempts/{attemptId}/chart-data(attemptId=${result.attemptId()})}">
+            <canvas width="480" height="220" role="img" aria-label="Result chart"></canvas>
+        </div>
+        </div>
+    </section>
+
+    <section class="section">
         <h2>Questions</h2>
         <ol>
-            <li th:each="question : ${result.questions()}">
-                <h3 th:text="${question.displayOrder()} + '. ' + ${question.questionText()}">Question</h3>
-                <p th:if="${!question.answered()}">Unanswered</p>
-                <p th:if="${question.answered()}"
-                   th:text="${question.correct()} ? 'Answered correctly' : 'Answered incorrectly'">Answered</p>
-                <ul>
-                    <li th:each="option : ${question.options()}">
+            <li class="review-card" th:each="question : ${result.questions()}">
+                <div class="section-header">
+                    <h3 th:text="${question.displayOrder()} + '. ' + ${question.questionText()}">Question</h3>
+                    <span class="badge badge-muted" th:if="${!question.answered()}">Unanswered</span>
+                    <span class="badge badge-success" th:if="${question.answered() and question.correct()}">Correct</span>
+                    <span class="badge badge-danger" th:if="${question.answered() and !question.correct()}">Wrong</span>
+                </div>
+                <div class="content-grid">
+                    <div class="state-panel empty-state--compact">
+                        <h4>Your answer</h4>
+                        <p th:if="${!question.answered()}">Unanswered</p>
+                        <p th:each="option : ${question.options()}"
+                           th:if="${option.selected()}"
+                           th:text="${option.optionText()}">Selected option</p>
+                    </div>
+                    <div class="state-panel empty-state--compact">
+                        <h4>Correct answer</h4>
+                        <p th:each="option : ${question.options()}"
+                           th:if="${option.correct()}"
+                           th:text="${option.optionText()}">Correct option</p>
+                    </div>
+                </div>
+                <ul class="review-answer-list">
+                    <li class="review-answer" th:each="option : ${question.options()}">
                         <span th:text="${option.optionText()}">Option</span>
-                        <strong th:if="${option.selected()}">Selected</strong>
-                        <strong th:if="${option.correct()}">Correct option</strong>
+                        <span class="badge badge-primary" th:if="${option.selected()}">Selected</span>
+                        <span class="badge badge-success" th:if="${option.correct()}">Correct option</span>
                     </li>
                 </ul>
             </li>
         </ol>
     </section>
 
-    <p>
-        <a th:href="@{/quizzes}">Back to quizzes</a>
-        <a th:href="@{/attempts/history}">History</a>
+    <p class="cluster">
+        <a class="button button-secondary" th:href="@{/quizzes}">Back to quizzes</a>
+        <a class="button button-secondary" th:href="@{/attempts/history}">History</a>
     </p>
 </main>
 </body>

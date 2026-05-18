@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Server Error</title>
-    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <th:block th:replace="~{layout/fragments :: head('Server Error - Quizz')}"></th:block>
 </head>
-<body>
-<main class="error-page">
-    <h1>Server Error</h1>
-    <p th:text="${message ?: 'An unexpected error occurred.'}">An unexpected error occurred.</p>
-    <a th:href="@{/}">Home</a>
+<body class="public-shell">
+<main class="page-container error-page">
+    <section class="card error-card">
+        <span class="badge badge-danger">500</span>
+        <h1 class="page-title mt-4">Server Error</h1>
+        <p th:text="${message ?: 'An unexpected error occurred.'}">An unexpected error occurred.</p>
+        <a class="button button-primary" th:href="@{/quizzes}">Back to quizzes</a>
+    </section>
 </main>
 </body>
 </html>
