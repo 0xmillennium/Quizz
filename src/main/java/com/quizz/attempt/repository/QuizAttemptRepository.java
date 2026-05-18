@@ -58,17 +58,29 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
             """)
     List<QuizAttempt> findHistoryByUserId(Long userId);
 
+    @EntityGraph(attributePaths = {
+            "user",
+            "quiz",
+            "questions"
+    })
     @Query("""
             select a
             from QuizAttempt a
-            where a.status = :status
+            where a.user.id = :userId
+              and a.status = :status
               and a.expiresAt <= :now
             """)
-    List<QuizAttempt> findByStatusAndExpiresAtBeforeOrAt(
+    List<QuizAttempt> findByUserIdAndStatusAndExpiresAtLessThanEqual(
+            Long userId,
             AttemptStatus status,
             Instant now
     );
 
+    @EntityGraph(attributePaths = {
+            "user",
+            "quiz",
+            "questions"
+    })
     @Query("""
             select a
             from QuizAttempt a

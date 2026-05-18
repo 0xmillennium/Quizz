@@ -13,6 +13,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,6 +44,12 @@ public class AttemptQuestion extends BaseEntity {
     @Column(name = "selected_option_id")
     private Long selectedOptionId;
 
+    @Column(name = "answer_revision", nullable = false)
+    private int answerRevision;
+
+    @Column(name = "answered_at")
+    private Instant answeredAt;
+
     @Column(name = "correct")
     private Boolean correct;
 
@@ -63,6 +70,7 @@ public class AttemptQuestion extends BaseEntity {
         this.questionText = question.getText();
         this.displayOrder = displayOrder;
         this.correct = null;
+        this.answerRevision = 0;
         question.getOptions().forEach(option -> options.add(AttemptAnswerOption.snapshotFrom(this, option)));
     }
 
@@ -81,6 +89,20 @@ public class AttemptQuestion extends BaseEntity {
         }
         findOption(selectedOptionId);
         this.selectedOptionId = selectedOptionId;
+    }
+
+    public AutosaveOutcome autosaveAnswer(
+            Long selectedOptionId,
+            int incomingRevision,
+            Instant answeredAt
+    ) {
+        if (incomingRevision <= answerRevision) {
+            return AutosaveOutcome.staleOutcome();
+        }
+        selectOption(selectedOptionId);
+        this.answerRevision = incomingRevision;
+        this.answeredAt = answeredAt;
+        return AutosaveOutcome.savedOutcome();
     }
 
     void evaluate() {
@@ -124,6 +146,14 @@ public class AttemptQuestion extends BaseEntity {
 
     public Long getSelectedOptionId() {
         return selectedOptionId;
+    }
+
+    public int getAnswerRevision() {
+        return answerRevision;
+    }
+
+    public Instant getAnsweredAt() {
+        return answeredAt;
     }
 
     public Boolean getCorrect() {

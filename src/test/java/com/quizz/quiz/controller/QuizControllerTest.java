@@ -17,8 +17,11 @@ import com.quizz.quiz.dto.QuizDetailResponse;
 import com.quizz.quiz.dto.QuizSummaryResponse;
 import com.quizz.quiz.entity.Quiz;
 import com.quizz.quiz.mapper.QuizMapper;
+import com.quizz.quiz.service.QuizAttemptStateProvider;
+import com.quizz.quiz.service.QuizAttemptStateResponse;
 import com.quizz.quiz.service.QuizQueryService;
 import com.quizz.security.config.SecurityConfig;
+import com.quizz.security.context.CurrentUserProvider;
 import com.quizz.security.handler.CustomAuthenticationSuccessHandler;
 import com.quizz.security.service.CustomUserDetailsService;
 import com.quizz.user.entity.User;
@@ -60,6 +63,12 @@ class QuizControllerTest {
     @Mock
     private CategoryMapper categoryMapper;
 
+    @Mock
+    private QuizAttemptStateProvider quizAttemptStateProvider;
+
+    @Mock
+    private CurrentUserProvider currentUserProvider;
+
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -68,7 +77,9 @@ class QuizControllerTest {
                 quizQueryService,
                 quizMapper,
                 categoryQueryService,
-                categoryMapper
+                categoryMapper,
+                quizAttemptStateProvider,
+                currentUserProvider
         );
 
         mockMvc = MockMvcBuilders
@@ -117,11 +128,15 @@ class QuizControllerTest {
         QuizDetailResponse response = new QuizDetailResponse(1L, "Science Quiz", null, "Science", 30, 0, List.of());
         when(quizQueryService.getPublishedById(1L)).thenReturn(quiz);
         when(quizMapper.toDetailResponse(quiz)).thenReturn(response);
+        when(currentUserProvider.getCurrentUserId()).thenReturn(7L);
+        when(quizAttemptStateProvider.resolveForQuizDetail(1L, 7L))
+                .thenReturn(new QuizAttemptStateResponse(null, null, null, null));
 
         mockMvc.perform(get("/quizzes/1").with(user("user@example.com").roles("USER")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("quiz/detail"))
-                .andExpect(model().attribute("quiz", response));
+                .andExpect(model().attribute("quiz", response))
+                .andExpect(model().attributeExists("attemptState"));
     }
 
     @Test

@@ -14,8 +14,10 @@ CREATE TABLE quiz_attempts (
     started_at TIMESTAMPTZ NOT NULL,
     expires_at TIMESTAMPTZ NOT NULL,
     submitted_at TIMESTAMPTZ,
+    abandoned_at TIMESTAMPTZ,
 
     status VARCHAR(30) NOT NULL,
+    completion_reason VARCHAR(30),
 
     total_questions INT NOT NULL,
     correct_count INT NOT NULL,
@@ -33,7 +35,13 @@ CREATE TABLE quiz_attempts (
         ON DELETE RESTRICT,
 
     CONSTRAINT ck_quiz_attempts_status
-        CHECK (status IN ('IN_PROGRESS', 'COMPLETED', 'EXPIRED')),
+        CHECK (status IN ('IN_PROGRESS', 'COMPLETED', 'ABANDONED')),
+
+    CONSTRAINT ck_quiz_attempts_completion_reason
+        CHECK (
+            completion_reason IS NULL
+            OR completion_reason IN ('MANUAL', 'TIME_EXPIRED')
+        ),
 
     CONSTRAINT ck_quiz_attempts_duration
         CHECK (duration_minutes BETWEEN 1 AND 180),
@@ -53,14 +61,30 @@ CREATE TABLE quiz_attempts (
     CONSTRAINT ck_quiz_attempts_time
         CHECK (expires_at > started_at),
 
-    CONSTRAINT ck_quiz_attempts_completed_submitted
+    CONSTRAINT ck_quiz_attempts_lifecycle
         CHECK (
-            status <> 'COMPLETED'
-            OR submitted_at IS NOT NULL
+            (
+                status = 'IN_PROGRESS'
+                AND submitted_at IS NULL
+                AND abandoned_at IS NULL
+                AND completion_reason IS NULL
+            )
+            OR (
+                status = 'COMPLETED'
+                AND submitted_at IS NOT NULL
+                AND abandoned_at IS NULL
+                AND completion_reason IS NOT NULL
+            )
+            OR (
+                status = 'ABANDONED'
+                AND submitted_at IS NULL
+                AND abandoned_at IS NOT NULL
+                AND completion_reason IS NULL
+            )
         )
 );
 
-CREATE UNIQUE INDEX ux_quiz_attempts_one_in_progress_per_user_quiz
+CREATE UNIQUE INDEX uq_quiz_attempts_active_user_quiz
 ON quiz_attempts(user_id, quiz_id)
 WHERE status = 'IN_PROGRESS';
 
@@ -74,6 +98,8 @@ CREATE TABLE attempt_questions (
     question_text VARCHAR(1000) NOT NULL,
     display_order INT NOT NULL,
     selected_option_id BIGINT,
+    answer_revision INT NOT NULL DEFAULT 0,
+    answered_at TIMESTAMPTZ,
     correct BOOLEAN,
 
     CONSTRAINT fk_attempt_questions_attempt

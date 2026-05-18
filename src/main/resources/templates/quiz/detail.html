@@ -29,7 +29,29 @@
             th:text="${question.text()}">Question text</li>
     </ol>
 
-    <form th:action="@{/attempts/start}" method="post">
+    <section th:if="${attemptState.hasActiveAttempt()}">
+        <h2>Active attempt</h2>
+        <p>
+            Started <span th:text="${attemptState.startedAt()}">Started</span>,
+            expires <span th:text="${attemptState.expiresAt()}">Expires</span>
+        </p>
+        <a th:href="@{/attempts/{attemptId}(attemptId=${attemptState.activeAttemptId()})}">Continue</a>
+        <form th:action="@{/attempts/{attemptId}/restart(attemptId=${attemptState.activeAttemptId()})}" method="post">
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}">
+            <button type="submit">Restart</button>
+        </form>
+    </section>
+
+    <section th:if="${attemptState.hasAutoSubmittedAttempt()}">
+        <p>Your previous attempt was automatically submitted because time expired.</p>
+        <p>
+            <a th:href="@{/attempts/{attemptId}/result(attemptId=${attemptState.autoSubmittedAttemptId()})}">View Result</a>
+        </p>
+    </section>
+
+    <form th:if="${!attemptState.hasActiveAttempt()}" th:action="@{/attempts/start}" method="post">
         <input type="hidden" name="quizId" th:value="${quiz.id()}">
         <input type="hidden"
                th:name="${_csrf.parameterName}"

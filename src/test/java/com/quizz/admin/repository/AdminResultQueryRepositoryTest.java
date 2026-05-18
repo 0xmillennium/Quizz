@@ -154,6 +154,7 @@ class AdminResultQueryRepositoryTest {
         when(resultSet.getLong("category_id")).thenReturn(4L);
         when(resultSet.getString("category_name")).thenReturn("Science");
         when(resultSet.getString("status")).thenReturn("IN_PROGRESS");
+        when(resultSet.getString("completion_reason")).thenReturn(null);
         when(resultSet.getInt("total_questions")).thenReturn(5);
         when(resultSet.getInt("correct_count")).thenReturn(0);
         when(resultSet.getInt("wrong_count")).thenReturn(0);
@@ -163,6 +164,7 @@ class AdminResultQueryRepositoryTest {
         when(resultSet.getTimestamp("started_at")).thenReturn(Timestamp.from(startedAt));
         when(resultSet.getTimestamp("expires_at")).thenReturn(Timestamp.from(expiresAt));
         when(resultSet.getTimestamp("submitted_at")).thenReturn(null);
+        when(resultSet.getTimestamp("abandoned_at")).thenReturn(null);
 
         repository.findAttemptHeader(1L);
         AdminResultAttemptRow row = this.<AdminResultAttemptRow>captureQuery().rowMapper().mapRow(resultSet, 0);
@@ -230,6 +232,7 @@ class AdminResultQueryRepositoryTest {
         when(resultSet.getString("quiz_title")).thenReturn("Science Quiz");
         when(resultSet.getString("category_name")).thenReturn("Science");
         when(resultSet.getString("status")).thenReturn("COMPLETED");
+        when(resultSet.getString("completion_reason")).thenReturn("MANUAL");
         when(resultSet.getInt("total_questions")).thenReturn(5);
         when(resultSet.getInt("correct_count")).thenReturn(4);
         when(resultSet.getInt("wrong_count")).thenReturn(1);
@@ -238,6 +241,7 @@ class AdminResultQueryRepositoryTest {
         when(resultSet.getTimestamp("started_at")).thenReturn(Timestamp.from(startedAt));
         when(resultSet.getTimestamp("expires_at")).thenReturn(Timestamp.from(expiresAt));
         when(resultSet.getTimestamp("submitted_at")).thenReturn(Timestamp.from(submittedAt));
+        when(resultSet.getTimestamp("abandoned_at")).thenReturn(null);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

@@ -25,6 +25,8 @@
             <dd th:text="${result.categoryName()}">Science</dd>
             <dt>Status</dt>
             <dd th:text="${result.status()}">COMPLETED</dd>
+            <dt>Completion Reason</dt>
+            <dd th:text="${result.completionReason() ?: '-'}">MANUAL</dd>
             <dt>Score percentage</dt>
             <dd th:text="${result.scorePercentage() + '%'}">80%</dd>
             <dt>Correct / Wrong / Unanswered</dt>
@@ -41,6 +43,8 @@
             <dd th:text="${result.expiresAt()}">2026-01-01T10:30:00Z</dd>
             <dt>Submitted At</dt>
             <dd th:text="${result.submittedAt() ?: '-'}">2026-01-01T10:15:00Z</dd>
+            <dt>Abandoned At</dt>
+            <dd th:text="${result.abandonedAt() ?: '-'}">-</dd>
         </dl>
     </section>
 

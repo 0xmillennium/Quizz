@@ -8,6 +8,7 @@ public record QuizResultResponse(
         String quizTitle,
         String categoryName,
         String status,
+        String completionReason,
         int totalQuestions,
         int correctCount,
         int wrongCount,
@@ -17,6 +18,7 @@ public record QuizResultResponse(
         Instant startedAt,
         Instant expiresAt,
         Instant submittedAt,
+        Instant abandonedAt,
         List<ResultQuestionResponse> questions
 ) {
 }

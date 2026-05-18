@@ -87,7 +87,7 @@ class AdminResultControllerTest {
                 .andExpect(model().attribute("filter", response.filter()))
                 .andExpect(model().attribute("categories", categories))
                 .andExpect(model().attribute("quizzes", quizzes))
-                .andExpect(model().attribute("statuses", List.of("IN_PROGRESS", "COMPLETED", "EXPIRED")));
+                .andExpect(model().attribute("statuses", List.of("IN_PROGRESS", "COMPLETED", "ABANDONED")));
     }
 
     @Test
@@ -174,12 +174,14 @@ class AdminResultControllerTest {
                 4L,
                 "Science",
                 "COMPLETED",
+                "MANUAL",
                 5,
                 4,
                 1,
                 0,
                 80,
                 "v1",
+                null,
                 null,
                 null,
                 null,

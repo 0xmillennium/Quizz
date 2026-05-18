@@ -9,6 +9,7 @@ public record AdminResultSummaryResponse(
         String quizTitle,
         String categoryName,
         String status,
+        String completionReason,
         int totalQuestions,
         int correctCount,
         int wrongCount,
@@ -16,6 +17,7 @@ public record AdminResultSummaryResponse(
         int scorePercentage,
         Instant startedAt,
         Instant expiresAt,
-        Instant submittedAt
+        Instant submittedAt,
+        Instant abandonedAt
 ) {
 }

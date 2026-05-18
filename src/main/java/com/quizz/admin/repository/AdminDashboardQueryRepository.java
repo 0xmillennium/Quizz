@@ -27,7 +27,11 @@ public class AdminDashboardQueryRepository {
                 (SELECT COUNT(*) FROM quiz_attempts) AS total_attempts,
                 (SELECT COUNT(*) FROM quiz_attempts WHERE status = 'IN_PROGRESS') AS in_progress_attempts,
                 (SELECT COUNT(*) FROM quiz_attempts WHERE status = 'COMPLETED') AS completed_attempts,
-                (SELECT COUNT(*) FROM quiz_attempts WHERE status = 'EXPIRED') AS expired_attempts,
+                (SELECT COUNT(*) FROM quiz_attempts WHERE status = 'ABANDONED') AS abandoned_attempts,
+                (SELECT COUNT(*) FROM quiz_attempts
+                 WHERE status = 'COMPLETED' AND completion_reason = 'MANUAL') AS manual_completed_attempts,
+                (SELECT COUNT(*) FROM quiz_attempts
+                 WHERE status = 'COMPLETED' AND completion_reason = 'TIME_EXPIRED') AS time_expired_completed_attempts,
                 (SELECT COALESCE(AVG(score_percentage), 0)
                  FROM quiz_attempts
                  WHERE status = 'COMPLETED') AS average_score_percentage
@@ -41,9 +45,11 @@ public class AdminDashboardQueryRepository {
                 a.quiz_title_snapshot AS quiz_title,
                 a.category_name_snapshot AS category_name,
                 a.status,
+                a.completion_reason,
                 a.score_percentage,
                 a.started_at,
-                a.submitted_at
+                a.submitted_at,
+                a.abandoned_at
             FROM quiz_attempts a
             JOIN users u ON u.id = a.user_id
             ORDER BY a.started_at DESC
@@ -79,7 +85,9 @@ public class AdminDashboardQueryRepository {
                 rs.getLong("total_attempts"),
                 rs.getLong("in_progress_attempts"),
                 rs.getLong("completed_attempts"),
-                rs.getLong("expired_attempts"),
+                rs.getLong("abandoned_attempts"),
+                rs.getLong("manual_completed_attempts"),
+                rs.getLong("time_expired_completed_attempts"),
                 rs.getDouble("average_score_percentage")
         );
     }
@@ -92,9 +100,11 @@ public class AdminDashboardQueryRepository {
                 rs.getString("quiz_title"),
                 rs.getString("category_name"),
                 rs.getString("status"),
+                rs.getString("completion_reason"),
                 rs.getInt("score_percentage"),
                 toInstant(rs.getTimestamp("started_at")),
-                toInstant(rs.getTimestamp("submitted_at"))
+                toInstant(rs.getTimestamp("submitted_at")),
+                toInstant(rs.getTimestamp("abandoned_at"))
         );
     }
 
@@ -116,7 +126,9 @@ public class AdminDashboardQueryRepository {
             long totalAttempts,
             long inProgressAttempts,
             long completedAttempts,
-            long expiredAttempts,
+            long abandonedAttempts,
+            long manualCompletedAttempts,
+            long timeExpiredCompletedAttempts,
             double averageScorePercentage
     ) {
     }
@@ -128,9 +140,11 @@ public class AdminDashboardQueryRepository {
             String quizTitle,
             String categoryName,
             String status,
+            String completionReason,
             int scorePercentage,
             Instant startedAt,
-            Instant submittedAt
+            Instant submittedAt,
+            Instant abandonedAt
     ) {
     }
 }

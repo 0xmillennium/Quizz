@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const timer = document.querySelector("[data-expires-at]");
     const form = document.getElementById("quiz-submit-form");
     const message = document.getElementById("quiz-timer-message");
+    const token = document.querySelector("meta[name='_csrf']")?.content;
+    const header = document.querySelector("meta[name='_csrf_header']")?.content;
 
     if (!timer) {
         return;
@@ -10,6 +12,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const expiresAt = new Date(timer.dataset.expiresAt).getTime();
     let submitted = false;
 
+    async function autoSubmit() {
+        if (!form || !form.dataset.autoSubmitUrl || submitted) {
+            return;
+        }
+        submitted = true;
+        try {
+            const response = await fetch(form.dataset.autoSubmitUrl, {
+                method: "POST",
+                headers: token && header ? {[header]: token} : {}
+            });
+            if (!response.ok) {
+                throw new Error("Auto-submit failed");
+            }
+            const data = await response.json();
+            window.location.assign(data.redirectUrl);
+        } catch (error) {
+            if (message) {
+                message.textContent = "Time is up. Reconnect and refresh to see your result.";
+            }
+        }
+    }
+
     function render() {
         const remainingMs = expiresAt - Date.now();
         if (remainingMs <= 0) {
@@ -17,10 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (message) {
                 message.textContent = "Time is up. Submitting your quiz.";
             }
-            if (form && !submitted) {
-                submitted = true;
-                form.requestSubmit();
-            }
+            autoSubmit();
             return;
         }
 

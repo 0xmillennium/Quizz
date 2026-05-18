@@ -42,7 +42,7 @@ public class QuizAttemptMapper {
                 .map(question -> {
                     UserAnswerRequest answer = new UserAnswerRequest();
                     answer.setAttemptQuestionId(question.getId());
-                    answer.setSelectedOptionId(null);
+                    answer.setSelectedOptionId(question.getSelectedOptionId());
                     return answer;
                 })
                 .toList());
@@ -55,6 +55,7 @@ public class QuizAttemptMapper {
                 attempt.getQuizTitleSnapshot(),
                 attempt.getCategoryNameSnapshot(),
                 attempt.getStatus().name(),
+                attempt.getCompletionReason() == null ? null : attempt.getCompletionReason().name(),
                 attempt.getTotalQuestions(),
                 attempt.getCorrectCount(),
                 attempt.getWrongCount(),
@@ -64,6 +65,7 @@ public class QuizAttemptMapper {
                 attempt.getStartedAt(),
                 attempt.getExpiresAt(),
                 attempt.getSubmittedAt(),
+                attempt.getAbandonedAt(),
                 attempt.getQuestions().stream()
                         .sorted(Comparator.comparingInt(AttemptQuestion::getDisplayOrder))
                         .map(this::toResultQuestionResponse)
@@ -78,11 +80,14 @@ public class QuizAttemptMapper {
                         attempt.getQuizTitleSnapshot(),
                         attempt.getCategoryNameSnapshot(),
                         attempt.getStatus().name(),
+                        attempt.getCompletionReason() == null ? null : attempt.getCompletionReason().name(),
                         attempt.getTotalQuestions(),
                         attempt.getCorrectCount(),
                         attempt.getScorePercentage(),
                         attempt.getStartedAt(),
-                        attempt.getSubmittedAt()
+                        attempt.getExpiresAt(),
+                        attempt.getSubmittedAt(),
+                        attempt.getAbandonedAt()
                 ))
                 .toList();
     }
@@ -100,6 +105,8 @@ public class QuizAttemptMapper {
                 question.getId(),
                 question.getQuestionText(),
                 question.getDisplayOrder(),
+                question.getSelectedOptionId(),
+                question.getAnswerRevision(),
                 question.getOptions().stream()
                         .sorted(Comparator.comparingInt(AttemptAnswerOption::getDisplayOrder))
                         .map(option -> new AttemptAnswerOptionResponse(

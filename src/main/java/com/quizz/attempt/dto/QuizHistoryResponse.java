@@ -7,10 +7,13 @@ public record QuizHistoryResponse(
         String quizTitle,
         String categoryName,
         String status,
+        String completionReason,
         int totalQuestions,
         int correctCount,
         int scorePercentage,
         Instant startedAt,
-        Instant submittedAt
+        Instant expiresAt,
+        Instant submittedAt,
+        Instant abandonedAt
 ) {
 }

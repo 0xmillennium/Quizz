@@ -13,6 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import com.quizz.attempt.dto.AutoSubmitResponse;
+import com.quizz.attempt.dto.AutosaveAnswerResponse;
 import com.quizz.attempt.dto.QuizAttemptPageResponse;
 import com.quizz.attempt.dto.QuizHistoryResponse;
 import com.quizz.attempt.dto.QuizResultResponse;
@@ -23,6 +25,8 @@ import com.quizz.attempt.entity.QuizAttempt;
 import com.quizz.attempt.mapper.QuizAttemptMapper;
 import com.quizz.attempt.service.QuizAttemptCommandService;
 import com.quizz.attempt.service.QuizAttemptQueryService;
+import com.quizz.common.exception.BusinessRuleException;
+import com.quizz.common.exception.GlobalExceptionHandler;
 import com.quizz.common.exception.NotFoundException;
 import com.quizz.security.config.SecurityConfig;
 import com.quizz.security.context.CurrentUserProvider;
@@ -84,6 +88,7 @@ class QuizAttemptControllerTest {
 
         mockMvc = MockMvcBuilders
                 .standaloneSetup(controller)
+                .setControllerAdvice(new GlobalExceptionHandler())
                 .apply(springSecurity(springSecurityFilterChain()))
                 .build();
     }
@@ -91,7 +96,7 @@ class QuizAttemptControllerTest {
     @Test
     void postStartRedirectsToAttempt() throws Exception {
         when(currentUserProvider.getCurrentUserId()).thenReturn(7L);
-        when(quizAttemptCommandService.startAttempt(3L, 7L)).thenReturn(new StartQuizResponse(11L));
+        when(quizAttemptCommandService.startAttempt(3L, 7L)).thenReturn(new StartQuizResponse(11L, false, false, null));
 
         mockMvc.perform(post("/attempts/start")
                         .param("quizId", "3")
@@ -154,17 +159,32 @@ class QuizAttemptControllerTest {
     }
 
     @Test
+    void getResultHandlesAbandonedAttemptAsBadRequest() throws Exception {
+        when(currentUserProvider.getCurrentUserId()).thenReturn(7L);
+        when(quizAttemptQueryService.getResult(11L, 7L))
+                .thenThrow(new BusinessRuleException("Only completed attempts have results."));
+
+        mockMvc.perform(get("/attempts/11/result").with(user("user@example.com").roles("USER")))
+                .andExpect(status().isBadRequest())
+                .andExpect(view().name("error/400"))
+                .andExpect(model().attribute("message", "Only completed attempts have results."));
+    }
+
+    @Test
     void getHistoryReturnsHistoryView() throws Exception {
         QuizHistoryResponse history = new QuizHistoryResponse(
                 11L,
                 "Science Quiz",
                 "Science",
                 "COMPLETED",
+                "MANUAL",
                 2,
                 1,
                 50,
                 Instant.parse("2026-01-01T12:00:00Z"),
-                Instant.parse("2026-01-01T12:01:00Z")
+                Instant.parse("2026-01-01T12:30:00Z"),
+                Instant.parse("2026-01-01T12:01:00Z"),
+                null
         );
         when(currentUserProvider.getCurrentUserId()).thenReturn(7L);
         when(quizAttemptQueryService.findHistoryByUser(7L)).thenReturn(List.of(attempt));
@@ -189,6 +209,58 @@ class QuizAttemptControllerTest {
     }
 
     @Test
+    void getChartDataHandlesAbandonedAttemptAsBadRequest() throws Exception {
+        when(currentUserProvider.getCurrentUserId()).thenReturn(7L);
+        when(quizAttemptQueryService.getResultChart(11L, 7L))
+                .thenThrow(new BusinessRuleException("Only completed attempts have results."));
+
+        mockMvc.perform(get("/attempts/11/chart-data").with(user("user@example.com").roles("USER")))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void postAutosaveReturnsJsonSaved() throws Exception {
+        AutosaveAnswerResponse response = new AutosaveAnswerResponse(
+                11L,
+                22L,
+                33L,
+                1,
+                "SAVED",
+                true,
+                false,
+                false,
+                null,
+                Instant.parse("2026-01-01T12:01:00Z"),
+                Instant.parse("2026-01-01T12:30:00Z")
+        );
+        when(currentUserProvider.getCurrentUserId()).thenReturn(7L);
+        when(quizAttemptCommandService.autosaveAnswer(11L, 22L, 7L, 33L, 1)).thenReturn(response);
+
+        mockMvc.perform(post("/attempts/11/questions/22/answer")
+                        .param("selectedOptionId", "33")
+                        .param("answerRevision", "1")
+                        .with(user("user@example.com").roles("USER"))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.saved").value(true))
+                .andExpect(jsonPath("$.stale").value(false));
+    }
+
+    @Test
+    void postAutoSubmitReturnsJsonRedirect() throws Exception {
+        when(currentUserProvider.getCurrentUserId()).thenReturn(7L);
+        when(quizAttemptCommandService.autoSubmitIfOverdue(11L, 7L))
+                .thenReturn(new AutoSubmitResponse(11L, "COMPLETED", "TIME_EXPIRED", "/attempts/11/result"));
+
+        mockMvc.perform(post("/attempts/11/auto-submit")
+                        .with(user("user@example.com").roles("USER"))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.completionReason").value("TIME_EXPIRED"))
+                .andExpect(jsonPath("$.redirectUrl").value("/attempts/11/result"));
+    }
+
+    @Test
     void anonymousAccessRedirectsToLogin() throws Exception {
         mockMvc.perform(get("/attempts/history"))
                 .andExpect(status().is3xxRedirection())
@@ -201,6 +273,17 @@ class QuizAttemptControllerTest {
                         .param("quizId", "3")
                         .with(user("user@example.com").roles("USER")))
                 .andExpect(status().isForbidden());
+        mockMvc.perform(post("/attempts/11/restart")
+                        .with(user("user@example.com").roles("USER")))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/attempts/11/auto-submit")
+                        .with(user("user@example.com").roles("USER")))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/attempts/11/questions/22/answer")
+                        .param("selectedOptionId", "33")
+                        .param("answerRevision", "1")
+                        .with(user("user@example.com").roles("USER")))
+                .andExpect(status().isForbidden());
     }
 
     private QuizResultResponse resultResponse() {
@@ -209,6 +292,7 @@ class QuizAttemptControllerTest {
                 "Science Quiz",
                 "Science",
                 "COMPLETED",
+                "MANUAL",
                 2,
                 1,
                 1,
@@ -218,6 +302,7 @@ class QuizAttemptControllerTest {
                 Instant.parse("2026-01-01T12:00:00Z"),
                 Instant.parse("2026-01-01T12:30:00Z"),
                 Instant.parse("2026-01-01T12:01:00Z"),
+                null,
                 List.of()
         );
     }

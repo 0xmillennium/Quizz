@@ -67,7 +67,7 @@ class DefaultQuizAttemptQueryServiceTest {
     @Test
     void getAttemptPageRejectsCompletedAttempt() throws Exception {
         QuizAttempt attempt = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(60));
-        attempt.complete(NOW.minusSeconds(10), new ScoreResult(1, 0, 0, 1, 0, "DEFAULT_V1"));
+        attempt.completeManually(NOW.minusSeconds(10), new ScoreResult(1, 0, 0, 1, 0, "DEFAULT_V1"));
         when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
 
         assertThatThrownBy(() -> service.getAttemptPage(4L, 1L))
@@ -76,9 +76,9 @@ class DefaultQuizAttemptQueryServiceTest {
     }
 
     @Test
-    void getAttemptPageRejectsExpiredStatusAttempt() throws Exception {
+    void getAttemptPageRejectsAbandonedAttempt() throws Exception {
         QuizAttempt attempt = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(60));
-        attempt.markExpired();
+        attempt.abandonForRestart(NOW.minusSeconds(10));
         when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
 
         assertThatThrownBy(() -> service.getAttemptPage(4L, 1L))
@@ -98,9 +98,9 @@ class DefaultQuizAttemptQueryServiceTest {
     }
 
     @Test
-    void getResultReturnsCompletedAttempt() throws Exception {
+    void getResultReturnsCompletedManualAttempt() throws Exception {
         QuizAttempt attempt = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(60));
-        attempt.complete(NOW.minusSeconds(10), new ScoreResult(1, 0, 0, 1, 0, "DEFAULT_V1"));
+        attempt.completeManually(NOW.minusSeconds(10), new ScoreResult(1, 0, 0, 1, 0, "DEFAULT_V1"));
         when(quizAttemptRepository.findResultByIdAndUserId(4L, 1L)).thenReturn(Optional.of(attempt));
 
         assertThat(service.getResult(4L, 1L)).isSameAs(attempt);
@@ -108,12 +108,24 @@ class DefaultQuizAttemptQueryServiceTest {
     }
 
     @Test
-    void getResultReturnsExpiredAttempt() throws Exception {
+    void getResultReturnsCompletedTimeExpiredAttempt() throws Exception {
         QuizAttempt attempt = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(60));
-        attempt.markExpired();
+        attempt.completeByTimeExpiry(new ScoreResult(1, 0, 0, 1, 0, "DEFAULT_V1"));
         when(quizAttemptRepository.findResultByIdAndUserId(4L, 1L)).thenReturn(Optional.of(attempt));
 
         assertThat(service.getResult(4L, 1L)).isSameAs(attempt);
+        verify(quizAttemptRepository).findQuestionsWithOptionsByIdIn(List.of(400L));
+    }
+
+    @Test
+    void getResultRejectsAbandonedAttempt() throws Exception {
+        QuizAttempt attempt = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(60));
+        attempt.abandonForRestart(NOW.minusSeconds(10));
+        when(quizAttemptRepository.findResultByIdAndUserId(4L, 1L)).thenReturn(Optional.of(attempt));
+
+        assertThatThrownBy(() -> service.getResult(4L, 1L))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("Only completed attempts have results.");
     }
 
     @Test
@@ -123,7 +135,7 @@ class DefaultQuizAttemptQueryServiceTest {
 
         assertThatThrownBy(() -> service.getResult(4L, 1L))
                 .isInstanceOf(BusinessRuleException.class)
-                .hasMessage("Attempt is still in progress.");
+                .hasMessage("Only completed attempts have results.");
     }
 
     @Test
@@ -137,12 +149,23 @@ class DefaultQuizAttemptQueryServiceTest {
     @Test
     void getResultChartUsesStoredCountsThroughMapper() throws Exception {
         QuizAttempt attempt = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(60));
-        attempt.complete(NOW.minusSeconds(10), new ScoreResult(1, 0, 0, 1, 0, "DEFAULT_V1"));
+        attempt.completeManually(NOW.minusSeconds(10), new ScoreResult(1, 0, 0, 1, 0, "DEFAULT_V1"));
         ResultChartResponse chart = new ResultChartResponse(0, 0, 1);
         when(quizAttemptRepository.findResultByIdAndUserId(4L, 1L)).thenReturn(Optional.of(attempt));
         when(quizAttemptMapper.toChartResponse(attempt)).thenReturn(chart);
 
         assertThat(service.getResultChart(4L, 1L)).isSameAs(chart);
         verify(quizAttemptMapper).toChartResponse(attempt);
+    }
+
+    @Test
+    void getResultChartRejectsAbandonedAttempt() throws Exception {
+        QuizAttempt attempt = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(60));
+        attempt.abandonForRestart(NOW.minusSeconds(10));
+        when(quizAttemptRepository.findResultByIdAndUserId(4L, 1L)).thenReturn(Optional.of(attempt));
+
+        assertThatThrownBy(() -> service.getResultChart(4L, 1L))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("Only completed attempts have results.");
     }
 }

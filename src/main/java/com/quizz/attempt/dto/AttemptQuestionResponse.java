@@ -6,6 +6,8 @@ public record AttemptQuestionResponse(
         Long id,
         String questionText,
         int displayOrder,
+        Long selectedOptionId,
+        int answerRevision,
         List<AttemptAnswerOptionResponse> options
 ) {
 }

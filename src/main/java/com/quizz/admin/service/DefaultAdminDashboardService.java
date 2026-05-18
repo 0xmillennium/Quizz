@@ -31,9 +31,11 @@ public class DefaultAdminDashboardService implements AdminDashboardService {
                         row.quizTitle(),
                         row.categoryName(),
                         row.status(),
+                        row.completionReason(),
                         row.scorePercentage(),
                         row.startedAt(),
-                        row.submittedAt()
+                        row.submittedAt(),
+                        row.abandonedAt()
                 ))
                 .toList();
 
@@ -51,7 +53,9 @@ public class DefaultAdminDashboardService implements AdminDashboardService {
                 metrics.totalAttempts(),
                 metrics.inProgressAttempts(),
                 metrics.completedAttempts(),
-                metrics.expiredAttempts(),
+                metrics.abandonedAttempts(),
+                metrics.manualCompletedAttempts(),
+                metrics.timeExpiredCompletedAttempts(),
                 metrics.averageScorePercentage(),
                 recentAttempts
         );

@@ -41,9 +41,11 @@ class DefaultAdminDashboardServiceTest {
                 "Science Quiz",
                 "Science",
                 "COMPLETED",
+                "MANUAL",
                 80,
                 startedAt,
-                submittedAt
+                submittedAt,
+                null
         );
         when(repository.fetchMetrics()).thenReturn(metrics);
         when(repository.findRecentAttempts(10)).thenReturn(List.of(recentAttempt));
@@ -65,7 +67,7 @@ class DefaultAdminDashboardServiceTest {
         assertThat(response.totalAttempts()).isEqualTo(30);
         assertThat(response.inProgressAttempts()).isEqualTo(3);
         assertThat(response.completedAttempts()).isEqualTo(20);
-        assertThat(response.expiredAttempts()).isEqualTo(7);
+        assertThat(response.abandonedAttempts()).isEqualTo(7);
         assertThat(response.averageScorePercentage()).isEqualTo(76.5);
         assertThat(response.recentAttempts()).singleElement().satisfies(attempt -> {
             assertThat(attempt.attemptId()).isEqualTo(1L);
@@ -107,6 +109,8 @@ class DefaultAdminDashboardServiceTest {
                 3,
                 20,
                 7,
+                14,
+                6,
                 76.5
         );
     }

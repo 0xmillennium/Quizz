@@ -75,6 +75,12 @@ class SecurityConfigTest {
     }
 
     @Test
+    void faviconIsPublic() throws Exception {
+        mockMvc.perform(get("/favicon.ico"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void actuatorHealthIsPublic() throws Exception {
         mockMvc.perform(get("/actuator/health"))
                 .andExpect(status().isOk());
@@ -170,6 +176,12 @@ class SecurityConfigTest {
         @ResponseBody
         String css() {
             return "body {}";
+        }
+
+        @GetMapping(value = "/favicon.ico", produces = "image/x-icon")
+        @ResponseBody
+        String favicon() {
+            return "icon";
         }
 
         @GetMapping("/actuator/health")

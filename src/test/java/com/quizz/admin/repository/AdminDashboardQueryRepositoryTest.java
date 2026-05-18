@@ -41,7 +41,7 @@ class AdminDashboardQueryRepositoryTest {
 
     @Test
     void fetchMetricsQueriesExpectedTables() {
-        DashboardMetricsRow metrics = new DashboardMetricsRow(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.0);
+        DashboardMetricsRow metrics = new DashboardMetricsRow(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.0);
         when(jdbcTemplate.queryForObject(anyString(), anyMap(), anyRowMapper())).thenReturn(metrics);
 
         repository.fetchMetrics();
@@ -58,7 +58,7 @@ class AdminDashboardQueryRepositoryTest {
         assertThat(sql).contains("status = 'ARCHIVED'");
         assertThat(sql).contains("status = 'IN_PROGRESS'");
         assertThat(sql).contains("status = 'COMPLETED'");
-        assertThat(sql).contains("status = 'EXPIRED'");
+        assertThat(sql).contains("status = 'ABANDONED'");
         assertThat(sql).contains("COALESCE(AVG(score_percentage), 0)");
         assertThat(sql).doesNotContain("email");
     }

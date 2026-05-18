@@ -182,6 +182,7 @@ class DefaultAdminResultServiceTest {
                 "Science Quiz",
                 "Science",
                 "COMPLETED",
+                "MANUAL",
                 5,
                 4,
                 1,
@@ -189,7 +190,8 @@ class DefaultAdminResultServiceTest {
                 80,
                 startedAt,
                 expiresAt,
-                submittedAt
+                submittedAt,
+                null
         );
         AdminResultFilterRequest filter = new AdminResultFilterRequest();
         filter.setSize(20);
@@ -242,6 +244,7 @@ class DefaultAdminResultServiceTest {
                 4L,
                 "Science",
                 "COMPLETED",
+                "MANUAL",
                 1,
                 1,
                 0,
@@ -250,7 +253,8 @@ class DefaultAdminResultServiceTest {
                 "v1",
                 Instant.parse("2026-01-01T10:00:00Z"),
                 Instant.parse("2026-01-01T10:30:00Z"),
-                Instant.parse("2026-01-01T10:10:00Z")
+                Instant.parse("2026-01-01T10:10:00Z"),
+                null
         );
         when(repository.findAttemptHeader(1L)).thenReturn(Optional.of(header));
         when(repository.findAttemptQuestionOptionRows(1L)).thenReturn(List.of(

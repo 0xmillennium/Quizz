@@ -80,7 +80,7 @@ class QuizAttemptMapperTest {
         Long selectedOptionId = first.getOptions().get(0).getId();
         attempt.answerQuestion(first.getId(), selectedOptionId);
         attempt.evaluateQuestions();
-        attempt.complete(Instant.parse("2026-01-01T12:01:00Z"), new ScoreResult(2, 1, 0, 1, 50, "DEFAULT_V1"));
+        attempt.completeManually(Instant.parse("2026-01-01T12:01:00Z"), new ScoreResult(2, 1, 0, 1, 50, "DEFAULT_V1"));
 
         QuizResultResponse response = mapper.toResultResponse(attempt);
 
@@ -106,7 +106,7 @@ class QuizAttemptMapperTest {
     @Test
     void toChartResponseUsesStoredCounts() {
         attempt.evaluateQuestions();
-        attempt.complete(Instant.parse("2026-01-01T12:01:00Z"), new ScoreResult(2, 0, 0, 2, 0, "DEFAULT_V1"));
+        attempt.completeManually(Instant.parse("2026-01-01T12:01:00Z"), new ScoreResult(2, 0, 0, 2, 0, "DEFAULT_V1"));
 
         ResultChartResponse chart = mapper.toChartResponse(attempt);
 

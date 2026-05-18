@@ -3,18 +3,18 @@ package com.quizz.attempt.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.quizz.attempt.dto.QuizResultResponse;
+import com.quizz.attempt.dto.AutosaveAnswerResponse;
+import com.quizz.attempt.dto.StartQuizResponse;
 import com.quizz.attempt.dto.SubmitQuizRequest;
 import com.quizz.attempt.dto.UserAnswerRequest;
+import com.quizz.attempt.entity.AttemptCompletionReason;
 import com.quizz.attempt.entity.AttemptQuestion;
 import com.quizz.attempt.entity.AttemptStatus;
 import com.quizz.attempt.entity.QuizAttempt;
-import com.quizz.attempt.mapper.QuizAttemptMapper;
 import com.quizz.attempt.repository.QuizAttemptRepository;
 import com.quizz.attempt.scoring.ScoreResult;
 import com.quizz.category.entity.Category;
@@ -32,7 +32,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -40,6 +39,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class DefaultQuizAttemptCommandServiceTest {
 
     private static final Instant NOW = Instant.parse("2026-01-01T12:00:00Z");
+    private static final ScoreResult SCORE = new ScoreResult(2, 1, 1, 0, 50, "DEFAULT_V1");
 
     @Mock
     private QuizAttemptRepository quizAttemptRepository;
@@ -52,9 +52,6 @@ class DefaultQuizAttemptCommandServiceTest {
 
     @Mock
     private ScoringService scoringService;
-
-    @Mock
-    private QuizAttemptMapper quizAttemptMapper;
 
     private User user;
     private Quiz quiz;
@@ -72,7 +69,6 @@ class DefaultQuizAttemptCommandServiceTest {
                 quizQueryService,
                 userQueryService,
                 scoringService,
-                quizAttemptMapper,
                 Clock.fixed(NOW, ZoneOffset.UTC)
         );
 
@@ -84,229 +80,249 @@ class DefaultQuizAttemptCommandServiceTest {
     }
 
     @Test
-    void startAttemptCreatesInProgressAttempt() {
-        stubStartDependencies();
+    void startAttemptCreatesNewAttemptWhenNoActiveAttempt() {
+        stubStartDependencies(Optional.empty());
 
-        service.startAttempt(3L, 1L);
+        StartQuizResponse response = service.startAttempt(3L, 1L);
 
-        ArgumentCaptor<QuizAttempt> captor = ArgumentCaptor.forClass(QuizAttempt.class);
-        verify(quizAttemptRepository).save(captor.capture());
-        QuizAttempt attempt = captor.getValue();
-        assertThat(attempt.getStatus()).isEqualTo(AttemptStatus.IN_PROGRESS);
-        assertThat(attempt.getStartedAt()).isEqualTo(NOW);
-        assertThat(attempt.getExpiresAt()).isEqualTo(NOW.plusSeconds(30 * 60));
-    }
-
-    @Test
-    void startAttemptSnapshotsQuizCategoryQuestionsAndOptions() {
-        stubStartDependencies();
-
-        service.startAttempt(3L, 1L);
-
-        ArgumentCaptor<QuizAttempt> captor = ArgumentCaptor.forClass(QuizAttempt.class);
-        verify(quizAttemptRepository).save(captor.capture());
-        QuizAttempt attempt = captor.getValue();
-        assertThat(attempt.getQuizTitleSnapshot()).isEqualTo("Science Quiz");
-        assertThat(attempt.getCategoryIdSnapshot()).isEqualTo(2L);
-        assertThat(attempt.getCategoryNameSnapshot()).isEqualTo("Science");
-        assertThat(attempt.getQuestions()).extracting(AttemptQuestion::getQuestionText)
-                .containsExactly("First?", "Second?");
-        assertThat(attempt.getQuestions().get(0).getOriginalQuestionId()).isEqualTo(10L);
-        assertThat(attempt.getQuestions().get(0).getOptions().get(0).getOriginalAnswerOptionId()).isEqualTo(101L);
-        assertThat(attempt.getQuestions().get(0).getOptions().get(0).getOptionText()).isEqualTo("First? correct");
-    }
-
-    @Test
-    void startAttemptRejectsExistingNonExpiredInProgressAttempt() throws Exception {
-        stubStartDependencies();
-        QuizAttempt existing = AttemptTestFactory.attempt(11L, user, quiz, NOW.minusSeconds(60));
-        when(quizAttemptRepository.findByUserIdAndQuizIdAndStatus(1L, 3L, AttemptStatus.IN_PROGRESS))
-                .thenReturn(Optional.of(existing));
-
-        assertThatThrownBy(() -> service.startAttempt(3L, 1L))
-                .isInstanceOf(BusinessRuleException.class)
-                .hasMessage("You already have an active attempt for this quiz.");
-    }
-
-    @Test
-    void startAttemptExpiresExistingExpiredInProgressAttemptAndCreatesNewAttempt() throws Exception {
-        stubStartDependencies();
-        QuizAttempt existing = AttemptTestFactory.attempt(11L, user, quiz, NOW.minusSeconds(31 * 60));
-        when(quizAttemptRepository.findByUserIdAndQuizIdAndStatus(1L, 3L, AttemptStatus.IN_PROGRESS))
-                .thenReturn(Optional.of(existing));
-
-        service.startAttempt(3L, 1L);
-
-        assertThat(existing.getStatus()).isEqualTo(AttemptStatus.EXPIRED);
-        verify(quizAttemptRepository).flush();
+        assertThat(response.attemptId()).isEqualTo(99L);
+        assertThat(response.resumed()).isFalse();
         verify(quizAttemptRepository).save(any(QuizAttempt.class));
     }
 
     @Test
-    void startAttemptUsesPublishedAttemptGraphAndUserQueryService() {
-        stubStartDependencies();
+    void startAttemptResumesExistingActiveAttempt() throws Exception {
+        QuizAttempt existing = AttemptTestFactory.attempt(11L, user, quiz, NOW.minusSeconds(60));
+        stubStartDependencies(Optional.of(existing));
 
-        service.startAttempt(3L, 1L);
+        StartQuizResponse response = service.startAttempt(3L, 1L);
 
-        verify(quizQueryService).getPublishedByIdForAttempt(3L);
-        verify(userQueryService).getById(1L);
+        assertThat(response.attemptId()).isEqualTo(11L);
+        assertThat(response.resumed()).isTrue();
     }
 
     @Test
-    void submitAttemptCompletesValidAttempt() throws Exception {
-        QuizAttempt attempt = persistedAttempt();
-        AttemptQuestion first = attempt.getQuestions().get(0);
-        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
-        ScoreResult scoreResult = new ScoreResult(2, 1, 1, 0, 50, "DEFAULT_V1");
-        when(scoringService.score(attempt)).thenReturn(scoreResult);
-        QuizResultResponse response = resultResponse(4L, "COMPLETED");
-        when(quizAttemptMapper.toResultResponse(attempt)).thenReturn(response);
+    void startAttemptAutoSubmitsOverdueActiveAttemptAndCreatesNewAttempt() throws Exception {
+        QuizAttempt existing = AttemptTestFactory.attempt(11L, user, quiz, NOW.minusSeconds(31 * 60));
+        stubStartDependencies(Optional.of(existing));
+        when(scoringService.score(existing)).thenReturn(SCORE);
 
-        QuizResultResponse result = service.submitAttempt(4L, 1L, request(answer(first, first.getOptions().get(0).getId())));
+        StartQuizResponse response = service.startAttempt(3L, 1L);
 
-        assertThat(result).isSameAs(response);
-        assertThat(attempt.getStatus()).isEqualTo(AttemptStatus.COMPLETED);
-        assertThat(attempt.getSubmittedAt()).isEqualTo(NOW);
-        assertThat(attempt.getScorePercentage()).isEqualTo(50);
-        verify(quizAttemptRepository).findQuestionsWithOptionsByIdIn(List.of(400L, 401L));
+        assertThat(existing.getStatus()).isEqualTo(AttemptStatus.COMPLETED);
+        assertThat(existing.getCompletionReason()).isEqualTo(AttemptCompletionReason.TIME_EXPIRED);
+        assertThat(existing.getSubmittedAt()).isEqualTo(existing.getExpiresAt());
+        assertThat(response.previousAttemptAutoSubmitted()).isTrue();
+        assertThat(response.previousAttemptId()).isEqualTo(11L);
     }
 
     @Test
-    void submitAttemptStoresSelectedOptionIds() throws Exception {
+    void restartAttemptAbandonsActiveAttemptAndCreatesNewAttempt() throws Exception {
+        QuizAttempt existing = persistedAttempt();
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(existing));
+
+        StartQuizResponse response = service.restartAttempt(4L, 1L);
+
+        assertThat(existing.getStatus()).isEqualTo(AttemptStatus.ABANDONED);
+        assertThat(existing.getAbandonedAt()).isEqualTo(NOW);
+        assertThat(response.attemptId()).isEqualTo(99L);
+    }
+
+    @Test
+    void restartAttemptAutoSubmitsOverdueAttemptAndCreatesNewAttempt() throws Exception {
+        QuizAttempt existing = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(31 * 60));
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(existing));
+        when(scoringService.score(existing)).thenReturn(SCORE);
+
+        StartQuizResponse response = service.restartAttempt(4L, 1L);
+
+        assertThat(existing.getStatus()).isEqualTo(AttemptStatus.COMPLETED);
+        assertThat(existing.getCompletionReason()).isEqualTo(AttemptCompletionReason.TIME_EXPIRED);
+        assertThat(response.previousAttemptAutoSubmitted()).isTrue();
+    }
+
+    @Test
+    void autosaveAnswerSavesSelectedOptionAndRevision() throws Exception {
         QuizAttempt attempt = persistedAttempt();
         AttemptQuestion first = attempt.getQuestions().get(0);
         Long selectedOptionId = first.getOptions().get(1).getId();
         when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
-        when(scoringService.score(attempt)).thenReturn(new ScoreResult(2, 0, 1, 1, 0, "DEFAULT_V1"));
-        when(quizAttemptMapper.toResultResponse(attempt)).thenReturn(resultResponse(4L, "COMPLETED"));
 
-        service.submitAttempt(4L, 1L, request(answer(first, selectedOptionId)));
+        AutosaveAnswerResponse response = service.autosaveAnswer(4L, first.getId(), 1L, selectedOptionId, 1);
 
+        assertThat(response.saved()).isTrue();
         assertThat(first.getSelectedOptionId()).isEqualTo(selectedOptionId);
+        assertThat(first.getAnswerRevision()).isEqualTo(1);
     }
 
     @Test
-    void submitAttemptTreatsMissingAnswersAsUnanswered() throws Exception {
+    void staleAutosaveDoesNotOverwriteNewerAnswer() throws Exception {
         QuizAttempt attempt = persistedAttempt();
+        AttemptQuestion first = attempt.getQuestions().get(0);
+        Long newerOption = first.getOptions().get(1).getId();
+        first.autosaveAnswer(newerOption, 2, NOW.minusSeconds(5));
         when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
-        when(scoringService.score(attempt)).thenReturn(new ScoreResult(2, 0, 0, 2, 0, "DEFAULT_V1"));
-        when(quizAttemptMapper.toResultResponse(attempt)).thenReturn(resultResponse(4L, "COMPLETED"));
 
-        service.submitAttempt(4L, 1L, request());
+        AutosaveAnswerResponse response = service.autosaveAnswer(4L, first.getId(), 1L, first.getOptions().get(0).getId(), 1);
 
-        assertThat(attempt.getQuestions()).allMatch(question -> question.getSelectedOptionId() == null);
-        assertThat(attempt.getUnansweredCount()).isEqualTo(2);
+        assertThat(response.stale()).isTrue();
+        assertThat(first.getSelectedOptionId()).isEqualTo(newerOption);
+        assertThat(first.getAnswerRevision()).isEqualTo(2);
     }
 
     @Test
-    void submitAttemptRejectsDuplicateAttemptQuestionId() throws Exception {
+    void autosaveRejectsOptionFromAnotherQuestion() throws Exception {
+        QuizAttempt attempt = persistedAttempt();
+        AttemptQuestion first = attempt.getQuestions().get(0);
+        AttemptQuestion second = attempt.getQuestions().get(1);
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
+
+        assertThatThrownBy(() -> service.autosaveAnswer(4L, first.getId(), 1L, second.getOptions().get(0).getId(), 1))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("Selected option does not belong to this question.");
+    }
+
+    @Test
+    void autosaveAutoSubmitsWhenOverdue() throws Exception {
+        QuizAttempt attempt = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(31 * 60));
+        AttemptQuestion first = attempt.getQuestions().get(0);
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(scoringService.score(attempt)).thenReturn(SCORE);
+
+        AutosaveAnswerResponse response = service.autosaveAnswer(4L, first.getId(), 1L, first.getOptions().get(0).getId(), 1);
+
+        assertThat(response.autoSubmitted()).isTrue();
+        assertThat(response.redirectUrl()).isEqualTo("/attempts/4/result");
+        assertThat(attempt.getCompletionReason()).isEqualTo(AttemptCompletionReason.TIME_EXPIRED);
+    }
+
+    @Test
+    void manualSubmitBeforeExpiryCompletesWithManualReason() throws Exception {
+        QuizAttempt attempt = persistedAttempt();
+        AttemptQuestion first = attempt.getQuestions().get(0);
+        AttemptQuestion second = attempt.getQuestions().get(1);
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(scoringService.score(attempt)).thenReturn(SCORE);
+
+        service.submitAttempt(4L, 1L, request(
+                answer(first, first.getOptions().get(0).getId()),
+                answer(second, second.getOptions().get(0).getId())
+        ));
+
+        assertThat(attempt.getStatus()).isEqualTo(AttemptStatus.COMPLETED);
+        assertThat(attempt.getCompletionReason()).isEqualTo(AttemptCompletionReason.MANUAL);
+        assertThat(attempt.getSubmittedAt()).isEqualTo(NOW);
+    }
+
+    @Test
+    void manualSubmitRejectsMissingAttemptQuestionEntry() throws Exception {
         QuizAttempt attempt = persistedAttempt();
         AttemptQuestion first = attempt.getQuestions().get(0);
         when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
 
+        assertThatThrownBy(() -> service.submitAttempt(
+                4L,
+                1L,
+                request(answer(first, first.getOptions().get(0).getId()))
+        ))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("All attempt questions must be submitted.");
+    }
+
+    @Test
+    void manualSubmitAllowsPresentQuestionEntryWithNullSelectedOption() throws Exception {
+        QuizAttempt attempt = persistedAttempt();
+        AttemptQuestion first = attempt.getQuestions().get(0);
+        AttemptQuestion second = attempt.getQuestions().get(1);
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
+        when(scoringService.score(attempt)).thenReturn(new ScoreResult(2, 1, 0, 1, 50, "DEFAULT_V1"));
+
+        service.submitAttempt(4L, 1L, request(
+                answer(first, null),
+                answer(second, second.getOptions().get(0).getId())
+        ));
+
+        assertThat(first.getSelectedOptionId()).isNull();
+        assertThat(attempt.getStatus()).isEqualTo(AttemptStatus.COMPLETED);
+        assertThat(attempt.getCompletionReason()).isEqualTo(AttemptCompletionReason.MANUAL);
+    }
+
+    @Test
+    void manualSubmitRejectsDuplicateQuestionEntry() throws Exception {
+        QuizAttempt attempt = persistedAttempt();
+        AttemptQuestion first = attempt.getQuestions().get(0);
+        AttemptQuestion second = attempt.getQuestions().get(1);
+        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
+
         assertThatThrownBy(() -> service.submitAttempt(4L, 1L, request(
                 answer(first, first.getOptions().get(0).getId()),
-                answer(first, first.getOptions().get(1).getId())
+                answer(first, first.getOptions().get(1).getId()),
+                answer(second, second.getOptions().get(0).getId())
         )))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessage("Duplicate answers are not allowed.");
     }
 
     @Test
-    void submitAttemptRejectsUnknownAttemptQuestionId() throws Exception {
+    void manualSubmitRejectsUnknownQuestionEntry() throws Exception {
         QuizAttempt attempt = persistedAttempt();
+        AttemptQuestion first = attempt.getQuestions().get(0);
         when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
 
-        UserAnswerRequest answer = new UserAnswerRequest();
-        answer.setAttemptQuestionId(999L);
-
-        assertThatThrownBy(() -> service.submitAttempt(4L, 1L, request(answer)))
+        assertThatThrownBy(() -> service.submitAttempt(4L, 1L, request(
+                answer(first, first.getOptions().get(0).getId()),
+                answer(999L, null)
+        )))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessage("Attempt question not found.");
     }
 
     @Test
-    void submitAttemptRejectsOptionFromAnotherQuestion() throws Exception {
+    void manualSubmitRejectsSelectedOptionFromAnotherQuestion() throws Exception {
         QuizAttempt attempt = persistedAttempt();
         AttemptQuestion first = attempt.getQuestions().get(0);
         AttemptQuestion second = attempt.getQuestions().get(1);
         when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
 
-        assertThatThrownBy(() -> service.submitAttempt(
-                4L,
-                1L,
-                request(answer(first, second.getOptions().get(0).getId()))
-        ))
+        assertThatThrownBy(() -> service.submitAttempt(4L, 1L, request(
+                answer(first, second.getOptions().get(0).getId()),
+                answer(second, second.getOptions().get(1).getId())
+        )))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessage("Selected option does not belong to this question.");
     }
 
     @Test
-    void submitAttemptMarksExpiredIfNowIsAtOrAfterExpiresAt() throws Exception {
-        QuizAttempt attempt = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(30 * 60));
+    void manualSubmitAfterExpiryIgnoresIncompletePayloadAndCompletesAsTimeExpired() throws Exception {
+        QuizAttempt attempt = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(31 * 60));
         when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
-        QuizResultResponse response = resultResponse(4L, "EXPIRED");
-        when(quizAttemptMapper.toResultResponse(attempt)).thenReturn(response);
-
-        QuizResultResponse result = service.submitAttempt(4L, 1L, request());
-
-        assertThat(result).isSameAs(response);
-        assertThat(attempt.getStatus()).isEqualTo(AttemptStatus.EXPIRED);
-        verify(quizAttemptRepository).findQuestionsWithOptionsByIdIn(List.of(400L, 401L));
-    }
-
-    @Test
-    void submitAttemptDoesNotScoreExpiredAttempt() throws Exception {
-        QuizAttempt attempt = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(30 * 60));
-        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
-        when(quizAttemptMapper.toResultResponse(attempt)).thenReturn(resultResponse(4L, "EXPIRED"));
+        when(scoringService.score(attempt)).thenReturn(SCORE);
 
         service.submitAttempt(4L, 1L, request());
 
-        verify(scoringService, never()).score(any());
-        assertThat(attempt.getScorePercentage()).isZero();
+        assertThat(attempt.getStatus()).isEqualTo(AttemptStatus.COMPLETED);
+        assertThat(attempt.getCompletionReason()).isEqualTo(AttemptCompletionReason.TIME_EXPIRED);
+        assertThat(attempt.getSubmittedAt()).isEqualTo(attempt.getExpiresAt());
     }
 
     @Test
-    void submitAttemptRejectsCompletedAttempt() throws Exception {
-        QuizAttempt attempt = persistedAttempt();
-        attempt.complete(NOW.minusSeconds(10), new ScoreResult(2, 1, 1, 0, 50, "DEFAULT_V1"));
-        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
+    void autoSubmitOverdueAttemptsForUserAffectsOnlyRepositoryReturnedAttempts() throws Exception {
+        QuizAttempt overdue = AttemptTestFactory.attempt(4L, user, quiz, NOW.minusSeconds(31 * 60));
+        when(quizAttemptRepository.findByUserIdAndStatusAndExpiresAtLessThanEqual(1L, AttemptStatus.IN_PROGRESS, NOW))
+                .thenReturn(List.of(overdue));
+        when(scoringService.score(overdue)).thenReturn(SCORE);
 
-        assertThatThrownBy(() -> service.submitAttempt(4L, 1L, request()))
-                .isInstanceOf(BusinessRuleException.class)
-                .hasMessage("Attempt is not in progress.");
+        int count = service.autoSubmitOverdueAttemptsForUser(1L);
+
+        assertThat(count).isEqualTo(1);
+        assertThat(overdue.getCompletionReason()).isEqualTo(AttemptCompletionReason.TIME_EXPIRED);
     }
 
-    @Test
-    void submitAttemptRejectsAlreadyExpiredAttempt() throws Exception {
-        QuizAttempt attempt = persistedAttempt();
-        attempt.markExpired();
-        when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
-
-        assertThatThrownBy(() -> service.submitAttempt(4L, 1L, request()))
-                .isInstanceOf(BusinessRuleException.class)
-                .hasMessage("Attempt is not in progress.");
-    }
-
-    @Test
-    void expireOverdueAttemptsMarksExpiredAttempts() throws Exception {
-        QuizAttempt first = persistedAttempt();
-        QuizAttempt second = AttemptTestFactory.attempt(5L, user, quiz, NOW.minusSeconds(31 * 60));
-        when(quizAttemptRepository.findByStatusAndExpiresAtBeforeOrAt(AttemptStatus.IN_PROGRESS, NOW))
-                .thenReturn(List.of(first, second));
-
-        service.expireOverdueAttempts();
-
-        assertThat(first.getStatus()).isEqualTo(AttemptStatus.EXPIRED);
-        assertThat(second.getStatus()).isEqualTo(AttemptStatus.EXPIRED);
-    }
-
-    private void stubStartDependencies() {
+    private void stubStartDependencies(Optional<QuizAttempt> existing) {
         when(userQueryService.getById(1L)).thenReturn(user);
         when(quizQueryService.getPublishedByIdForAttempt(3L)).thenReturn(quiz);
         when(quizAttemptRepository.findByUserIdAndQuizIdAndStatus(1L, 3L, AttemptStatus.IN_PROGRESS))
-                .thenReturn(Optional.empty());
+                .thenReturn(existing);
     }
 
     private QuizAttempt persistedAttempt() throws Exception {
@@ -320,28 +336,13 @@ class DefaultQuizAttemptCommandServiceTest {
     }
 
     private UserAnswerRequest answer(AttemptQuestion question, Long selectedOptionId) {
-        UserAnswerRequest answer = new UserAnswerRequest();
-        answer.setAttemptQuestionId(question.getId());
-        answer.setSelectedOptionId(selectedOptionId);
-        return answer;
+        return answer(question.getId(), selectedOptionId);
     }
 
-    private QuizResultResponse resultResponse(Long attemptId, String status) {
-        return new QuizResultResponse(
-                attemptId,
-                "Science Quiz",
-                "Science",
-                status,
-                2,
-                0,
-                0,
-                2,
-                0,
-                "DEFAULT_V1",
-                NOW.minusSeconds(60),
-                NOW.plusSeconds(60),
-                null,
-                List.of()
-        );
+    private UserAnswerRequest answer(Long attemptQuestionId, Long selectedOptionId) {
+        UserAnswerRequest answer = new UserAnswerRequest();
+        answer.setAttemptQuestionId(attemptQuestionId);
+        answer.setSelectedOptionId(selectedOptionId);
+        return answer;
     }
 }

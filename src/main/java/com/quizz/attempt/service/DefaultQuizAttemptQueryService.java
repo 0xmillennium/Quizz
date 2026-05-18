@@ -38,7 +38,7 @@ public class DefaultQuizAttemptQueryService implements QuizAttemptQueryService {
         if (!attempt.isInProgress()) {
             throw new BusinessRuleException("Attempt is not in progress.");
         }
-        if (attempt.isExpiredAt(Instant.now(clock))) {
+        if (attempt.isOverdueAt(Instant.now(clock))) {
             throw new BusinessRuleException("Attempt has expired.");
         }
         loadQuestionOptions(attempt);
@@ -49,8 +49,8 @@ public class DefaultQuizAttemptQueryService implements QuizAttemptQueryService {
     public QuizAttempt getResult(Long attemptId, Long userId) {
         QuizAttempt attempt = quizAttemptRepository.findResultByIdAndUserId(attemptId, userId)
                 .orElseThrow(() -> new NotFoundException("Attempt not found."));
-        if (attempt.isInProgress()) {
-            throw new BusinessRuleException("Attempt is still in progress.");
+        if (!attempt.isCompleted()) {
+            throw new BusinessRuleException("Only completed attempts have results.");
         }
         loadQuestionOptions(attempt);
         return attempt;

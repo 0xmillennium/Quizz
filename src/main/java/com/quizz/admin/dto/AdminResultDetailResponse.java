@@ -12,6 +12,7 @@ public record AdminResultDetailResponse(
         Long categoryId,
         String categoryName,
         String status,
+        String completionReason,
         int totalQuestions,
         int correctCount,
         int wrongCount,
@@ -21,6 +22,7 @@ public record AdminResultDetailResponse(
         Instant startedAt,
         Instant expiresAt,
         Instant submittedAt,
+        Instant abandonedAt,
         List<AdminResultQuestionResponse> questions
 ) {
 }

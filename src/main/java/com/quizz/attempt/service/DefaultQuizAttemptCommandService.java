@@ -1,14 +1,16 @@
 package com.quizz.attempt.service;
 
-import com.quizz.attempt.dto.QuizResultResponse;
+import com.quizz.attempt.dto.AutoSubmitResponse;
+import com.quizz.attempt.dto.AutosaveAnswerResponse;
 import com.quizz.attempt.dto.StartQuizResponse;
 import com.quizz.attempt.dto.SubmitQuizRequest;
+import com.quizz.attempt.dto.SubmitQuizResponse;
 import com.quizz.attempt.dto.UserAnswerRequest;
 import com.quizz.attempt.entity.AttemptAnswerOption;
 import com.quizz.attempt.entity.AttemptQuestion;
 import com.quizz.attempt.entity.AttemptStatus;
+import com.quizz.attempt.entity.AutosaveOutcome;
 import com.quizz.attempt.entity.QuizAttempt;
-import com.quizz.attempt.mapper.QuizAttemptMapper;
 import com.quizz.attempt.repository.QuizAttemptRepository;
 import com.quizz.attempt.scoring.ScoreResult;
 import com.quizz.common.exception.BusinessRuleException;
@@ -22,6 +24,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
@@ -35,7 +38,6 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
     private final QuizQueryService quizQueryService;
     private final UserQueryService userQueryService;
     private final ScoringService scoringService;
-    private final QuizAttemptMapper quizAttemptMapper;
     private final Clock clock;
 
     public DefaultQuizAttemptCommandService(
@@ -43,14 +45,12 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
             QuizQueryService quizQueryService,
             UserQueryService userQueryService,
             ScoringService scoringService,
-            QuizAttemptMapper quizAttemptMapper,
             Clock clock
     ) {
         this.quizAttemptRepository = quizAttemptRepository;
         this.quizQueryService = quizQueryService;
         this.userQueryService = userQueryService;
         this.scoringService = scoringService;
-        this.quizAttemptMapper = quizAttemptMapper;
         this.clock = clock;
     }
 
@@ -60,16 +60,141 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
         User user = userQueryService.getById(userId);
         Quiz quiz = quizQueryService.getPublishedByIdForAttempt(quizId);
 
-        quizAttemptRepository.findByUserIdAndQuizIdAndStatus(userId, quizId, AttemptStatus.IN_PROGRESS)
-                .ifPresent(existing -> handleExistingInProgressAttempt(existing, now));
+        QuizAttempt existing = quizAttemptRepository.findByUserIdAndQuizIdAndStatus(
+                userId,
+                quizId,
+                AttemptStatus.IN_PROGRESS
+        ).orElse(null);
+        if (existing != null && !existing.isOverdueAt(now)) {
+            return new StartQuizResponse(existing.getId(), true, false, null);
+        }
+        if (existing != null) {
+            autoSubmitExisting(existing);
+            quizAttemptRepository.flush();
+        }
 
         QuizAttempt attempt = QuizAttempt.start(user, quiz, now);
         QuizAttempt saved = quizAttemptRepository.save(attempt);
-        return new StartQuizResponse(saved.getId());
+        return new StartQuizResponse(
+                saved.getId(),
+                false,
+                existing != null,
+                existing == null ? null : existing.getId()
+        );
     }
 
     @Override
-    public QuizResultResponse submitAttempt(
+    public StartQuizResponse restartAttempt(Long attemptId, Long userId) {
+        Instant now = Instant.now(clock);
+        QuizAttempt existing = quizAttemptRepository.findByIdAndUserIdWithQuestions(attemptId, userId)
+                .orElseThrow(() -> new NotFoundException("Attempt not found."));
+        if (!existing.isInProgress()) {
+            throw new BusinessRuleException("Only an active attempt can be restarted.");
+        }
+
+        boolean autoSubmitted = false;
+        if (existing.isOverdueAt(now)) {
+            autoSubmitExisting(existing);
+            autoSubmitted = true;
+        } else {
+            existing.abandonForRestart(now);
+        }
+        quizAttemptRepository.flush();
+
+        QuizAttempt replacement = QuizAttempt.start(existing.getUser(), existing.getQuiz(), now);
+        QuizAttempt saved = quizAttemptRepository.save(replacement);
+        return new StartQuizResponse(saved.getId(), false, autoSubmitted, existing.getId());
+    }
+
+    @Override
+    public AutosaveAnswerResponse autosaveAnswer(
+            Long attemptId,
+            Long attemptQuestionId,
+            Long userId,
+            Long selectedOptionId,
+            int answerRevision
+    ) {
+        if (answerRevision < 1) {
+            throw new BusinessRuleException("Answer revision must be positive.");
+        }
+
+        Instant now = Instant.now(clock);
+        QuizAttempt attempt = quizAttemptRepository.findByIdAndUserIdWithQuestions(attemptId, userId)
+                .orElseThrow(() -> new NotFoundException("Attempt not found."));
+        if (attempt.isCompleted()) {
+            throw new BusinessRuleException("Completed attempts cannot be changed.");
+        }
+        if (attempt.isAbandoned()) {
+            throw new BusinessRuleException("Abandoned attempts cannot be changed.");
+        }
+        if (attempt.isOverdueAt(now)) {
+            autoSubmitExisting(attempt);
+            return new AutosaveAnswerResponse(
+                    attempt.getId(),
+                    attemptQuestionId,
+                    selectedOptionId,
+                    answerRevision,
+                    attempt.getStatus().name(),
+                    false,
+                    false,
+                    true,
+                    resultUrl(attempt.getId()),
+                    null,
+                    attempt.getExpiresAt()
+            );
+        }
+
+        loadQuestionOptions(attempt);
+        AttemptQuestion question = findAttemptQuestion(attempt, attemptQuestionId);
+        validateSelectedOptionBelongsToQuestion(question, selectedOptionId);
+        AutosaveOutcome outcome = question.autosaveAnswer(selectedOptionId, answerRevision, now);
+        return new AutosaveAnswerResponse(
+                attempt.getId(),
+                question.getId(),
+                question.getSelectedOptionId(),
+                question.getAnswerRevision(),
+                outcome.saved() ? "SAVED" : "STALE",
+                outcome.saved(),
+                outcome.stale(),
+                false,
+                null,
+                outcome.saved() ? question.getAnsweredAt() : null,
+                attempt.getExpiresAt()
+        );
+    }
+
+    @Override
+    public AutoSubmitResponse autoSubmitIfOverdue(Long attemptId, Long userId) {
+        Instant now = Instant.now(clock);
+        QuizAttempt attempt = quizAttemptRepository.findByIdAndUserIdWithQuestions(attemptId, userId)
+                .orElseThrow(() -> new NotFoundException("Attempt not found."));
+        if (attempt.isCompleted()) {
+            return autoSubmitResponse(attempt);
+        }
+        if (attempt.isAbandoned()) {
+            throw new BusinessRuleException("Abandoned attempts cannot be submitted.");
+        }
+        if (!attempt.isOverdueAt(now)) {
+            throw new BusinessRuleException("Attempt has not expired yet.");
+        }
+        autoSubmitExisting(attempt);
+        return autoSubmitResponse(attempt);
+    }
+
+    @Override
+    public int autoSubmitOverdueAttemptsForUser(Long userId) {
+        Instant now = Instant.now(clock);
+        List<QuizAttempt> overdueAttempts = quizAttemptRepository.findByUserIdAndStatusAndExpiresAtLessThanEqual(
+                userId,
+                AttemptStatus.IN_PROGRESS,
+                now
+        );
+        overdueAttempts.forEach(this::autoSubmitExisting);
+        return overdueAttempts.size();
+    }
+
+    @Override
+    public SubmitQuizResponse submitAttempt(
             Long attemptId,
             Long userId,
             SubmitQuizRequest request
@@ -77,41 +202,50 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
         Instant now = Instant.now(clock);
         QuizAttempt attempt = quizAttemptRepository.findByIdAndUserIdWithQuestions(attemptId, userId)
                 .orElseThrow(() -> new NotFoundException("Attempt not found."));
-
-        if (!attempt.isInProgress()) {
-            throw new BusinessRuleException("Attempt is not in progress.");
+        if (attempt.isCompleted()) {
+            throw new BusinessRuleException("Attempt is already completed.");
         }
-
-        if (attempt.isExpiredAt(now)) {
-            attempt.markExpired();
-            loadQuestionOptions(attempt);
-            return quizAttemptMapper.toResultResponse(attempt);
+        if (attempt.isAbandoned()) {
+            throw new BusinessRuleException("Abandoned attempts cannot be submitted.");
         }
 
         loadQuestionOptions(attempt);
+        if (attempt.isOverdueAt(now)) {
+            ScoreResult scoreResult = scoringService.score(attempt);
+            attempt.completeByTimeExpiry(scoreResult);
+            return new SubmitQuizResponse(attempt.getId(), attempt.getCompletionReason().name());
+        }
+
         Map<Long, Long> submittedAnswers = validatedAnswers(request, attempt);
         for (AttemptQuestion question : attempt.getQuestions()) {
-            attempt.answerQuestion(question.getId(), submittedAnswers.get(question.getId()));
+            question.autosaveAnswer(
+                    submittedAnswers.get(question.getId()),
+                    question.getAnswerRevision() + 1,
+                    now
+            );
         }
 
         ScoreResult scoreResult = scoringService.score(attempt);
-        attempt.complete(now, scoreResult);
-        return quizAttemptMapper.toResultResponse(attempt);
+        attempt.completeManually(now, scoreResult);
+        return new SubmitQuizResponse(attempt.getId(), attempt.getCompletionReason().name());
     }
 
-    @Override
-    public void expireOverdueAttempts() {
-        Instant now = Instant.now(clock);
-        quizAttemptRepository.findByStatusAndExpiresAtBeforeOrAt(AttemptStatus.IN_PROGRESS, now)
-                .forEach(QuizAttempt::markExpired);
-    }
-
-    private void handleExistingInProgressAttempt(QuizAttempt existing, Instant now) {
-        if (!existing.isExpiredAt(now)) {
-            throw new BusinessRuleException("You already have an active attempt for this quiz.");
+    private void autoSubmitExisting(QuizAttempt attempt) {
+        if (!attempt.isInProgress()) {
+            return;
         }
-        existing.markExpired();
-        quizAttemptRepository.flush();
+        loadQuestionOptions(attempt);
+        ScoreResult scoreResult = scoringService.score(attempt);
+        attempt.completeByTimeExpiry(scoreResult);
+    }
+
+    private AutoSubmitResponse autoSubmitResponse(QuizAttempt attempt) {
+        return new AutoSubmitResponse(
+                attempt.getId(),
+                attempt.getStatus().name(),
+                attempt.getCompletionReason() == null ? null : attempt.getCompletionReason().name(),
+                resultUrl(attempt.getId())
+        );
     }
 
     private Map<Long, Long> validatedAnswers(SubmitQuizRequest request, QuizAttempt attempt) {
@@ -134,8 +268,14 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
             if (submittedAnswers.containsKey(questionId)) {
                 throw new BusinessRuleException("Duplicate answers are not allowed.");
             }
-            validateSelectedOptionBelongsToQuestion(attempt, questionId, answer.getSelectedOptionId());
             submittedAnswers.put(questionId, answer.getSelectedOptionId());
+        }
+        if (!submittedAnswers.keySet().equals(knownQuestionIds)) {
+            throw new BusinessRuleException("All attempt questions must be submitted.");
+        }
+        for (Map.Entry<Long, Long> submittedAnswer : submittedAnswers.entrySet()) {
+            AttemptQuestion question = findAttemptQuestion(attempt, submittedAnswer.getKey());
+            validateSelectedOptionBelongsToQuestion(question, submittedAnswer.getValue());
         }
         return submittedAnswers;
     }
@@ -149,23 +289,26 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
         }
     }
 
-    private void validateSelectedOptionBelongsToQuestion(
-            QuizAttempt attempt,
-            Long questionId,
-            Long selectedOptionId
-    ) {
+    private AttemptQuestion findAttemptQuestion(QuizAttempt attempt, Long attemptQuestionId) {
+        return attempt.getQuestions().stream()
+                .filter(question -> Objects.equals(question.getId(), attemptQuestionId))
+                .findFirst()
+                .orElseThrow(() -> new BusinessRuleException("Attempt question not found."));
+    }
+
+    private void validateSelectedOptionBelongsToQuestion(AttemptQuestion question, Long selectedOptionId) {
         if (selectedOptionId == null) {
             return;
         }
-        AttemptQuestion question = attempt.getQuestions().stream()
-                .filter(candidate -> questionId.equals(candidate.getId()))
-                .findFirst()
-                .orElseThrow(() -> new BusinessRuleException("Attempt question not found."));
         boolean optionBelongsToQuestion = question.getOptions().stream()
                 .map(AttemptAnswerOption::getId)
                 .anyMatch(selectedOptionId::equals);
         if (!optionBelongsToQuestion) {
             throw new BusinessRuleException("Selected option does not belong to this question.");
         }
+    }
+
+    private String resultUrl(Long attemptId) {
+        return "/attempts/" + attemptId + "/result";
     }
 }

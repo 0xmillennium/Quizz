@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${attempt.quizTitle()} + ' - Quizz'">Quiz - Quizz</title>
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script defer th:src="@{/js/quiz-timer.js}"></script>
+    <script defer th:src="@{/js/attempt-autosave.js}"></script>
 </head>
 <body>
 <header th:replace="~{layout/fragments :: userNav}"></header>
@@ -25,6 +28,7 @@
 
     <form id="quiz-submit-form"
           th:action="@{/attempts/{attemptId}/submit(attemptId=${attempt.attemptId()})}"
+          th:attr="data-auto-submit-url=@{/attempts/{attemptId}/auto-submit(attemptId=${attempt.attemptId()})}"
           th:object="${submitQuizRequest}"
           method="post">
         <input type="hidden"
@@ -34,13 +38,21 @@
         <ol>
             <li th:each="question, questionStat : ${attempt.questions()}">
                 <h2 th:text="${question.displayOrder()} + '. ' + ${question.questionText()}">Question</h2>
+                <p>Your answers are saved automatically. You can leave and continue while time remains.</p>
                 <input type="hidden"
                        th:field="*{answers[__${questionStat.index}__].attemptQuestionId}">
+                <p class="autosave-status"
+                   aria-live="polite"
+                   th:attr="data-autosave-status-for=${question.id()}">Saved</p>
                 <div th:each="option : ${question.options()}">
                     <label>
                         <input type="radio"
                                th:field="*{answers[__${questionStat.index}__].selectedOptionId}"
-                               th:value="${option.id()}">
+                               th:value="${option.id()}"
+                               th:checked="${option.id() == question.selectedOptionId()}"
+                               th:attr="data-autosave-url=@{/attempts/{attemptId}/questions/{attemptQuestionId}/answer(attemptId=${attempt.attemptId()},attemptQuestionId=${question.id()})},
+                                        data-attempt-question-id=${question.id()},
+                                        data-answer-revision=${question.answerRevision()}">
                         <span th:text="${option.optionText()}">Option</span>
                     </label>
                 </div>

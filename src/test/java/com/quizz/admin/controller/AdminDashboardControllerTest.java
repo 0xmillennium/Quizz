@@ -89,6 +89,8 @@ class AdminDashboardControllerTest {
                 0,
                 0,
                 0,
+                0,
+                0,
                 0.0,
                 List.of()
         );

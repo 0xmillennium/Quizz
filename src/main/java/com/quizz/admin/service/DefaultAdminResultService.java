@@ -94,6 +94,7 @@ public class DefaultAdminResultService implements AdminResultService {
                         row.quizTitle(),
                         row.categoryName(),
                         row.status(),
+                        row.completionReason(),
                         row.totalQuestions(),
                         row.correctCount(),
                         row.wrongCount(),
@@ -101,7 +102,8 @@ public class DefaultAdminResultService implements AdminResultService {
                         row.scorePercentage(),
                         row.startedAt(),
                         row.expiresAt(),
-                        row.submittedAt()
+                        row.submittedAt(),
+                        row.abandonedAt()
                 ))
                 .toList();
 
@@ -135,6 +137,7 @@ public class DefaultAdminResultService implements AdminResultService {
                 header.categoryId(),
                 header.categoryName(),
                 header.status(),
+                header.completionReason(),
                 header.totalQuestions(),
                 header.correctCount(),
                 header.wrongCount(),
@@ -144,6 +147,7 @@ public class DefaultAdminResultService implements AdminResultService {
                 header.startedAt(),
                 header.expiresAt(),
                 header.submittedAt(),
+                header.abandonedAt(),
                 questions
         );
     }

@@ -12,12 +12,12 @@ This tooling is for catalog content only. It does not create demo users, solve q
 - An admin account has already been bootstrapped.
 - The admin account can log in through `/login` and access `/admin`.
 
-For Docker, the app is commonly available at `http://localhost:8081`. For a local Spring Boot run, it may be `http://localhost:8080`.
+For Docker, the app is commonly available at `http://localhost:8081`. For a local Spring Boot run, it may be `http://localhost:8081`.
 
 ## Load All Demo Catalog Data
 
 ```bash
-python3 scripts/demo/load-all-demo-catalog.py --base-url http://localhost:8080
+python3 scripts/demo/load-all-demo-catalog.py --base-url http://localhost:8081
 ```
 
 The script prompts for the admin password with hidden input. Passwords are not accepted through command-line arguments or environment variables.
@@ -28,7 +28,7 @@ Base URL resolution order:
 
 1. `--base-url`
 2. `QUIZZ_BASE_URL`
-3. `http://localhost:8080`
+3. `http://localhost:8081`
 
 Example:
 
@@ -97,4 +97,4 @@ Quiz archived:
 Archived quizzes are not edited or republished by this phase. Rename the fixture title or handle the archived quiz manually.
 
 Wrong port or base URL:
-Use `--base-url` or `QUIZZ_BASE_URL`. Docker may use `http://localhost:8081`; local Spring Boot often uses `http://localhost:8080`.
+Use `--base-url` or `QUIZZ_BASE_URL`. Docker may use `http://localhost:8081`.

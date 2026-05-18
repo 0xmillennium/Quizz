@@ -59,9 +59,16 @@ public class QuizAttempt extends BaseEntity {
     @Column(name = "submitted_at")
     private Instant submittedAt;
 
+    @Column(name = "abandoned_at")
+    private Instant abandonedAt;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
     private AttemptStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "completion_reason", length = 30)
+    private AttemptCompletionReason completionReason;
 
     @Column(name = "total_questions", nullable = false)
     private int totalQuestions;
@@ -140,11 +147,11 @@ public class QuizAttempt extends BaseEntity {
         return status == AttemptStatus.COMPLETED;
     }
 
-    public boolean isExpiredStatus() {
-        return status == AttemptStatus.EXPIRED;
+    public boolean isAbandoned() {
+        return status == AttemptStatus.ABANDONED;
     }
 
-    public boolean isExpiredAt(Instant now) {
+    public boolean isOverdueAt(Instant now) {
         return !now.isBefore(this.expiresAt);
     }
 
@@ -158,26 +165,39 @@ public class QuizAttempt extends BaseEntity {
         questions.forEach(AttemptQuestion::evaluate);
     }
 
-    public void complete(Instant submittedAt, ScoreResult scoreResult) {
+    public void completeManually(Instant submittedAt, ScoreResult scoreResult) {
         ensureInProgress();
         this.submittedAt = submittedAt;
+        this.abandonedAt = null;
+        this.completionReason = AttemptCompletionReason.MANUAL;
         this.status = AttemptStatus.COMPLETED;
+        applyScore(scoreResult);
+    }
+
+    public void completeByTimeExpiry(ScoreResult scoreResult) {
+        ensureInProgress();
+        this.submittedAt = expiresAt;
+        this.abandonedAt = null;
+        this.completionReason = AttemptCompletionReason.TIME_EXPIRED;
+        this.status = AttemptStatus.COMPLETED;
+        applyScore(scoreResult);
+    }
+
+    public void abandonForRestart(Instant abandonedAt) {
+        ensureInProgress();
+        this.submittedAt = null;
+        this.abandonedAt = abandonedAt;
+        this.completionReason = null;
+        this.status = AttemptStatus.ABANDONED;
+    }
+
+    private void applyScore(ScoreResult scoreResult) {
         this.totalQuestions = scoreResult.totalQuestions();
         this.correctCount = scoreResult.correctCount();
         this.wrongCount = scoreResult.wrongCount();
         this.unansweredCount = scoreResult.unansweredCount();
         this.scorePercentage = scoreResult.scorePercentage();
         this.scoringVersion = scoreResult.scoringVersion();
-    }
-
-    public void markExpired() {
-        if (isCompleted()) {
-            throw new BusinessRuleException("Completed attempts cannot be expired.");
-        }
-        if (isExpiredStatus()) {
-            return;
-        }
-        status = AttemptStatus.EXPIRED;
     }
 
     private AttemptQuestion findQuestion(Long attemptQuestionId) {
@@ -229,8 +249,16 @@ public class QuizAttempt extends BaseEntity {
         return submittedAt;
     }
 
+    public Instant getAbandonedAt() {
+        return abandonedAt;
+    }
+
     public AttemptStatus getStatus() {
         return status;
+    }
+
+    public AttemptCompletionReason getCompletionReason() {
+        return completionReason;
     }
 
     public int getTotalQuestions() {

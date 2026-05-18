@@ -67,6 +67,7 @@
             <th>Quiz</th>
             <th>Category</th>
             <th>Status</th>
+            <th>Reason</th>
             <th>Score %</th>
             <th>Correct / Wrong / Unanswered</th>
             <th>Started At</th>
@@ -80,6 +81,7 @@
             <td th:text="${result.quizTitle()}">Science Quiz</td>
             <td th:text="${result.categoryName()}">Science</td>
             <td th:text="${result.status()}">COMPLETED</td>
+            <td th:text="${result.completionReason() ?: '-'}">MANUAL</td>
             <td th:text="${result.scorePercentage()}">80</td>
             <td>
                 <span th:text="${result.correctCount()}">4</span> /

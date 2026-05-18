@@ -53,7 +53,11 @@
             <p>
                 In Progress <span th:text="${dashboard.inProgressAttempts()}">0</span>,
                 Completed <span th:text="${dashboard.completedAttempts()}">0</span>,
-                Expired <span th:text="${dashboard.expiredAttempts()}">0</span>
+                Abandoned <span th:text="${dashboard.abandonedAttempts()}">0</span>
+            </p>
+            <p>
+                Manual <span th:text="${dashboard.manualCompletedAttempts()}">0</span>,
+                Time Expired <span th:text="${dashboard.timeExpiredCompletedAttempts()}">0</span>
             </p>
         </article>
         <article>
@@ -72,6 +76,7 @@
             <th>Quiz</th>
             <th>Category</th>
             <th>Status</th>
+            <th>Reason</th>
             <th>Score</th>
             <th>Started At</th>
             <th>Submitted At</th>
@@ -84,6 +89,7 @@
             <td th:text="${attempt.quizTitle()}">Science Quiz</td>
             <td th:text="${attempt.categoryName()}">Science</td>
             <td th:text="${attempt.status()}">COMPLETED</td>
+            <td th:text="${attempt.completionReason() ?: '-'}">MANUAL</td>
             <td th:text="${attempt.scorePercentage() + '%'}">80%</td>
             <td th:text="${attempt.startedAt()}">2026-01-01T10:00:00Z</td>
             <td th:text="${attempt.submittedAt() ?: '-'}">2026-01-01T10:15:00Z</td>

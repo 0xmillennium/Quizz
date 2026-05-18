@@ -9,8 +9,10 @@ public record AdminRecentAttemptResponse(
         String quizTitle,
         String categoryName,
         String status,
+        String completionReason,
         int scorePercentage,
         Instant startedAt,
-        Instant submittedAt
+        Instant submittedAt,
+        Instant abandonedAt
 ) {
 }

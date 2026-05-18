@@ -46,7 +46,7 @@ public class AdminResultController {
         model.addAttribute("filter", response.filter());
         model.addAttribute("categories", categoryMapper.toOptionResponseList(categoryQueryService.findActive()));
         model.addAttribute("quizzes", quizMapper.toSummaryResponseList(quizQueryService.findPublished()));
-        model.addAttribute("statuses", List.of("IN_PROGRESS", "COMPLETED", "EXPIRED"));
+        model.addAttribute("statuses", List.of("IN_PROGRESS", "COMPLETED", "ABANDONED"));
         return "admin/results/list";
     }
 

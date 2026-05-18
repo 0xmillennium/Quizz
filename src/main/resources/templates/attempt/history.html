@@ -19,9 +19,11 @@
             <th>Quiz</th>
             <th>Category</th>
             <th>Status</th>
+            <th>Reason</th>
             <th>Score</th>
             <th>Correct</th>
             <th>Started</th>
+            <th>Expires</th>
             <th>Submitted</th>
             <th>Result</th>
         </tr>
@@ -30,14 +32,18 @@
         <tr th:each="attempt : ${history}">
             <td th:text="${attempt.quizTitle()}">Quiz</td>
             <td th:text="${attempt.categoryName()}">Category</td>
-            <td th:text="${attempt.status()}">COMPLETED</td>
+            <td th:text="${attempt.status() == 'COMPLETED' && attempt.completionReason() == 'MANUAL' ? 'Completed manually' : (attempt.status() == 'COMPLETED' && attempt.completionReason() == 'TIME_EXPIRED' ? 'Auto-submitted when time expired' : (attempt.status() == 'ABANDONED' ? 'Abandoned' : attempt.status()))}">COMPLETED</td>
+            <td th:text="${attempt.completionReason() ?: '-'}">MANUAL</td>
             <td th:text="${attempt.scorePercentage()} + '%'">80%</td>
             <td th:text="${attempt.correctCount()} + ' / ' + ${attempt.totalQuestions()}">4 / 5</td>
             <td th:text="${attempt.startedAt()}">Started</td>
+            <td th:text="${attempt.expiresAt()}">Expires</td>
             <td th:text="${attempt.submittedAt()} ?: '-'">Submitted</td>
             <td>
-                <a th:if="${attempt.status() == 'COMPLETED' || attempt.status() == 'EXPIRED'}"
+                <a th:if="${attempt.status() == 'COMPLETED'}"
                    th:href="@{/attempts/{attemptId}/result(attemptId=${attempt.attemptId()})}">View</a>
+                <a th:if="${attempt.status() == 'IN_PROGRESS'}"
+                   th:href="@{/attempts/{attemptId}(attemptId=${attempt.attemptId()})}">Continue</a>
             </td>
         </tr>
         </tbody>

@@ -16,7 +16,9 @@ public record AdminDashboardResponse(
         long totalAttempts,
         long inProgressAttempts,
         long completedAttempts,
-        long expiredAttempts,
+        long abandonedAttempts,
+        long manualCompletedAttempts,
+        long timeExpiredCompletedAttempts,
         double averageScorePercentage,
         List<AdminRecentAttemptResponse> recentAttempts
 ) {

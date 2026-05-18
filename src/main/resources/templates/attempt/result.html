@@ -19,7 +19,9 @@
         <h2>Result</h2>
         <dl>
             <dt>Status</dt>
-            <dd th:text="${result.status()}">COMPLETED</dd>
+            <dd th:text="${result.status() == 'COMPLETED' && result.completionReason() == 'MANUAL' ? 'Completed manually' : (result.status() == 'COMPLETED' && result.completionReason() == 'TIME_EXPIRED' ? 'Auto-submitted when time expired' : (result.status() == 'ABANDONED' ? 'Abandoned' : result.status()))}">COMPLETED</dd>
+            <dt>Completion Reason</dt>
+            <dd th:text="${result.completionReason() ?: '-'}">MANUAL</dd>
             <dt>Score</dt>
             <dd th:text="${result.scorePercentage()} + '%'">80%</dd>
             <dt>Correct</dt>
@@ -34,6 +36,8 @@
             <dd th:text="${result.startedAt()}">Started</dd>
             <dt th:if="${result.submittedAt() != null}">Submitted</dt>
             <dd th:if="${result.submittedAt() != null}" th:text="${result.submittedAt()}">Submitted</dd>
+            <dt th:if="${result.abandonedAt() != null}">Abandoned</dt>
+            <dd th:if="${result.abandonedAt() != null}" th:text="${result.abandonedAt()}">Abandoned</dd>
         </dl>
     </section>
 

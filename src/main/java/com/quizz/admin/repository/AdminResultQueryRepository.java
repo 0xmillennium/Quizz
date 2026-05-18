@@ -22,6 +22,7 @@ public class AdminResultQueryRepository {
                 a.quiz_title_snapshot AS quiz_title,
                 a.category_name_snapshot AS category_name,
                 a.status,
+                a.completion_reason,
                 a.total_questions,
                 a.correct_count,
                 a.wrong_count,
@@ -29,7 +30,8 @@ public class AdminResultQueryRepository {
                 a.score_percentage,
                 a.started_at,
                 a.expires_at,
-                a.submitted_at
+                a.submitted_at,
+                a.abandoned_at
             FROM quiz_attempts a
             JOIN users u ON u.id = a.user_id
             WHERE 1=1
@@ -52,6 +54,7 @@ public class AdminResultQueryRepository {
                 a.category_id_snapshot AS category_id,
                 a.category_name_snapshot AS category_name,
                 a.status,
+                a.completion_reason,
                 a.total_questions,
                 a.correct_count,
                 a.wrong_count,
@@ -60,7 +63,8 @@ public class AdminResultQueryRepository {
                 a.scoring_version,
                 a.started_at,
                 a.expires_at,
-                a.submitted_at
+                a.submitted_at,
+                a.abandoned_at
             FROM quiz_attempts a
             JOIN users u ON u.id = a.user_id
             WHERE a.id = :attemptId
@@ -162,6 +166,7 @@ public class AdminResultQueryRepository {
                 rs.getString("quiz_title"),
                 rs.getString("category_name"),
                 rs.getString("status"),
+                rs.getString("completion_reason"),
                 rs.getInt("total_questions"),
                 rs.getInt("correct_count"),
                 rs.getInt("wrong_count"),
@@ -169,7 +174,8 @@ public class AdminResultQueryRepository {
                 rs.getInt("score_percentage"),
                 toInstant(rs.getTimestamp("started_at")),
                 toInstant(rs.getTimestamp("expires_at")),
-                toInstant(rs.getTimestamp("submitted_at"))
+                toInstant(rs.getTimestamp("submitted_at")),
+                toInstant(rs.getTimestamp("abandoned_at"))
         );
     }
 
@@ -183,6 +189,7 @@ public class AdminResultQueryRepository {
                 rs.getLong("category_id"),
                 rs.getString("category_name"),
                 rs.getString("status"),
+                rs.getString("completion_reason"),
                 rs.getInt("total_questions"),
                 rs.getInt("correct_count"),
                 rs.getInt("wrong_count"),
@@ -191,7 +198,8 @@ public class AdminResultQueryRepository {
                 rs.getString("scoring_version"),
                 toInstant(rs.getTimestamp("started_at")),
                 toInstant(rs.getTimestamp("expires_at")),
-                toInstant(rs.getTimestamp("submitted_at"))
+                toInstant(rs.getTimestamp("submitted_at")),
+                toInstant(rs.getTimestamp("abandoned_at"))
         );
     }
 
@@ -235,6 +243,7 @@ public class AdminResultQueryRepository {
             String quizTitle,
             String categoryName,
             String status,
+            String completionReason,
             int totalQuestions,
             int correctCount,
             int wrongCount,
@@ -242,7 +251,8 @@ public class AdminResultQueryRepository {
             int scorePercentage,
             Instant startedAt,
             Instant expiresAt,
-            Instant submittedAt
+            Instant submittedAt,
+            Instant abandonedAt
     ) {
     }
 
@@ -255,6 +265,7 @@ public class AdminResultQueryRepository {
             Long categoryId,
             String categoryName,
             String status,
+            String completionReason,
             int totalQuestions,
             int correctCount,
             int wrongCount,
@@ -263,7 +274,8 @@ public class AdminResultQueryRepository {
             String scoringVersion,
             Instant startedAt,
             Instant expiresAt,
-            Instant submittedAt
+            Instant submittedAt,
+            Instant abandonedAt
     ) {
     }
 

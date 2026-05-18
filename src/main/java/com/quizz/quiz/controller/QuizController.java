@@ -3,7 +3,9 @@ package com.quizz.quiz.controller;
 import com.quizz.category.mapper.CategoryMapper;
 import com.quizz.category.service.CategoryQueryService;
 import com.quizz.quiz.mapper.QuizMapper;
+import com.quizz.quiz.service.QuizAttemptStateProvider;
 import com.quizz.quiz.service.QuizQueryService;
+import com.quizz.security.context.CurrentUserProvider;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,17 +19,23 @@ public class QuizController {
     private final QuizMapper quizMapper;
     private final CategoryQueryService categoryQueryService;
     private final CategoryMapper categoryMapper;
+    private final QuizAttemptStateProvider quizAttemptStateProvider;
+    private final CurrentUserProvider currentUserProvider;
 
     public QuizController(
             QuizQueryService quizQueryService,
             QuizMapper quizMapper,
             CategoryQueryService categoryQueryService,
-            CategoryMapper categoryMapper
+            CategoryMapper categoryMapper,
+            QuizAttemptStateProvider quizAttemptStateProvider,
+            CurrentUserProvider currentUserProvider
     ) {
         this.quizQueryService = quizQueryService;
         this.quizMapper = quizMapper;
         this.categoryQueryService = categoryQueryService;
         this.categoryMapper = categoryMapper;
+        this.quizAttemptStateProvider = quizAttemptStateProvider;
+        this.currentUserProvider = currentUserProvider;
     }
 
     @GetMapping("/quizzes")
@@ -49,6 +57,10 @@ public class QuizController {
     @GetMapping("/quizzes/{id}")
     public String detail(@PathVariable Long id, Model model) {
         model.addAttribute("quiz", quizMapper.toDetailResponse(quizQueryService.getPublishedById(id)));
+        model.addAttribute("attemptState", quizAttemptStateProvider.resolveForQuizDetail(
+                id,
+                currentUserProvider.getCurrentUserId()
+        ));
         return "quiz/detail";
     }
 }
