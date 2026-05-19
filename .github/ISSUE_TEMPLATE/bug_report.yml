@@ -1,0 +1,69 @@
+name: Bug report
+description: Report a reproducible defect in Quizz.
+title: "fix: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If this may involve a vulnerability, stop and follow SECURITY.md instead of submitting a public issue.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What went wrong?
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include OS, Java version, Docker version if relevant, browser if UI-related, and branch or commit.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List the smallest steps that reproduce the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs/screenshots
+      description: Add relevant logs or screenshots. Remove secrets and private data first.
+    validations:
+      required: false
+  - type: dropdown
+    id: regression
+    attributes:
+      label: Regression?
+      options:
+        - "No"
+        - "Yes"
+        - "Unknown"
+    validations:
+      required: true
+  - type: textarea
+    id: security-impact
+    attributes:
+      label: Security impact?
+      description: If there may be security impact, do not continue publicly. Follow SECURITY.md.
+    validations:
+      required: false

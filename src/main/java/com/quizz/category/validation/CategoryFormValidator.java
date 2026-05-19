@@ -24,8 +24,7 @@ public class CategoryFormValidator {
             bindingResult.rejectValue(
                     "name",
                     "category.name.duplicate",
-                    "Category name is already in use."
-            );
+                    "Category name is already in use.");
         }
     }
 
@@ -38,8 +37,7 @@ public class CategoryFormValidator {
             bindingResult.rejectValue(
                     "name",
                     "category.name.duplicate",
-                    "Category name is already in use."
-            );
+                    "Category name is already in use.");
         }
     }
 }

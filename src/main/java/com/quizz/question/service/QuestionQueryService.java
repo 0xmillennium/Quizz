@@ -6,9 +6,11 @@ import java.util.List;
 /**
  * Read boundary for question-bank data.
  *
- * <p>Query methods shape admin lists, authoring selectors, and active question
+ * <p>
+ * Query methods shape admin lists, authoring selectors, and active question
  * counts. They must not mutate question lifecycle or expose correctness to
- * active attempt play DTOs; the attempt package owns that DTO boundary.</p>
+ * active attempt play DTOs; the attempt package owns that DTO boundary.
+ * </p>
  */
 public interface QuestionQueryService {
 

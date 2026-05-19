@@ -7,10 +7,12 @@ import com.quizz.question.entity.Question;
 /**
  * Write boundary for the question-bank aggregate.
  *
- * <p>Commands create and update questions with owned answer options and enforce
+ * <p>
+ * Commands create and update questions with owned answer options and enforce
  * authoring invariants such as option count and exactly one correct option.
  * Archive and restore are lifecycle transitions; callers should not hard-delete
- * questions that may be referenced by quizzes or attempt snapshots.</p>
+ * questions that may be referenced by quizzes or attempt snapshots.
+ * </p>
  */
 public interface QuestionCommandService {
 
@@ -22,8 +24,10 @@ public interface QuestionCommandService {
     /**
      * Replaces editable question text, category, and owned options.
      *
-     * <p>The service validates that the replacement option set still has
-     * exactly one correct option.</p>
+     * <p>
+     * The service validates that the replacement option set still has
+     * exactly one correct option.
+     * </p>
      */
     Question update(Long questionId, QuestionUpdateRequest request);
 

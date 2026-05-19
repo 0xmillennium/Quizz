@@ -1,0 +1,34 @@
+name: Documentation issue
+description: Report a problem in Quizz documentation.
+title: "docs: "
+labels:
+  - documentation
+body:
+  - type: input
+    id: page-path
+    attributes:
+      label: Page/path
+      description: Which page, file, or section is affected?
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is confusing, incorrect, stale, or missing?
+    validations:
+      required: true
+  - type: textarea
+    id: suggested-correction
+    attributes:
+      label: Suggested correction
+      description: Suggest the wording or direction if you have one.
+    validations:
+      required: false
+  - type: textarea
+    id: source-of-truth
+    attributes:
+      label: Source-of-truth concern
+      description: Is there a code path, config file, ADR, or existing doc that should be treated as authoritative?
+    validations:
+      required: false

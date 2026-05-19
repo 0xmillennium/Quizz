@@ -7,10 +7,12 @@ import com.quizz.quiz.entity.Quiz;
 /**
  * Write boundary for quiz definitions.
  *
- * <p>Commands manage draft creation, draft updates, publishing, and archiving.
+ * <p>
+ * Commands manage draft creation, draft updates, publishing, and archiving.
  * They validate cross-aggregate authoring rules such as active categories,
  * active questions, pool size, and answer-option correctness before a quiz is
- * made available for attempts.</p>
+ * made available for attempts.
+ * </p>
  */
 public interface QuizCommandService {
 
@@ -22,8 +24,10 @@ public interface QuizCommandService {
     /**
      * Updates only a draft quiz.
      *
-     * <p>Published quizzes are immutable through this contract except for the
-     * archive lifecycle transition.</p>
+     * <p>
+     * Published quizzes are immutable through this contract except for the
+     * archive lifecycle transition.
+     * </p>
      */
     Quiz updateDraft(Long quizId, QuizUpdateRequest request);
 

@@ -43,7 +43,8 @@ class DefaultUserAccountServiceTest {
 
     @Test
     void createUserCreatesAdminWhenRoleAdmin() {
-        User user = service.createUser(new CreateUserCommand("Grace Hopper", "grace@example.com", "hash", UserRole.ADMIN));
+        User user = service
+                .createUser(new CreateUserCommand("Grace Hopper", "grace@example.com", "hash", UserRole.ADMIN));
 
         assertThat(user.getRole()).isEqualTo(UserRole.ADMIN);
     }
@@ -59,7 +60,8 @@ class DefaultUserAccountServiceTest {
 
     @Test
     void createUserTrimsAndCollapsesFullName() {
-        User user = service.createUser(new CreateUserCommand("  Ada   Byron   Lovelace  ", "ada@example.com", "hash", UserRole.USER));
+        User user = service.createUser(
+                new CreateUserCommand("  Ada   Byron   Lovelace  ", "ada@example.com", "hash", UserRole.USER));
 
         assertThat(user.getFullName()).isEqualTo("Ada Byron Lovelace");
     }
@@ -69,7 +71,7 @@ class DefaultUserAccountServiceTest {
         when(userRepository.existsByEmailIgnoreCase("ada@example.com")).thenReturn(true);
 
         assertThatThrownBy(() -> service.createUser(
-                new CreateUserCommand("Ada Lovelace", "ADA@example.com", "hash", UserRole.USER)
-        )).isInstanceOf(DuplicateResourceException.class);
+                new CreateUserCommand("Ada Lovelace", "ADA@example.com", "hash", UserRole.USER)))
+                .isInstanceOf(DuplicateResourceException.class);
     }
 }

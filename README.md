@@ -64,10 +64,18 @@ Full setup details live in [Getting Started with Docker](docs/getting-started/do
 ## Test Commands
 
 ```bash
+mvn spotless:check
 mvn clean test
+mvn -q javadoc:javadoc
 python3 -m unittest discover scripts/demo/tests
 mkdocs build --strict
 ```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for PR conventions, local quality tooling, and the full contributor workflow.
+
+## Release and Delivery
+
+Container images are published to GHCR from semantic version release tags, and documentation is deployed to GitHub Pages from `master`. See [Release and Delivery](docs/operations/release-and-delivery.md), [Repository Settings Checklist](docs/operations/repository-settings-checklist.md), and [First Release Runbook](docs/operations/first-release-runbook.md) for release readiness and verification.
 
 ## Documentation
 
@@ -85,3 +93,5 @@ mkdocs build --strict
 ## Security and Configuration
 
 `.env` is only for non-secret local configuration. Database password material belongs in `docker/secrets/postgres_password.txt`, and the admin password is entered interactively during bootstrap. `QUIZZ_BASE_URL` is not a supported configuration key; tooling derives the local base URL from `QUIZZ_HTTP_PORT`.
+
+Report suspected vulnerabilities privately by following [SECURITY.md](SECURITY.md), not through public issues.

@@ -5,6 +5,5 @@ public record ResultAnswerOptionResponse(
         String optionText,
         boolean correct,
         boolean selected,
-        int displayOrder
-) {
+        int displayOrder) {
 }

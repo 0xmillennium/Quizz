@@ -12,9 +12,11 @@ import org.springframework.stereotype.Repository;
 /**
  * JDBC read model for administrator dashboard metrics.
  *
- * <p>The repository performs aggregate count and recent-attempt reads only. It
+ * <p>
+ * The repository performs aggregate count and recent-attempt reads only. It
  * does not mutate operational state and deliberately selects user display names,
- * not email addresses, for recent attempt rows.</p>
+ * not email addresses, for recent attempt rows.
+ * </p>
  */
 @Repository
 public class AdminDashboardQueryRepository {
@@ -95,8 +97,7 @@ public class AdminDashboardQueryRepository {
                 rs.getLong("abandoned_attempts"),
                 rs.getLong("manual_completed_attempts"),
                 rs.getLong("time_expired_completed_attempts"),
-                rs.getDouble("average_score_percentage")
-        );
+                rs.getDouble("average_score_percentage"));
     }
 
     private RecentAttemptRow mapRecentAttemptRow(ResultSet rs, int rowNum) throws SQLException {
@@ -111,8 +112,7 @@ public class AdminDashboardQueryRepository {
                 rs.getInt("score_percentage"),
                 toInstant(rs.getTimestamp("started_at")),
                 toInstant(rs.getTimestamp("submitted_at")),
-                toInstant(rs.getTimestamp("abandoned_at"))
-        );
+                toInstant(rs.getTimestamp("abandoned_at")));
     }
 
     private Instant toInstant(Timestamp timestamp) {
@@ -136,8 +136,7 @@ public class AdminDashboardQueryRepository {
             long abandonedAttempts,
             long manualCompletedAttempts,
             long timeExpiredCompletedAttempts,
-            double averageScorePercentage
-    ) {
+            double averageScorePercentage) {
     }
 
     public record RecentAttemptRow(
@@ -151,7 +150,6 @@ public class AdminDashboardQueryRepository {
             int scorePercentage,
             Instant startedAt,
             Instant submittedAt,
-            Instant abandonedAt
-    ) {
+            Instant abandonedAt) {
     }
 }

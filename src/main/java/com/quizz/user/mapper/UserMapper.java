@@ -13,15 +13,13 @@ public class UserMapper {
                 user.getId(),
                 user.getFullName(),
                 user.getEmail(),
-                user.getRole().name()
-        );
+                user.getRole().name());
     }
 
     public UserSummaryResponse toSummaryResponse(User user) {
         return new UserSummaryResponse(
                 user.getId(),
                 user.getFullName(),
-                user.getEmail()
-        );
+                user.getEmail());
     }
 }

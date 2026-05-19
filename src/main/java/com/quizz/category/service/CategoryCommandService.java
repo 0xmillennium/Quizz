@@ -7,10 +7,12 @@ import com.quizz.category.entity.Category;
 /**
  * Write boundary for category master data.
  *
- * <p>Command methods create and update category metadata and manage the
+ * <p>
+ * Command methods create and update category metadata and manage the
  * active/inactive lifecycle. Deactivation is the supported removal-like
  * transition; callers should not hard-delete categories to preserve question,
- * quiz, and attempt history.</p>
+ * quiz, and attempt history.
+ * </p>
  */
 public interface CategoryCommandService {
 
@@ -26,8 +28,10 @@ public interface CategoryCommandService {
     /**
      * Deactivates a category without deleting historical references.
      *
-     * <p>Quiz publication validates active categories, so inactive categories
-     * are excluded from newly publishable quiz definitions through that flow.</p>
+     * <p>
+     * Quiz publication validates active categories, so inactive categories
+     * are excluded from newly publishable quiz definitions through that flow.
+     * </p>
      */
     void deactivate(Long categoryId);
 }

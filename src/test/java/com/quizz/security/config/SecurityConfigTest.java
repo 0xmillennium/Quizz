@@ -41,13 +41,13 @@ class SecurityConfigTest {
     @BeforeEach
     void setUp() throws Exception {
         CustomUserDetailsService userDetailsService = new CustomUserDetailsService(new MissingUserQueryService());
-        SecurityConfig securityConfig = new SecurityConfig(userDetailsService, new CustomAuthenticationSuccessHandler());
+        SecurityConfig securityConfig = new SecurityConfig(userDetailsService,
+                new CustomAuthenticationSuccessHandler());
         PasswordEncoder passwordEncoder = securityConfig.passwordEncoder();
         AuthenticationProvider authenticationProvider = securityConfig.authenticationProvider(passwordEncoder);
         SecurityFilterChain securityFilterChain = securityConfig.securityFilterChain(
                 httpSecurity(authenticationProvider),
-                authenticationProvider
-        );
+                authenticationProvider);
         Filter springSecurityFilterChain = new FilterChainProxy(securityFilterChain);
 
         mockMvc = MockMvcBuilders
@@ -109,15 +109,16 @@ class SecurityConfigTest {
     @Test
     void postLogoutRedirectsToLoginLogoutWhenAuthenticatedAndCsrfProvided() throws Exception {
         mockMvc.perform(post("/logout")
-                        .with(user("ada@example.com").roles("USER"))
-                        .with(csrf()))
+                .with(user("ada@example.com").roles("USER"))
+                .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login?logout"));
     }
 
     private HttpSecurity httpSecurity(AuthenticationProvider authenticationProvider) {
         ObjectPostProcessor<Object> objectPostProcessor = new PassthroughObjectPostProcessor();
-        AuthenticationManagerBuilder authenticationManagerBuilder = new AuthenticationManagerBuilder(objectPostProcessor);
+        AuthenticationManagerBuilder authenticationManagerBuilder = new AuthenticationManagerBuilder(
+                objectPostProcessor);
         authenticationManagerBuilder.authenticationProvider(authenticationProvider);
 
         ApplicationContext applicationContext = new StaticApplicationContext();

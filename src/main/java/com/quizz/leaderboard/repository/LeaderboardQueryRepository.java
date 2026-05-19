@@ -11,10 +11,12 @@ import org.springframework.stereotype.Repository;
 /**
  * JDBC read model for public leaderboard rankings.
  *
- * <p>There is no leaderboard table or entity. Queries rank completed attempts
+ * <p>
+ * There is no leaderboard table or entity. Queries rank completed attempts
  * with non-null {@code submitted_at}, keep one best row per user within the
  * selected view, and use deterministic tie-breakers. User email is deliberately
- * excluded from the select list.</p>
+ * excluded from the select list.
+ * </p>
  */
 @Repository
 public class LeaderboardQueryRepository {
@@ -231,8 +233,7 @@ public class LeaderboardQueryRepository {
                 rs.getInt("total_questions"),
                 rs.getInt("correct_count"),
                 rs.getInt("score_percentage"),
-                rs.getTimestamp("submitted_at").toInstant()
-        );
+                rs.getTimestamp("submitted_at").toInstant());
     }
 
     public record LeaderboardRow(
@@ -246,7 +247,6 @@ public class LeaderboardQueryRepository {
             int totalQuestions,
             int correctCount,
             int scorePercentage,
-            Instant submittedAt
-    ) {
+            Instant submittedAt) {
     }
 }

@@ -51,8 +51,7 @@ class DefaultQuizAttemptQueryServiceTest {
         service = new DefaultQuizAttemptQueryService(
                 quizAttemptRepository,
                 quizAttemptMapper,
-                Clock.fixed(NOW, ZoneOffset.UTC)
-        );
+                Clock.fixed(NOW, ZoneOffset.UTC));
     }
 
     @Test

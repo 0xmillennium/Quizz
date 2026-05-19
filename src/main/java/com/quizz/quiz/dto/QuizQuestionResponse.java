@@ -4,6 +4,5 @@ public record QuizQuestionResponse(
         Long questionId,
         String text,
         String categoryName,
-        int displayOrder
-) {
+        int displayOrder) {
 }

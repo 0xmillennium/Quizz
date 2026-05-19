@@ -26,8 +26,7 @@ public class DefaultLeaderboardService implements LeaderboardService {
     public DefaultLeaderboardService(
             LeaderboardQueryRepository leaderboardQueryRepository,
             QuizQueryService quizQueryService,
-            CategoryQueryService categoryQueryService
-    ) {
+            CategoryQueryService categoryQueryService) {
         this.leaderboardQueryRepository = leaderboardQueryRepository;
         this.quizQueryService = quizQueryService;
         this.categoryQueryService = categoryQueryService;
@@ -64,8 +63,7 @@ public class DefaultLeaderboardService implements LeaderboardService {
                 quizId,
                 categoryId,
                 limit,
-                rows.stream().map(this::toEntryResponse).toList()
-        );
+                rows.stream().map(this::toEntryResponse).toList());
     }
 
     private int normalizeLimit(Integer limit) {
@@ -87,7 +85,6 @@ public class DefaultLeaderboardService implements LeaderboardService {
                 row.totalQuestions(),
                 row.correctCount(),
                 row.scorePercentage(),
-                row.submittedAt()
-        );
+                row.submittedAt());
     }
 }

@@ -22,15 +22,19 @@ import java.util.List;
 /**
  * Quiz definition aggregate that owns its question pool memberships.
  *
- * <p>A quiz starts as {@code DRAFT}, can be published after validation, and can
+ * <p>
+ * A quiz starts as {@code DRAFT}, can be published after validation, and can
  * be archived. Draft updates replace the pool and policy fields. Published
  * quizzes are not updated through the aggregate; the supported post-publish
- * lifecycle transition is archive.</p>
+ * lifecycle transition is archive.
+ * </p>
  *
- * <p>{@code questionCount} controls how many pool questions are sampled for
+ * <p>
+ * {@code questionCount} controls how many pool questions are sampled for
  * each fresh attempt, {@code attemptLimit} controls rights in the cooldown
  * window, and {@code retakeCooldownMinutes} defines the reset delay once rights
- * are exhausted.</p>
+ * are exhausted.
+ * </p>
  */
 @Entity
 @Table(name = "quizzes")
@@ -65,11 +69,7 @@ public class Quiz extends BaseEntity {
     @Column(name = "status", nullable = false, length = 30)
     private QuizStatus status;
 
-    @OneToMany(
-            mappedBy = "quiz",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("displayOrder ASC")
     private List<QuizQuestion> questions = new ArrayList<>();
 
@@ -84,8 +84,7 @@ public class Quiz extends BaseEntity {
             int questionCount,
             int attemptLimit,
             int retakeCooldownMinutes,
-            List<Question> selectedQuestions
-    ) {
+            List<Question> selectedQuestions) {
         this.title = title;
         this.description = description;
         this.category = category;
@@ -105,8 +104,7 @@ public class Quiz extends BaseEntity {
             int questionCount,
             int attemptLimit,
             int retakeCooldownMinutes,
-            List<Question> selectedQuestions
-    ) {
+            List<Question> selectedQuestions) {
         return new Quiz(
                 title,
                 description,
@@ -115,8 +113,7 @@ public class Quiz extends BaseEntity {
                 questionCount,
                 attemptLimit,
                 retakeCooldownMinutes,
-                selectedQuestions
-        );
+                selectedQuestions);
     }
 
     public void updateDraft(
@@ -127,8 +124,7 @@ public class Quiz extends BaseEntity {
             int questionCount,
             int attemptLimit,
             int retakeCooldownMinutes,
-            List<Question> selectedQuestions
-    ) {
+            List<Question> selectedQuestions) {
         ensureDraft();
         this.title = title;
         this.description = description;
@@ -143,9 +139,11 @@ public class Quiz extends BaseEntity {
     /**
      * Publishes a draft quiz after enforcing aggregate-local policy checks.
      *
-     * <p>The command service performs cross-aggregate checks for active
+     * <p>
+     * The command service performs cross-aggregate checks for active
      * category, active questions, and option correctness before calling this
-     * method. The aggregate protects the local pool size and policy bounds.</p>
+     * method. The aggregate protects the local pool size and policy bounds.
+     * </p>
      */
     public void publish() {
         ensureDraft();

@@ -7,9 +7,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * Spring Boot entry point and production-jar tooling dispatcher.
  *
- * <p>When invoked as {@code hash-password}, startup delegates to
+ * <p>
+ * When invoked as {@code hash-password}, startup delegates to
  * {@link PasswordHashCli} and returns before the Spring context is created.
- * All other invocations start the MVC application normally.</p>
+ * All other invocations start the MVC application normally.
+ * </p>
  */
 @SpringBootApplication
 public class QuizzApplication {

@@ -25,8 +25,7 @@ public class QuestionMapper {
                 question.getOptions().stream()
                         .sorted(Comparator.comparingInt(AnswerOption::getDisplayOrder))
                         .map(this::toAnswerOptionResponse)
-                        .toList()
-        );
+                        .toList());
     }
 
     public QuestionSummaryResponse toSummaryResponse(Question question) {
@@ -35,8 +34,7 @@ public class QuestionMapper {
                 question.getText(),
                 question.getCategory().getName(),
                 question.getStatus().name(),
-                question.getOptions().size()
-        );
+                question.getOptions().size());
     }
 
     public List<QuestionSummaryResponse> toSummaryResponseList(List<Question> questions) {
@@ -50,8 +48,7 @@ public class QuestionMapper {
                 question.getId(),
                 question.getText(),
                 question.getCategory().getId(),
-                question.getCategory().getName()
-        );
+                question.getCategory().getName());
     }
 
     public List<QuestionSelectionResponse> toSelectionResponseList(List<Question> questions) {
@@ -76,8 +73,7 @@ public class QuestionMapper {
                 option.getId(),
                 option.getText(),
                 option.isCorrect(),
-                option.getDisplayOrder()
-        );
+                option.getDisplayOrder());
     }
 
     private AnswerOptionRequest toAnswerOptionRequest(AnswerOption option) {

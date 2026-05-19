@@ -10,10 +10,12 @@ import org.springframework.stereotype.Component;
 /**
  * Spring Security-backed current-user provider.
  *
- * <p>This adapter is the production boundary that reads
+ * <p>
+ * This adapter is the production boundary that reads
  * {@code SecurityContextHolder}. It converts the authenticated
  * {@link CustomUserDetails} principal into an {@link AuthenticatedUser} record
- * so MVC and service code do not depend on framework principal types.</p>
+ * so MVC and service code do not depend on framework principal types.
+ * </p>
  */
 @Component
 public class SecurityCurrentUserProvider implements CurrentUserProvider {
@@ -30,8 +32,7 @@ public class SecurityCurrentUserProvider implements CurrentUserProvider {
                 principal.getId(),
                 principal.getFullName(),
                 principal.getEmail(),
-                principal.getRole()
-        );
+                principal.getRole());
     }
 
     @Override

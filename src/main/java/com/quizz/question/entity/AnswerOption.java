@@ -12,18 +12,15 @@ import jakarta.persistence.UniqueConstraint;
 /**
  * Owned answer option child of a {@link Question}.
  *
- * <p>Answer options are managed through the question aggregate rather than a
+ * <p>
+ * Answer options are managed through the question aggregate rather than a
  * separate repository or service. Correctness is copied into attempt snapshots
- * for scoring and reporting; active play-page DTOs must not expose it.</p>
+ * for scoring and reporting; active play-page DTOs must not expose it.
+ * </p>
  */
 @Entity
-@Table(
-        name = "answer_options",
-        uniqueConstraints = @UniqueConstraint(
-                name = "uk_answer_options_question_order",
-                columnNames = {"question_id", "display_order"}
-        )
-)
+@Table(name = "answer_options", uniqueConstraints = @UniqueConstraint(name = "uk_answer_options_question_order", columnNames = {
+        "question_id", "display_order"}))
 public class AnswerOption extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

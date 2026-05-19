@@ -14,11 +14,13 @@ import org.springframework.stereotype.Repository;
 /**
  * JDBC read model for administrator attempt-result reporting.
  *
- * <p>Summary and detail rows are read from attempt snapshot tables and persisted
+ * <p>
+ * Summary and detail rows are read from attempt snapshot tables and persisted
  * score columns. Detail rows join attempt questions to attempt answer options,
  * not live question-bank options, so reports reflect what the user saw. User
  * email is deliberately excluded, and this repository never recalculates
- * scores.</p>
+ * scores.
+ * </p>
  */
 @Repository
 public class AdminResultQueryRepository {
@@ -126,8 +128,7 @@ public class AdminResultQueryRepository {
         List<AdminResultAttemptRow> rows = jdbcTemplate.query(
                 ATTEMPT_HEADER_SQL,
                 Map.of("attemptId", attemptId),
-                this::mapAttemptRow
-        );
+                this::mapAttemptRow);
         return rows.stream().findFirst();
     }
 
@@ -184,8 +185,7 @@ public class AdminResultQueryRepository {
                 toInstant(rs.getTimestamp("started_at")),
                 toInstant(rs.getTimestamp("expires_at")),
                 toInstant(rs.getTimestamp("submitted_at")),
-                toInstant(rs.getTimestamp("abandoned_at"))
-        );
+                toInstant(rs.getTimestamp("abandoned_at")));
     }
 
     private AdminResultAttemptRow mapAttemptRow(ResultSet rs, int rowNum) throws SQLException {
@@ -208,8 +208,7 @@ public class AdminResultQueryRepository {
                 toInstant(rs.getTimestamp("started_at")),
                 toInstant(rs.getTimestamp("expires_at")),
                 toInstant(rs.getTimestamp("submitted_at")),
-                toInstant(rs.getTimestamp("abandoned_at"))
-        );
+                toInstant(rs.getTimestamp("abandoned_at")));
     }
 
     private AdminResultQuestionOptionRow mapQuestionOptionRow(ResultSet rs, int rowNum) throws SQLException {
@@ -224,8 +223,7 @@ public class AdminResultQueryRepository {
                 getNullableLong(rs, "original_answer_option_id"),
                 rs.getString("option_text"),
                 rs.getBoolean("option_correct"),
-                rs.getInt("option_display_order")
-        );
+                rs.getInt("option_display_order"));
     }
 
     private Long getNullableLong(ResultSet rs, String column) throws SQLException {
@@ -261,8 +259,7 @@ public class AdminResultQueryRepository {
             Instant startedAt,
             Instant expiresAt,
             Instant submittedAt,
-            Instant abandonedAt
-    ) {
+            Instant abandonedAt) {
     }
 
     public record AdminResultAttemptRow(
@@ -284,8 +281,7 @@ public class AdminResultQueryRepository {
             Instant startedAt,
             Instant expiresAt,
             Instant submittedAt,
-            Instant abandonedAt
-    ) {
+            Instant abandonedAt) {
     }
 
     public record AdminResultQuestionOptionRow(
@@ -299,7 +295,6 @@ public class AdminResultQueryRepository {
             Long originalAnswerOptionId,
             String optionText,
             boolean optionCorrect,
-            int optionDisplayOrder
-    ) {
+            int optionDisplayOrder) {
     }
 }

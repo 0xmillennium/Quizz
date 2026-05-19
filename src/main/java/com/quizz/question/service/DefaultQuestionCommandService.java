@@ -30,8 +30,7 @@ public class DefaultQuestionCommandService implements QuestionCommandService {
 
     public DefaultQuestionCommandService(
             QuestionRepository questionRepository,
-            CategoryQueryService categoryQueryService
-    ) {
+            CategoryQueryService categoryQueryService) {
         this.questionRepository = questionRepository;
         this.categoryQueryService = categoryQueryService;
     }

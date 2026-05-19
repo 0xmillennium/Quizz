@@ -13,19 +13,16 @@ import jakarta.persistence.UniqueConstraint;
 /**
  * Snapshot of a live answer option captured for an attempt question.
  *
- * <p>The snapshot stores option text, display order, original option id, and
+ * <p>
+ * The snapshot stores option text, display order, original option id, and
  * correctness as of attempt creation. Correctness is needed for scoring,
  * results, and admin reports, but active play DTOs intentionally expose only
- * the snapshot option id, text, and display order.</p>
+ * the snapshot option id, text, and display order.
+ * </p>
  */
 @Entity
-@Table(
-        name = "attempt_answer_options",
-        uniqueConstraints = @UniqueConstraint(
-                name = "uk_attempt_answer_options_question_order",
-                columnNames = {"attempt_question_id", "display_order"}
-        )
-)
+@Table(name = "attempt_answer_options", uniqueConstraints = @UniqueConstraint(name = "uk_attempt_answer_options_question_order", columnNames = {
+        "attempt_question_id", "display_order"}))
 public class AttemptAnswerOption extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -66,8 +63,7 @@ public class AttemptAnswerOption extends BaseEntity {
     static AttemptAnswerOption snapshotFrom(
             AttemptQuestion attemptQuestion,
             AnswerOption answerOption,
-            int displayOrder
-    ) {
+            int displayOrder) {
         return new AttemptAnswerOption(attemptQuestion, answerOption, displayOrder);
     }
 

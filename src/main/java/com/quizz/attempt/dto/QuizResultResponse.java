@@ -6,9 +6,11 @@ import java.util.List;
 /**
  * Completed attempt result model.
  *
- * <p>Result DTOs may expose correctness because the attempt has reached a
+ * <p>
+ * Result DTOs may expose correctness because the attempt has reached a
  * terminal review context. Scores and question text come from the immutable
- * attempt snapshot, not from live quiz or question-bank state.</p>
+ * attempt snapshot, not from live quiz or question-bank state.
+ * </p>
  */
 public record QuizResultResponse(
         Long attemptId,
@@ -26,6 +28,5 @@ public record QuizResultResponse(
         Instant expiresAt,
         Instant submittedAt,
         Instant abandonedAt,
-        List<ResultQuestionResponse> questions
-) {
+        List<ResultQuestionResponse> questions) {
 }

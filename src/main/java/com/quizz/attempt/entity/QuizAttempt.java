@@ -29,16 +29,20 @@ import java.util.function.Function;
 /**
  * Immutable quiz-content snapshot and lifecycle aggregate for one user's attempt.
  *
- * <p>An attempt is {@code IN_PROGRESS}, {@code COMPLETED}, or {@code ABANDONED}.
+ * <p>
+ * An attempt is {@code IN_PROGRESS}, {@code COMPLETED}, or {@code ABANDONED}.
  * Completed attempts have a completion reason of {@code MANUAL} or
  * {@code TIME_EXPIRED}; result counters are meaningful only after completion.
  * Restart abandons an in-progress attempt and creates a new attempt from the
- * same sampled snapshot rather than drawing a new pool.</p>
+ * same sampled snapshot rather than drawing a new pool.
+ * </p>
  *
- * <p>{@link AttemptQuestion} children store the question and answer-option
+ * <p>
+ * {@link AttemptQuestion} children store the question and answer-option
  * snapshot used for play, scoring, result review, and admin reporting. The live
  * question bank may change after an attempt starts without changing this
- * aggregate.</p>
+ * aggregate.
+ * </p>
  */
 @Entity
 @Table(name = "quiz_attempts")
@@ -104,11 +108,7 @@ public class QuizAttempt extends BaseEntity {
     @Column(name = "scoring_version", nullable = false, length = 30)
     private String scoringVersion;
 
-    @OneToMany(
-            mappedBy = "attempt",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "attempt", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("displayOrder ASC")
     private List<AttemptQuestion> questions = new ArrayList<>();
 
@@ -120,8 +120,7 @@ public class QuizAttempt extends BaseEntity {
             Quiz quiz,
             Instant startedAt,
             List<QuizQuestion> selectedQuestions,
-            Function<Question, List<AnswerOption>> optionOrderProvider
-    ) {
+            Function<Question, List<AnswerOption>> optionOrderProvider) {
         if (selectedQuestions.isEmpty()) {
             throw new BusinessRuleException("Quiz must have at least one question.");
         }
@@ -147,8 +146,7 @@ public class QuizAttempt extends BaseEntity {
                     this,
                     question,
                     questionDisplayOrder,
-                    optionOrderProvider.apply(question)
-            ));
+                    optionOrderProvider.apply(question)));
             questionDisplayOrder++;
         }
     }
@@ -177,8 +175,7 @@ public class QuizAttempt extends BaseEntity {
             Quiz quiz,
             Instant startedAt,
             List<QuizQuestion> selectedQuestions,
-            Function<Question, List<AnswerOption>> optionOrderProvider
-    ) {
+            Function<Question, List<AnswerOption>> optionOrderProvider) {
         return new QuizAttempt(user, quiz, startedAt, selectedQuestions, optionOrderProvider);
     }
 
@@ -228,9 +225,11 @@ public class QuizAttempt extends BaseEntity {
     /**
      * Completes this attempt because its server-side time window expired.
      *
-     * <p>The submitted time is set to {@code expiresAt}, not the current clock
+     * <p>
+     * The submitted time is set to {@code expiresAt}, not the current clock
      * time, because the logical submission moment is the end of the quiz window
-     * even if the user returns later.</p>
+     * even if the user returns later.
+     * </p>
      */
     public void completeByTimeExpiry(ScoreResult scoreResult) {
         ensureInProgress();
@@ -244,9 +243,11 @@ public class QuizAttempt extends BaseEntity {
     /**
      * Abandons an active attempt as part of a restart transaction.
      *
-     * <p>The replacement attempt is created from this attempt's snapshot before
+     * <p>
+     * The replacement attempt is created from this attempt's snapshot before
      * the old attempt becomes terminal at the service boundary, which prevents
-     * restart from becoming a way to repeatedly sample the question pool.</p>
+     * restart from becoming a way to repeatedly sample the question pool.
+     * </p>
      */
     public void abandonForRestart(Instant abandonedAt) {
         ensureInProgress();

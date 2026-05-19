@@ -54,10 +54,10 @@ class RegistrationControllerTest {
     @Test
     void postValidRegisterRedirectsToLogin() throws Exception {
         mockMvc.perform(post("/register")
-                        .param("fullName", "Ada Lovelace")
-                        .param("email", "ada@example.com")
-                        .param("password", "password123")
-                        .param("confirmPassword", "password123"))
+                .param("fullName", "Ada Lovelace")
+                .param("email", "ada@example.com")
+                .param("password", "password123")
+                .param("confirmPassword", "password123"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
 
@@ -67,10 +67,10 @@ class RegistrationControllerTest {
     @Test
     void postInvalidRegisterReturnsRegisterView() throws Exception {
         mockMvc.perform(post("/register")
-                        .param("fullName", "")
-                        .param("email", "not-an-email")
-                        .param("password", "short")
-                        .param("confirmPassword", "short"))
+                .param("fullName", "")
+                .param("email", "not-an-email")
+                .param("password", "short")
+                .param("confirmPassword", "short"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("auth/register"));
 

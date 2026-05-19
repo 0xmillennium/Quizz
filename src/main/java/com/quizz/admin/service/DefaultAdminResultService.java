@@ -45,8 +45,7 @@ public class DefaultAdminResultService implements AdminResultService {
             AdminResultQueryRepository repository,
             UserQueryService userQueryService,
             QuizQueryService quizQueryService,
-            CategoryQueryService categoryQueryService
-    ) {
+            CategoryQueryService categoryQueryService) {
         this.repository = repository;
         this.userQueryService = userQueryService;
         this.quizQueryService = quizQueryService;
@@ -82,8 +81,7 @@ public class DefaultAdminResultService implements AdminResultService {
                 startedFrom,
                 startedToExclusive,
                 size,
-                (page - 1) * size
-        );
+                (page - 1) * size);
 
         long total = repository.countResults(criteria);
         List<AdminResultSummaryResponse> results = repository.findResults(criteria).stream()
@@ -103,8 +101,7 @@ public class DefaultAdminResultService implements AdminResultService {
                         row.startedAt(),
                         row.expiresAt(),
                         row.submittedAt(),
-                        row.abandonedAt()
-                ))
+                        row.abandonedAt()))
                 .toList();
 
         int totalPages = total == 0 ? 0 : (int) Math.ceil((double) total / size);
@@ -114,8 +111,7 @@ public class DefaultAdminResultService implements AdminResultService {
                 total,
                 totalPages,
                 page > 1,
-                totalPages > 0 && page < totalPages
-        );
+                totalPages > 0 && page < totalPages);
 
         return new AdminResultListResponse(normalizedFilter, pageResponse, results);
     }
@@ -125,8 +121,7 @@ public class DefaultAdminResultService implements AdminResultService {
         AdminResultAttemptRow header = repository.findAttemptHeader(attemptId)
                 .orElseThrow(() -> new NotFoundException("Attempt not found."));
         List<AdminResultQuestionResponse> questions = groupQuestions(
-                repository.findAttemptQuestionOptionRows(attemptId)
-        );
+                repository.findAttemptQuestionOptionRows(attemptId));
 
         return new AdminResultDetailResponse(
                 header.attemptId(),
@@ -148,8 +143,7 @@ public class DefaultAdminResultService implements AdminResultService {
                 header.expiresAt(),
                 header.submittedAt(),
                 header.abandonedAt(),
-                questions
-        );
+                questions);
     }
 
     private int normalizePage(Integer page) {
@@ -198,22 +192,21 @@ public class DefaultAdminResultService implements AdminResultService {
     private List<AdminResultQuestionResponse> groupQuestions(List<AdminResultQuestionOptionRow> rows) {
         Map<Long, QuestionAccumulator> grouped = new LinkedHashMap<>();
         for (AdminResultQuestionOptionRow row : rows) {
-            QuestionAccumulator question = grouped.computeIfAbsent(row.attemptQuestionId(), id -> new QuestionAccumulator(
-                    row.attemptQuestionId(),
-                    row.originalQuestionId(),
-                    row.questionText(),
-                    row.questionDisplayOrder(),
-                    row.selectedOptionId(),
-                    row.questionCorrect()
-            ));
+            QuestionAccumulator question = grouped.computeIfAbsent(row.attemptQuestionId(),
+                    id -> new QuestionAccumulator(
+                            row.attemptQuestionId(),
+                            row.originalQuestionId(),
+                            row.questionText(),
+                            row.questionDisplayOrder(),
+                            row.selectedOptionId(),
+                            row.questionCorrect()));
             question.options().add(new AdminResultAnswerOptionResponse(
                     row.attemptAnswerOptionId(),
                     row.originalAnswerOptionId(),
                     row.optionText(),
                     row.optionCorrect(),
                     Objects.equals(row.attemptAnswerOptionId(), question.selectedOptionId()),
-                    row.optionDisplayOrder()
-            ));
+                    row.optionDisplayOrder()));
         }
 
         return grouped.values().stream()
@@ -224,8 +217,7 @@ public class DefaultAdminResultService implements AdminResultService {
                         question.displayOrder(),
                         question.selectedOptionId(),
                         question.correct(),
-                        List.copyOf(question.options())
-                ))
+                        List.copyOf(question.options())))
                 .toList();
     }
 
@@ -236,8 +228,7 @@ public class DefaultAdminResultService implements AdminResultService {
             int displayOrder,
             Long selectedOptionId,
             Boolean correct,
-            List<AdminResultAnswerOptionResponse> options
-    ) {
+            List<AdminResultAnswerOptionResponse> options) {
 
         private QuestionAccumulator(
                 Long attemptQuestionId,
@@ -245,8 +236,7 @@ public class DefaultAdminResultService implements AdminResultService {
                 String questionText,
                 int displayOrder,
                 Long selectedOptionId,
-                Boolean correct
-        ) {
+                Boolean correct) {
             this(
                     attemptQuestionId,
                     originalQuestionId,
@@ -254,8 +244,7 @@ public class DefaultAdminResultService implements AdminResultService {
                     displayOrder,
                     selectedOptionId,
                     correct,
-                    new ArrayList<>()
-            );
+                    new ArrayList<>());
         }
     }
 }

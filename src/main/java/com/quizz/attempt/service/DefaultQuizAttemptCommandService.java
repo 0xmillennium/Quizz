@@ -37,10 +37,12 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Transactional implementation of attempt lifecycle commands.
  *
- * <p>The implementation coordinates quiz/user reads, attempt snapshots,
+ * <p>
+ * The implementation coordinates quiz/user reads, attempt snapshots,
  * persisted answer state, scoring, and allowance locking in one write boundary.
  * Controllers should depend on {@link QuizAttemptCommandService}, not on the
- * attempt repositories directly.</p>
+ * attempt repositories directly.
+ * </p>
  */
 @Service
 @Transactional
@@ -61,8 +63,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
             UserQueryService userQueryService,
             ScoringService scoringService,
             AttemptRandomizer attemptRandomizer,
-            Clock clock
-    ) {
+            Clock clock) {
         this.quizAttemptRepository = quizAttemptRepository;
         this.allowanceRepository = allowanceRepository;
         this.quizQueryService = quizQueryService;
@@ -82,8 +83,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
         QuizAttempt existing = quizAttemptRepository.findByUserIdAndQuizIdAndStatus(
                 userId,
                 quizId,
-                AttemptStatus.IN_PROGRESS
-        ).orElse(null);
+                AttemptStatus.IN_PROGRESS).orElse(null);
         if (existing != null && !existing.isOverdueAt(now)) {
             allowance.resetIfCooldownExpired(quiz, now);
             return new StartQuizResponse(
@@ -92,8 +92,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
                     false,
                     null,
                     allowance.getRemainingAttempts(),
-                    allowance.getCooldownUntil()
-            );
+                    allowance.getCooldownUntil());
         }
         boolean previousAttemptAutoSubmitted = false;
         if (existing != null) {
@@ -115,8 +114,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
                 previousAttemptAutoSubmitted,
                 existing == null ? null : existing.getId(),
                 allowance.getRemainingAttempts(),
-                allowance.getCooldownUntil()
-        );
+                allowance.getCooldownUntil());
     }
 
     @Override
@@ -155,8 +153,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
                     false,
                     existing.getId(),
                     allowance.getRemainingAttempts(),
-                    allowance.getCooldownUntil()
-            );
+                    allowance.getCooldownUntil());
         }
     }
 
@@ -166,8 +163,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
             Long attemptQuestionId,
             Long userId,
             Long selectedOptionId,
-            int answerRevision
-    ) {
+            int answerRevision) {
         if (answerRevision < 1) {
             throw new BusinessRuleException("Answer revision must be positive.");
         }
@@ -197,8 +193,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
                     true,
                     resultUrl(attempt.getId()),
                     null,
-                    attempt.getExpiresAt()
-            );
+                    attempt.getExpiresAt());
         }
 
         loadQuestionOptions(attempt);
@@ -216,8 +211,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
                 false,
                 null,
                 outcome.saved() ? question.getAnsweredAt() : null,
-                attempt.getExpiresAt()
-        );
+                attempt.getExpiresAt());
     }
 
     @Override
@@ -245,8 +239,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
         List<QuizAttempt> overdueAttempts = quizAttemptRepository.findByUserIdAndStatusAndExpiresAtLessThanEqual(
                 userId,
                 AttemptStatus.IN_PROGRESS,
-                now
-        );
+                now);
         overdueAttempts.forEach(attempt -> {
             autoSubmitExisting(attempt);
             updateAllowanceAfterTerminal(attempt);
@@ -258,8 +251,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
     public SubmitQuizResponse submitAttempt(
             Long attemptId,
             Long userId,
-            SubmitQuizRequest request
-    ) {
+            SubmitQuizRequest request) {
         Instant now = Instant.now(clock);
         QuizAttempt attempt = quizAttemptRepository.findByIdAndUserIdWithQuestions(attemptId, userId)
                 .orElseThrow(() -> new NotFoundException("Attempt not found."));
@@ -283,8 +275,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
             question.autosaveAnswer(
                     submittedAnswers.get(question.getId()),
                     question.getAnswerRevision() + 1,
-                    now
-            );
+                    now);
         }
 
         ScoreResult scoreResult = scoringService.score(attempt);
@@ -306,8 +297,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
                 quiz,
                 now,
                 questionOrder,
-                question -> attemptRandomizer.shuffledCopy(question.getOptions())
-        );
+                question -> attemptRandomizer.shuffledCopy(question.getOptions()));
     }
 
     private void autoSubmitExisting(QuizAttempt attempt) {
@@ -345,8 +335,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
         boolean hasActiveAttempt = quizAttemptRepository.existsByUserIdAndQuizIdAndStatus(
                 attempt.getUser().getId(),
                 attempt.getQuiz().getId(),
-                AttemptStatus.IN_PROGRESS
-        );
+                AttemptStatus.IN_PROGRESS);
         // Cooldown starts only when exhausted rights are no longer paired with
         // an active attempt the user can finish or restart.
         if (hasActiveAttempt) {
@@ -364,8 +353,7 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
                 attempt.getId(),
                 attempt.getStatus().name(),
                 attempt.getCompletionReason() == null ? null : attempt.getCompletionReason().name(),
-                resultUrl(attempt.getId())
-        );
+                resultUrl(attempt.getId()));
     }
 
     private Map<Long, Long> validatedAnswers(SubmitQuizRequest request, QuizAttempt attempt) {

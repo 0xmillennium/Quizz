@@ -9,6 +9,5 @@ public record ResultQuestionResponse(
         Long selectedOptionId,
         boolean answered,
         boolean correct,
-        List<ResultAnswerOptionResponse> options
-) {
+        List<ResultAnswerOptionResponse> options) {
 }

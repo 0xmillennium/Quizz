@@ -5,9 +5,7 @@ import jakarta.validation.constraints.Size;
 
 public class AnswerOptionRequest {
 
-    @NotBlank
-    @Size(max = 500)
-    private String text;
+    @NotBlank @Size(max = 500) private String text;
 
     private boolean correct;
 

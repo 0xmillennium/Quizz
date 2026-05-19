@@ -76,8 +76,7 @@ class CategoryAdminControllerTest {
                 categoryCommandService,
                 categoryQueryService,
                 categoryMapper,
-                categoryFormValidator
-        );
+                categoryFormValidator);
 
         mockMvc = MockMvcBuilders
                 .standaloneSetup(controller)
@@ -114,10 +113,10 @@ class CategoryAdminControllerTest {
     @Test
     void postCategoriesValidRedirectsToCategories() throws Exception {
         mockMvc.perform(post("/admin/categories")
-                        .with(user("admin@example.com").roles("ADMIN"))
-                        .with(csrf())
-                        .param("name", "Science")
-                        .param("description", "Questions about science"))
+                .with(user("admin@example.com").roles("ADMIN"))
+                .with(csrf())
+                .param("name", "Science")
+                .param("description", "Questions about science"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/categories"));
 
@@ -127,10 +126,10 @@ class CategoryAdminControllerTest {
     @Test
     void postCategoriesInvalidReturnsCreateView() throws Exception {
         mockMvc.perform(post("/admin/categories")
-                        .with(user("admin@example.com").roles("ADMIN"))
-                        .with(csrf())
-                        .param("name", "")
-                        .param("description", "Questions about science"))
+                .with(user("admin@example.com").roles("ADMIN"))
+                .with(csrf())
+                .param("name", "")
+                .param("description", "Questions about science"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/categories/create"));
 
@@ -155,10 +154,10 @@ class CategoryAdminControllerTest {
     @Test
     void postCategoryUpdateValidRedirectsToCategories() throws Exception {
         mockMvc.perform(post("/admin/categories/1")
-                        .with(user("admin@example.com").roles("ADMIN"))
-                        .with(csrf())
-                        .param("name", "Science")
-                        .param("description", "Questions about science"))
+                .with(user("admin@example.com").roles("ADMIN"))
+                .with(csrf())
+                .param("name", "Science")
+                .param("description", "Questions about science"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/categories"));
 
@@ -168,25 +167,24 @@ class CategoryAdminControllerTest {
     @Test
     void postCategoryUpdateInvalidReturnsEditView() throws Exception {
         mockMvc.perform(post("/admin/categories/1")
-                        .with(user("admin@example.com").roles("ADMIN"))
-                        .with(csrf())
-                        .param("name", "")
-                        .param("description", "Questions about science"))
+                .with(user("admin@example.com").roles("ADMIN"))
+                .with(csrf())
+                .param("name", "")
+                .param("description", "Questions about science"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/categories/edit"))
                 .andExpect(model().attribute("categoryId", 1L));
 
         verify(categoryCommandService, never()).update(
                 org.mockito.ArgumentMatchers.any(),
-                any(CategoryUpdateRequest.class)
-        );
+                any(CategoryUpdateRequest.class));
     }
 
     @Test
     void postActivateCategoryRedirectsToCategories() throws Exception {
         mockMvc.perform(post("/admin/categories/1/activate")
-                        .with(user("admin@example.com").roles("ADMIN"))
-                        .with(csrf()))
+                .with(user("admin@example.com").roles("ADMIN"))
+                .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/categories"));
 
@@ -196,8 +194,8 @@ class CategoryAdminControllerTest {
     @Test
     void postDeactivateCategoryRedirectsToCategories() throws Exception {
         mockMvc.perform(post("/admin/categories/1/deactivate")
-                        .with(user("admin@example.com").roles("ADMIN"))
-                        .with(csrf()))
+                .with(user("admin@example.com").roles("ADMIN"))
+                .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/categories"));
 
@@ -206,19 +204,20 @@ class CategoryAdminControllerTest {
 
     private Filter springSecurityFilterChain() throws Exception {
         CustomUserDetailsService userDetailsService = new CustomUserDetailsService(new MissingUserQueryService());
-        SecurityConfig securityConfig = new SecurityConfig(userDetailsService, new CustomAuthenticationSuccessHandler());
+        SecurityConfig securityConfig = new SecurityConfig(userDetailsService,
+                new CustomAuthenticationSuccessHandler());
         PasswordEncoder passwordEncoder = securityConfig.passwordEncoder();
         AuthenticationProvider authenticationProvider = securityConfig.authenticationProvider(passwordEncoder);
         SecurityFilterChain securityFilterChain = securityConfig.securityFilterChain(
                 httpSecurity(authenticationProvider),
-                authenticationProvider
-        );
+                authenticationProvider);
         return new FilterChainProxy(securityFilterChain);
     }
 
     private HttpSecurity httpSecurity(AuthenticationProvider authenticationProvider) {
         ObjectPostProcessor<Object> objectPostProcessor = new PassthroughObjectPostProcessor();
-        AuthenticationManagerBuilder authenticationManagerBuilder = new AuthenticationManagerBuilder(objectPostProcessor);
+        AuthenticationManagerBuilder authenticationManagerBuilder = new AuthenticationManagerBuilder(
+                objectPostProcessor);
         authenticationManagerBuilder.authenticationProvider(authenticationProvider);
 
         ApplicationContext applicationContext = new StaticApplicationContext();

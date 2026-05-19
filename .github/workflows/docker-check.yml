@@ -1,0 +1,47 @@
+name: Docker Check
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  docker:
+    name: Compose config, image build, and health smoke
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Prepare CI local configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .env.example .env
+          mkdir -p docker/secrets
+          openssl rand -base64 48 | tr -d '\n' > docker/secrets/postgres_password.txt
+
+      - name: Validate Docker Compose configuration
+        run: docker compose config
+
+      - name: Build Docker images
+        run: docker compose build
+
+      - name: Start Docker runtime
+        run: docker compose up --build --wait
+
+      - name: Smoke test application health
+        shell: bash
+        run: |
+          set -euo pipefail
+          QUIZZ_HTTP_PORT="$(awk -F= '/^QUIZZ_HTTP_PORT=/{print $2; exit}' .env | tr -d '\r' | sed 's/^"//; s/"$//')"
+          curl -fsS "http://localhost:${QUIZZ_HTTP_PORT}/actuator/health"
+
+      - name: Stop Docker runtime
+        if: always()
+        run: docker compose down -v

@@ -23,8 +23,7 @@ public class QuizFormValidator {
 
     public QuizFormValidator(
             CategoryQueryService categoryQueryService,
-            QuestionQueryService questionQueryService
-    ) {
+            QuestionQueryService questionQueryService) {
         this.categoryQueryService = categoryQueryService;
         this.questionQueryService = questionQueryService;
     }
@@ -37,8 +36,7 @@ public class QuizFormValidator {
                 request.getAttemptLimit(),
                 request.getRetakeCooldownMinutes(),
                 request.getQuestionIds(),
-                bindingResult
-        );
+                bindingResult);
     }
 
     public void validateUpdate(QuizUpdateRequest request, BindingResult bindingResult) {
@@ -49,8 +47,7 @@ public class QuizFormValidator {
                 request.getAttemptLimit(),
                 request.getRetakeCooldownMinutes(),
                 request.getQuestionIds(),
-                bindingResult
-        );
+                bindingResult);
     }
 
     private void validate(
@@ -60,8 +57,7 @@ public class QuizFormValidator {
             Integer attemptLimit,
             Integer retakeCooldownMinutes,
             List<Long> questionIds,
-            BindingResult bindingResult
-    ) {
+            BindingResult bindingResult) {
         Category category = validateCategory(categoryId, bindingResult);
         validateDuration(durationMinutes, bindingResult);
         validatePositive("questionCount", questionCount, "Questions per attempt must be at least 1.", bindingResult);
@@ -70,8 +66,7 @@ public class QuizFormValidator {
                 "retakeCooldownMinutes",
                 retakeCooldownMinutes,
                 "Retake cooldown must be at least 1 minute.",
-                bindingResult
-        );
+                bindingResult);
         List<Question> questions = validateQuestions(questionIds, bindingResult);
         validateQuestionCount(questionCount, questions, bindingResult);
         validateQuestionCategories(category, questions, bindingResult);
@@ -88,8 +83,7 @@ public class QuizFormValidator {
             bindingResult.rejectValue(
                     "categoryId",
                     "quiz.category.invalid",
-                    "Please select an active category."
-            );
+                    "Please select an active category.");
             return null;
         }
     }
@@ -98,8 +92,7 @@ public class QuizFormValidator {
             String field,
             Integer value,
             String message,
-            BindingResult bindingResult
-    ) {
+            BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors(field) || value == null) {
             return;
         }
@@ -116,16 +109,14 @@ public class QuizFormValidator {
             bindingResult.rejectValue(
                     "durationMinutes",
                     "quiz.duration.range",
-                    "Duration must be between 1 and 180 minutes."
-            );
+                    "Duration must be between 1 and 180 minutes.");
         }
     }
 
     private void validateQuestionCount(
             Integer questionCount,
             List<Question> questions,
-            BindingResult bindingResult
-    ) {
+            BindingResult bindingResult) {
         if (questionCount == null
                 || questions.isEmpty()
                 || bindingResult.hasFieldErrors("questionCount")
@@ -136,8 +127,7 @@ public class QuizFormValidator {
             bindingResult.rejectValue(
                     "questionCount",
                     "quiz.questionCount.poolSize",
-                    "Questions per attempt cannot exceed the selected pool size."
-            );
+                    "Questions per attempt cannot exceed the selected pool size.");
         }
     }
 
@@ -146,8 +136,7 @@ public class QuizFormValidator {
             bindingResult.rejectValue(
                     "questionIds",
                     "quiz.questions.required",
-                    "Select at least one question."
-            );
+                    "Select at least one question.");
             return List.of();
         }
 
@@ -155,8 +144,7 @@ public class QuizFormValidator {
             bindingResult.rejectValue(
                     "questionIds",
                     "quiz.questions.invalid",
-                    "Selected questions must be active."
-            );
+                    "Selected questions must be active.");
             return List.of();
         }
 
@@ -164,8 +152,7 @@ public class QuizFormValidator {
             bindingResult.rejectValue(
                     "questionIds",
                     "quiz.questions.duplicate",
-                    "Duplicate questions are not allowed."
-            );
+                    "Duplicate questions are not allowed.");
             return List.of();
         }
 
@@ -181,8 +168,7 @@ public class QuizFormValidator {
                 bindingResult.rejectValue(
                         "questionIds",
                         "quiz.questions.invalid",
-                        "Selected questions must be active."
-                );
+                        "Selected questions must be active.");
                 return List.of();
             }
         }
@@ -192,8 +178,7 @@ public class QuizFormValidator {
     private void validateQuestionCategories(
             Category category,
             List<Question> questions,
-            BindingResult bindingResult
-    ) {
+            BindingResult bindingResult) {
         if (category == null || questions.isEmpty() || bindingResult.hasFieldErrors("questionIds")) {
             return;
         }
@@ -203,8 +188,7 @@ public class QuizFormValidator {
                 bindingResult.rejectValue(
                         "questionIds",
                         "quiz.questions.categoryMismatch",
-                        "All selected questions must belong to the selected category."
-                );
+                        "All selected questions must belong to the selected category.");
                 return;
             }
         }

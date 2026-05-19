@@ -7,9 +7,11 @@ import java.util.List;
 /**
  * Read boundary for attempt play, result, chart, and history views.
  *
- * <p>Implementations resolve attempts by user id for ownership and should not
+ * <p>
+ * Implementations resolve attempts by user id for ownership and should not
  * mutate lifecycle state. Result and chart reads are valid for completed
- * attempts, while active play DTOs must not expose answer correctness.</p>
+ * attempts, while active play DTOs must not expose answer correctness.
+ * </p>
  */
 public interface QuizAttemptQueryService {
 

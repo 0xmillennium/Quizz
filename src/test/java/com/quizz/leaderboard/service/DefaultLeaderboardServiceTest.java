@@ -40,8 +40,7 @@ class DefaultLeaderboardServiceTest {
         service = new DefaultLeaderboardService(
                 leaderboardQueryRepository,
                 quizQueryService,
-                categoryQueryService
-        );
+                categoryQueryService);
     }
 
     @Test
@@ -155,8 +154,7 @@ class DefaultLeaderboardServiceTest {
                 5,
                 4,
                 80,
-                submittedAt
-        );
+                submittedAt);
         when(leaderboardQueryRepository.findTopOverall(10)).thenReturn(List.of(row));
 
         LeaderboardViewResponse response = service.getLeaderboard(new LeaderboardFilterRequest());

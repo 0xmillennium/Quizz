@@ -31,8 +31,7 @@ public class QuizAttemptMapper {
                 attempt.getQuestions().stream()
                         .sorted(Comparator.comparingInt(AttemptQuestion::getDisplayOrder))
                         .map(this::toAttemptQuestionResponse)
-                        .toList()
-        );
+                        .toList());
     }
 
     public SubmitQuizRequest toSubmitQuizRequest(QuizAttempt attempt) {
@@ -69,8 +68,7 @@ public class QuizAttemptMapper {
                 attempt.getQuestions().stream()
                         .sorted(Comparator.comparingInt(AttemptQuestion::getDisplayOrder))
                         .map(this::toResultQuestionResponse)
-                        .toList()
-        );
+                        .toList());
     }
 
     public List<QuizHistoryResponse> toHistoryResponseList(List<QuizAttempt> attempts) {
@@ -87,8 +85,7 @@ public class QuizAttemptMapper {
                         attempt.getStartedAt(),
                         attempt.getExpiresAt(),
                         attempt.getSubmittedAt(),
-                        attempt.getAbandonedAt()
-                ))
+                        attempt.getAbandonedAt()))
                 .toList();
     }
 
@@ -96,8 +93,7 @@ public class QuizAttemptMapper {
         return new ResultChartResponse(
                 attempt.getCorrectCount(),
                 attempt.getWrongCount(),
-                attempt.getUnansweredCount()
-        );
+                attempt.getUnansweredCount());
     }
 
     private AttemptQuestionResponse toAttemptQuestionResponse(AttemptQuestion question) {
@@ -112,10 +108,8 @@ public class QuizAttemptMapper {
                         .map(option -> new AttemptAnswerOptionResponse(
                                 option.getId(),
                                 option.getOptionText(),
-                                option.getDisplayOrder()
-                        ))
-                        .toList()
-        );
+                                option.getDisplayOrder()))
+                        .toList());
     }
 
     private ResultQuestionResponse toResultQuestionResponse(AttemptQuestion question) {
@@ -133,9 +127,7 @@ public class QuizAttemptMapper {
                                 option.getOptionText(),
                                 option.isCorrect(),
                                 option.getId().equals(question.getSelectedOptionId()),
-                                option.getDisplayOrder()
-                        ))
-                        .toList()
-        );
+                                option.getDisplayOrder()))
+                        .toList());
     }
 }

@@ -13,9 +13,11 @@ import org.springframework.data.jpa.repository.Query;
 /**
  * Spring Data access for attempt snapshots and lifecycle queries.
  *
- * <p>Methods intentionally resolve user-scoped attempts for play/result flows
+ * <p>
+ * Methods intentionally resolve user-scoped attempts for play/result flows
  * and expose fetch graphs needed by command services. Controllers should use
- * attempt services instead of this repository.</p>
+ * attempt services instead of this repository.
+ * </p>
  */
 public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> {
 
@@ -32,8 +34,7 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
             """)
     Optional<QuizAttempt> findByIdAndUserIdWithQuestions(
             Long attemptId,
-            Long userId
-    );
+            Long userId);
 
     @EntityGraph(attributePaths = {
             "questions"
@@ -46,8 +47,7 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
             """)
     Optional<QuizAttempt> findResultByIdAndUserId(
             Long attemptId,
-            Long userId
-    );
+            Long userId);
 
     @Query("""
             select distinct q
@@ -80,8 +80,7 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
     List<QuizAttempt> findByUserIdAndStatusAndExpiresAtLessThanEqual(
             Long userId,
             AttemptStatus status,
-            Instant now
-    );
+            Instant now);
 
     @EntityGraph(attributePaths = {
             "user",
@@ -98,14 +97,12 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
     Optional<QuizAttempt> findByUserIdAndQuizIdAndStatus(
             Long userId,
             Long quizId,
-            AttemptStatus status
-    );
+            AttemptStatus status);
 
     boolean existsByUserIdAndQuizIdAndStatus(Long userId, Long quizId, AttemptStatus status);
 
     Optional<QuizAttempt> findFirstByUserIdAndQuizIdAndStatusOrderBySubmittedAtDescStartedAtDesc(
             Long userId,
             Long quizId,
-            AttemptStatus status
-    );
+            AttemptStatus status);
 }

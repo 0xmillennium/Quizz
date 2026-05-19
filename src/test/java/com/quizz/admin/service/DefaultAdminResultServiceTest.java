@@ -54,10 +54,11 @@ class DefaultAdminResultServiceTest {
                 repository,
                 userQueryService,
                 quizQueryService,
-                categoryQueryService
-        );
-        lenient().when(repository.countResults(org.mockito.ArgumentMatchers.any(AdminResultSearchCriteria.class))).thenReturn(0L);
-        lenient().when(repository.findResults(org.mockito.ArgumentMatchers.any(AdminResultSearchCriteria.class))).thenReturn(List.of());
+                categoryQueryService);
+        lenient().when(repository.countResults(org.mockito.ArgumentMatchers.any(AdminResultSearchCriteria.class)))
+                .thenReturn(0L);
+        lenient().when(repository.findResults(org.mockito.ArgumentMatchers.any(AdminResultSearchCriteria.class)))
+                .thenReturn(List.of());
     }
 
     @Test
@@ -191,12 +192,13 @@ class DefaultAdminResultServiceTest {
                 startedAt,
                 expiresAt,
                 submittedAt,
-                null
-        );
+                null);
         AdminResultFilterRequest filter = new AdminResultFilterRequest();
         filter.setSize(20);
-        when(repository.countResults(org.mockito.ArgumentMatchers.any(AdminResultSearchCriteria.class))).thenReturn(41L);
-        when(repository.findResults(org.mockito.ArgumentMatchers.any(AdminResultSearchCriteria.class))).thenReturn(List.of(row));
+        when(repository.countResults(org.mockito.ArgumentMatchers.any(AdminResultSearchCriteria.class)))
+                .thenReturn(41L);
+        when(repository.findResults(org.mockito.ArgumentMatchers.any(AdminResultSearchCriteria.class)))
+                .thenReturn(List.of(row));
 
         AdminResultListResponse response = service.searchResults(filter);
 
@@ -254,15 +256,13 @@ class DefaultAdminResultServiceTest {
                 Instant.parse("2026-01-01T10:00:00Z"),
                 Instant.parse("2026-01-01T10:30:00Z"),
                 Instant.parse("2026-01-01T10:10:00Z"),
-                null
-        );
+                null);
         when(repository.findAttemptHeader(1L)).thenReturn(Optional.of(header));
         when(repository.findAttemptQuestionOptionRows(1L)).thenReturn(List.of(
                 new AdminResultQuestionOptionRow(10L, 100L, "Question?", 1, 201L, true,
                         200L, 300L, "Wrong", false, 1),
                 new AdminResultQuestionOptionRow(10L, 100L, "Question?", 1, 201L, true,
-                        201L, 301L, "Correct", true, 2)
-        ));
+                        201L, 301L, "Correct", true, 2)));
 
         AdminResultDetailResponse response = service.getResultDetail(1L);
 
@@ -283,7 +283,8 @@ class DefaultAdminResultServiceTest {
     }
 
     private AdminResultSearchCriteria capturedFindCriteria() {
-        ArgumentCaptor<AdminResultSearchCriteria> criteriaCaptor = ArgumentCaptor.forClass(AdminResultSearchCriteria.class);
+        ArgumentCaptor<AdminResultSearchCriteria> criteriaCaptor = ArgumentCaptor
+                .forClass(AdminResultSearchCriteria.class);
         verify(repository).findResults(criteriaCaptor.capture());
         return criteriaCaptor.getValue();
     }

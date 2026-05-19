@@ -99,8 +99,7 @@ class QuestionMapperTest {
         Question question = Question.create(
                 "What is water?",
                 category,
-                List.of(new AnswerOptionDraft("H2O", true), new AnswerOptionDraft("CO2", false))
-        );
+                List.of(new AnswerOptionDraft("H2O", true), new AnswerOptionDraft("CO2", false)));
         setId(question, 10L);
         setId(question.getOptions().get(0), 101L);
         setId(question.getOptions().get(1), 102L);

@@ -33,7 +33,8 @@ class DefaultCategoryCommandServiceTest {
     @BeforeEach
     void setUp() {
         service = new DefaultCategoryCommandService(categoryRepository);
-        lenient().when(categoryRepository.save(any(Category.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        lenient().when(categoryRepository.save(any(Category.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test

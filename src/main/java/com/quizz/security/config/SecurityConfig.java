@@ -16,11 +16,13 @@ import org.springframework.security.web.SecurityFilterChain;
 /**
  * HTTP security configuration for MVC routes.
  *
- * <p>Public routes are limited to the home redirect, login, registration,
+ * <p>
+ * Public routes are limited to the home redirect, login, registration,
  * static assets, health, and error handling. Admin routes require
  * {@code ROLE_ADMIN}; quiz, attempt, and leaderboard routes require an
  * authenticated user. CSRF remains enabled through Spring Security defaults,
- * and logout invalidates the HTTP session and clears {@code JSESSIONID}.</p>
+ * and logout invalidates the HTTP session and clears {@code JSESSIONID}.
+ * </p>
  */
 @Configuration
 @EnableWebSecurity
@@ -31,8 +33,7 @@ public class SecurityConfig {
 
     public SecurityConfig(
             CustomUserDetailsService customUserDetailsService,
-            CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler
-    ) {
+            CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler) {
         this.customUserDetailsService = customUserDetailsService;
         this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
     }
@@ -52,8 +53,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            AuthenticationProvider authenticationProvider
-    ) throws Exception {
+            AuthenticationProvider authenticationProvider) throws Exception {
         http
                 .authenticationProvider(authenticationProvider)
                 .csrf(Customizer.withDefaults())
@@ -70,8 +70,8 @@ public class SecurityConfig {
                                 "/images/**",
                                 "/favicon.ico",
                                 "/actuator/health",
-                                "/error/**"
-                        ).permitAll()
+                                "/error/**")
+                        .permitAll()
                         .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
                         .requestMatchers(
                                 "/quizzes",
@@ -79,10 +79,9 @@ public class SecurityConfig {
                                 "/attempts",
                                 "/attempts/**",
                                 "/leaderboard",
-                                "/leaderboard/**"
-                        ).authenticated()
-                        .anyRequest().authenticated()
-                )
+                                "/leaderboard/**")
+                        .authenticated()
+                        .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
@@ -90,15 +89,13 @@ public class SecurityConfig {
                         .passwordParameter("password")
                         .successHandler(customAuthenticationSuccessHandler)
                         .failureUrl("/login?error")
-                        .permitAll()
-                )
+                        .permitAll())
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
-                        .permitAll()
-                );
+                        .permitAll());
 
         return http.build();
     }

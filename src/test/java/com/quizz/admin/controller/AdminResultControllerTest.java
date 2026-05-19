@@ -60,8 +60,7 @@ class AdminResultControllerTest {
                 categoryQueryService,
                 categoryMapper,
                 quizQueryService,
-                quizMapper
-        );
+                quizMapper);
 
         mockMvc = MockMvcBuilders
                 .standaloneSetup(controller)
@@ -73,7 +72,8 @@ class AdminResultControllerTest {
     void getResultsAsAdminReturnsListViewWithModelAttributes() throws Exception {
         AdminResultListResponse response = emptyResults(new AdminResultFilterRequest());
         List<CategoryOptionResponse> categories = List.of(new CategoryOptionResponse(1L, "Science"));
-        List<QuizSummaryResponse> quizzes = List.of(new QuizSummaryResponse(2L, "Science Quiz", "Science", 30, 5, 3, 1440));
+        List<QuizSummaryResponse> quizzes = List
+                .of(new QuizSummaryResponse(2L, "Science Quiz", "Science", 30, 5, 3, 1440));
         when(adminResultService.searchResults(any(AdminResultFilterRequest.class))).thenReturn(response);
         when(categoryQueryService.findActive()).thenReturn(List.of());
         when(categoryMapper.toOptionResponseList(List.of())).thenReturn(categories);
@@ -118,13 +118,13 @@ class AdminResultControllerTest {
         when(quizMapper.toSummaryResponseList(List.of())).thenReturn(List.of());
 
         mockMvc.perform(get("/admin/results")
-                        .param("userId", "1")
-                        .param("quizId", "2")
-                        .param("categoryId", "3")
-                        .param("status", "completed")
-                        .param("page", "2")
-                        .param("size", "50")
-                        .with(user("admin@example.com").roles("ADMIN")))
+                .param("userId", "1")
+                .param("quizId", "2")
+                .param("categoryId", "3")
+                .param("status", "completed")
+                .param("page", "2")
+                .param("size", "50")
+                .with(user("admin@example.com").roles("ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/results/list"));
 
@@ -160,8 +160,7 @@ class AdminResultControllerTest {
         return new AdminResultListResponse(
                 filter,
                 new AdminPageResponse(1, 20, 0, 0, false, false),
-                List.of()
-        );
+                List.of());
     }
 
     private AdminResultDetailResponse detail() {
@@ -185,7 +184,6 @@ class AdminResultControllerTest {
                 null,
                 null,
                 null,
-                List.of()
-        );
+                List.of());
     }
 }

@@ -49,8 +49,7 @@ public class QuestionFormValidator {
             bindingResult.rejectValue(
                     "categoryId",
                     "question.category.invalid",
-                    "Please select an active category."
-            );
+                    "Please select an active category.");
         }
     }
 
@@ -59,14 +58,12 @@ public class QuestionFormValidator {
             bindingResult.rejectValue(
                     "options",
                     "question.options.count",
-                    "A question must have at least 2 options."
-            );
+                    "A question must have at least 2 options.");
         } else if (options.size() > MAX_OPTIONS) {
             bindingResult.rejectValue(
                     "options",
                     "question.options.count",
-                    "A question can have at most 6 options."
-            );
+                    "A question can have at most 6 options.");
         }
 
         if (options == null) {
@@ -86,8 +83,7 @@ public class QuestionFormValidator {
                 bindingResult.rejectValue(
                         "options[" + i + "].text",
                         "question.options.textRequired",
-                        "Option text is required."
-                );
+                        "Option text is required.");
                 continue;
             }
 
@@ -95,8 +91,7 @@ public class QuestionFormValidator {
                 bindingResult.rejectValue(
                         "options[" + i + "].text",
                         "question.options.duplicate",
-                        "Option text must be unique."
-                );
+                        "Option text must be unique.");
             }
         }
 
@@ -104,8 +99,7 @@ public class QuestionFormValidator {
             bindingResult.rejectValue(
                     "options",
                     "question.options.correctRequired",
-                    "Exactly one option must be marked as correct."
-            );
+                    "Exactly one option must be marked as correct.");
         }
     }
 

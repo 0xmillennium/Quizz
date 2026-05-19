@@ -7,6 +7,5 @@ public record QuizSummaryResponse(
         int durationMinutes,
         int questionCount,
         int attemptLimit,
-        int retakeCooldownMinutes
-) {
+        int retakeCooldownMinutes) {
 }

@@ -5,6 +5,5 @@ import java.util.List;
 public record AdminResultListResponse(
         AdminResultFilterRequest filter,
         AdminPageResponse page,
-        List<AdminResultSummaryResponse> results
-) {
+        List<AdminResultSummaryResponse> results) {
 }

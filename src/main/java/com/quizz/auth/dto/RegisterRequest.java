@@ -6,22 +6,13 @@ import jakarta.validation.constraints.Size;
 
 public class RegisterRequest {
 
-    @NotBlank
-    @Size(min = 2, max = 80)
-    private String fullName;
+    @NotBlank @Size(min = 2, max = 80) private String fullName;
 
-    @NotBlank
-    @Email
-    @Size(max = 120)
-    private String email;
+    @NotBlank @Email @Size(max = 120) private String email;
 
-    @NotBlank
-    @Size(min = 8, max = 72)
-    private String password;
+    @NotBlank @Size(min = 8, max = 72) private String password;
 
-    @NotBlank
-    @Size(min = 8, max = 72)
-    private String confirmPassword;
+    @NotBlank @Size(min = 8, max = 72) private String confirmPassword;
 
     public String getFullName() {
         return fullName;

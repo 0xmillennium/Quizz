@@ -4,6 +4,5 @@ public record CategoryResponse(
         Long id,
         String name,
         String description,
-        boolean active
-) {
+        boolean active) {
 }

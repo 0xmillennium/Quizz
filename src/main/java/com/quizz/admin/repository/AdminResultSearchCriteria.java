@@ -11,6 +11,5 @@ public record AdminResultSearchCriteria(
         Instant startedFrom,
         Instant startedToExclusive,
         int limit,
-        int offset
-) {
+        int offset) {
 }

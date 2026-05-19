@@ -45,8 +45,7 @@ class DefaultAdminDashboardServiceTest {
                 80,
                 startedAt,
                 submittedAt,
-                null
-        );
+                null);
         when(repository.fetchMetrics()).thenReturn(metrics);
         when(repository.findRecentAttempts(10)).thenReturn(List.of(recentAttempt));
 
@@ -111,7 +110,6 @@ class DefaultAdminDashboardServiceTest {
                 7,
                 14,
                 6,
-                76.5
-        );
+                76.5);
     }
 }

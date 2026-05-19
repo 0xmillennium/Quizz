@@ -77,8 +77,7 @@ class LeaderboardControllerTest {
                 categoryQueryService,
                 categoryMapper,
                 quizQueryService,
-                quizMapper
-        );
+                quizMapper);
 
         mockMvc = MockMvcBuilders
                 .standaloneSetup(controller)
@@ -120,8 +119,8 @@ class LeaderboardControllerTest {
         stubPageDependencies();
 
         mockMvc.perform(get("/leaderboard")
-                        .param("quizId", "7")
-                        .with(user("user@example.com").roles("USER")))
+                .param("quizId", "7")
+                .with(user("user@example.com").roles("USER")))
                 .andExpect(status().isOk());
 
         LeaderboardFilterRequest filter = captureFilter();
@@ -133,8 +132,8 @@ class LeaderboardControllerTest {
         stubPageDependencies();
 
         mockMvc.perform(get("/leaderboard")
-                        .param("categoryId", "4")
-                        .with(user("user@example.com").roles("USER")))
+                .param("categoryId", "4")
+                .with(user("user@example.com").roles("USER")))
                 .andExpect(status().isOk());
 
         LeaderboardFilterRequest filter = captureFilter();
@@ -146,8 +145,8 @@ class LeaderboardControllerTest {
         stubPageDependencies();
 
         mockMvc.perform(get("/leaderboard")
-                        .param("limit", "25")
-                        .with(user("user@example.com").roles("USER")))
+                .param("limit", "25")
+                .with(user("user@example.com").roles("USER")))
                 .andExpect(status().isOk());
 
         LeaderboardFilterRequest filter = captureFilter();
@@ -157,7 +156,8 @@ class LeaderboardControllerTest {
     @Test
     void getLeaderboardAddsCategoriesAndQuizzesToModel() throws Exception {
         List<CategoryOptionResponse> categories = List.of(new CategoryOptionResponse(1L, "Science"));
-        List<QuizSummaryResponse> quizzes = List.of(new QuizSummaryResponse(2L, "Science Quiz", "Science", 30, 5, 3, 1440));
+        List<QuizSummaryResponse> quizzes = List
+                .of(new QuizSummaryResponse(2L, "Science Quiz", "Science", 30, 5, 3, 1440));
         when(leaderboardService.getLeaderboard(any(LeaderboardFilterRequest.class))).thenReturn(emptyLeaderboard());
         when(categoryQueryService.findActive()).thenReturn(List.of());
         when(categoryMapper.toOptionResponseList(List.of())).thenReturn(categories);
@@ -192,19 +192,20 @@ class LeaderboardControllerTest {
 
     private Filter springSecurityFilterChain() throws Exception {
         CustomUserDetailsService userDetailsService = new CustomUserDetailsService(new MissingUserQueryService());
-        SecurityConfig securityConfig = new SecurityConfig(userDetailsService, new CustomAuthenticationSuccessHandler());
+        SecurityConfig securityConfig = new SecurityConfig(userDetailsService,
+                new CustomAuthenticationSuccessHandler());
         PasswordEncoder passwordEncoder = securityConfig.passwordEncoder();
         AuthenticationProvider authenticationProvider = securityConfig.authenticationProvider(passwordEncoder);
         SecurityFilterChain securityFilterChain = securityConfig.securityFilterChain(
                 httpSecurity(authenticationProvider),
-                authenticationProvider
-        );
+                authenticationProvider);
         return new FilterChainProxy(securityFilterChain);
     }
 
     private HttpSecurity httpSecurity(AuthenticationProvider authenticationProvider) {
         ObjectPostProcessor<Object> objectPostProcessor = new PassthroughObjectPostProcessor();
-        AuthenticationManagerBuilder authenticationManagerBuilder = new AuthenticationManagerBuilder(objectPostProcessor);
+        AuthenticationManagerBuilder authenticationManagerBuilder = new AuthenticationManagerBuilder(
+                objectPostProcessor);
         authenticationManagerBuilder.authenticationProvider(authenticationProvider);
 
         ApplicationContext applicationContext = new StaticApplicationContext();

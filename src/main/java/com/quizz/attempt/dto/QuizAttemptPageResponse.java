@@ -6,9 +6,11 @@ import java.util.List;
 /**
  * Active attempt play-page model.
  *
- * <p>The model is built from immutable attempt snapshots and contains timing,
+ * <p>
+ * The model is built from immutable attempt snapshots and contains timing,
  * question, and selected-answer state. It must remain free of correctness
- * fields; correctness appears only in result or admin reporting DTOs.</p>
+ * fields; correctness appears only in result or admin reporting DTOs.
+ * </p>
  */
 public record QuizAttemptPageResponse(
         Long attemptId,
@@ -17,6 +19,5 @@ public record QuizAttemptPageResponse(
         int durationMinutes,
         Instant startedAt,
         Instant expiresAt,
-        List<AttemptQuestionResponse> questions
-) {
+        List<AttemptQuestionResponse> questions) {
 }

@@ -8,6 +8,5 @@ public record QuestionResponse(
         Long categoryId,
         String categoryName,
         String status,
-        List<AnswerOptionResponse> options
-) {
+        List<AnswerOptionResponse> options) {
 }

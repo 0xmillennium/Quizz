@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * Authenticated MVC boundary for public quiz browsing and detail pages.
  *
- * <p>The controller renders published quiz views and asks
+ * <p>
+ * The controller renders published quiz views and asks
  * {@link QuizAttemptStateProvider} for user-specific start/continue/restart
- * state. It does not access repositories or mutate attempt lifecycle state.</p>
+ * state. It does not access repositories or mutate attempt lifecycle state.
+ * </p>
  */
 @Controller
 public class QuizController {
@@ -35,8 +37,7 @@ public class QuizController {
             CategoryQueryService categoryQueryService,
             CategoryMapper categoryMapper,
             QuizAttemptStateProvider quizAttemptStateProvider,
-            CurrentUserProvider currentUserProvider
-    ) {
+            CurrentUserProvider currentUserProvider) {
         this.quizQueryService = quizQueryService;
         this.quizMapper = quizMapper;
         this.categoryQueryService = categoryQueryService;
@@ -49,14 +50,12 @@ public class QuizController {
     public String list(@RequestParam(required = false) Long categoryId, Model model) {
         model.addAttribute(
                 "categories",
-                categoryMapper.toOptionResponseList(categoryQueryService.findActive())
-        );
+                categoryMapper.toOptionResponseList(categoryQueryService.findActive()));
         model.addAttribute(
                 "quizzes",
                 quizMapper.toSummaryResponseList(categoryId == null
                         ? quizQueryService.findPublished()
-                        : quizQueryService.findPublishedByCategory(categoryId))
-        );
+                        : quizQueryService.findPublishedByCategory(categoryId)));
         model.addAttribute("selectedCategoryId", categoryId);
         return "quiz/list";
     }
@@ -66,8 +65,7 @@ public class QuizController {
         model.addAttribute("quiz", quizMapper.toDetailResponse(quizQueryService.getPublishedById(id)));
         model.addAttribute("attemptState", quizAttemptStateProvider.resolveForQuizDetail(
                 id,
-                currentUserProvider.getCurrentUserId()
-        ));
+                currentUserProvider.getCurrentUserId()));
         return "quiz/detail";
     }
 }

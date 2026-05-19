@@ -31,8 +31,7 @@ public class DefaultQuizCommandService implements QuizCommandService {
     public DefaultQuizCommandService(
             QuizRepository quizRepository,
             CategoryQueryService categoryQueryService,
-            QuestionQueryService questionQueryService
-    ) {
+            QuestionQueryService questionQueryService) {
         this.quizRepository = quizRepository;
         this.categoryQueryService = categoryQueryService;
         this.questionQueryService = questionQueryService;
@@ -53,8 +52,7 @@ public class DefaultQuizCommandService implements QuizCommandService {
                 request.getQuestionCount(),
                 request.getAttemptLimit(),
                 request.getRetakeCooldownMinutes(),
-                request.getQuestionIds()
-        );
+                request.getQuestionIds());
         Category category = categoryQueryService.getActiveById(request.getCategoryId());
         List<Question> questions = loadActiveQuestions(request.getQuestionIds());
         validateQuestionCategories(category, questions);
@@ -67,8 +65,7 @@ public class DefaultQuizCommandService implements QuizCommandService {
                 request.getQuestionCount(),
                 request.getAttemptLimit(),
                 request.getRetakeCooldownMinutes(),
-                questions
-        ));
+                questions));
     }
 
     @Override
@@ -88,8 +85,7 @@ public class DefaultQuizCommandService implements QuizCommandService {
                 request.getQuestionCount(),
                 request.getAttemptLimit(),
                 request.getRetakeCooldownMinutes(),
-                request.getQuestionIds()
-        );
+                request.getQuestionIds());
         Category category = categoryQueryService.getActiveById(request.getCategoryId());
         List<Question> questions = loadActiveQuestions(request.getQuestionIds());
         validateQuestionCategories(category, questions);
@@ -102,8 +98,7 @@ public class DefaultQuizCommandService implements QuizCommandService {
                 request.getQuestionCount(),
                 request.getAttemptLimit(),
                 request.getRetakeCooldownMinutes(),
-                questions
-        );
+                questions);
         return quiz;
     }
 
@@ -158,8 +153,7 @@ public class DefaultQuizCommandService implements QuizCommandService {
             Integer questionCount,
             Integer attemptLimit,
             Integer retakeCooldownMinutes,
-            List<Long> questionIds
-    ) {
+            List<Long> questionIds) {
         if (title.isBlank()) {
             throw new BusinessRuleException("Quiz title is required.");
         }

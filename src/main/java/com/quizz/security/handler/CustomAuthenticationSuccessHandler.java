@@ -12,9 +12,11 @@ import org.springframework.stereotype.Component;
 /**
  * Post-login redirect policy for form authentication.
  *
- * <p>Admins land on the admin dashboard and regular users land on the published
+ * <p>
+ * Admins land on the admin dashboard and regular users land on the published
  * quiz list. Authentication itself is still handled by Spring Security's form
- * login filter.</p>
+ * login filter.
+ * </p>
  */
 @Component
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
@@ -23,8 +25,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     public void onAuthenticationSuccess(
             HttpServletRequest request,
             HttpServletResponse response,
-            Authentication authentication
-    ) throws IOException, ServletException {
+            Authentication authentication) throws IOException, ServletException {
         boolean admin = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch("ROLE_ADMIN"::equals);

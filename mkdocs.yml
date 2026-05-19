@@ -58,6 +58,9 @@ nav:
       - Configuration: operations/configuration.md
       - Secrets: operations/secrets.md
       - Docker Runtime: operations/docker-runtime.md
+      - Release and Delivery: operations/release-and-delivery.md
+      - Repository Settings Checklist: operations/repository-settings-checklist.md
+      - First Release Runbook: operations/first-release-runbook.md
       - Troubleshooting: operations/troubleshooting.md
   - Reference:
       - Overview: reference/index.md
@@ -77,5 +80,6 @@ nav:
       - ADR-0006 Secrets and Local Configuration Boundary: decisions/adr-0006-secrets-and-local-configuration-boundary.md
       - ADR-0007 Server-rendered UI Design System: decisions/adr-0007-server-rendered-ui-design-system.md
   - Contributing:
+      - Repository Governance: contributing/repository-governance.md
       - Documentation Style Guide: contributing/documentation-style-guide.md
       - Code Documentation Standard: contributing/code-documentation-standard.md

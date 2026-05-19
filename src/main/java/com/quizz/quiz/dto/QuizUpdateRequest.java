@@ -11,35 +11,21 @@ import java.util.List;
 
 public class QuizUpdateRequest {
 
-    @NotBlank
-    @Size(min = 2, max = 150)
-    private String title;
+    @NotBlank @Size(min = 2, max = 150) private String title;
 
-    @Size(max = 1000)
-    private String description;
+    @Size(max = 1000) private String description;
 
-    @NotNull
-    private Long categoryId;
+    @NotNull private Long categoryId;
 
-    @NotNull
-    @Min(1)
-    @Max(180)
-    private Integer durationMinutes;
+    @NotNull @Min(1) @Max(180) private Integer durationMinutes;
 
-    @NotNull
-    @Min(1)
-    private Integer questionCount = 1;
+    @NotNull @Min(1) private Integer questionCount = 1;
 
-    @NotNull
-    @Min(1)
-    private Integer attemptLimit = 3;
+    @NotNull @Min(1) private Integer attemptLimit = 3;
 
-    @NotNull
-    @Min(1)
-    private Integer retakeCooldownMinutes = 1440;
+    @NotNull @Min(1) private Integer retakeCooldownMinutes = 1440;
 
-    @NotEmpty
-    private List<Long> questionIds = new ArrayList<>();
+    @NotEmpty private List<Long> questionIds = new ArrayList<>();
 
     public String getTitle() {
         return title;

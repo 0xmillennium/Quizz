@@ -114,8 +114,7 @@ class QuizMapperTest {
         Question created = Question.create(
                 text,
                 category,
-                List.of(new AnswerOptionDraft("A", true), new AnswerOptionDraft("B", false))
-        );
+                List.of(new AnswerOptionDraft("A", true), new AnswerOptionDraft("B", false)));
         setId(created, id);
         return created;
     }

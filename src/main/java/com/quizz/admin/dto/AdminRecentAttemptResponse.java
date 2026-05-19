@@ -13,6 +13,5 @@ public record AdminRecentAttemptResponse(
         int scorePercentage,
         Instant startedAt,
         Instant submittedAt,
-        Instant abandonedAt
-) {
+        Instant abandonedAt) {
 }

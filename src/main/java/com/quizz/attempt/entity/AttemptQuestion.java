@@ -22,19 +22,16 @@ import java.util.List;
 /**
  * Snapshot of a live question captured when an attempt starts.
  *
- * <p>The selected option is stored as a scalar attempt-answer-option id, not as
+ * <p>
+ * The selected option is stored as a scalar attempt-answer-option id, not as
  * a live answer-option relationship. {@code answerRevision} is the optimistic
  * client-side autosave guard: older revisions are ignored so late requests do
- * not overwrite newer answers.</p>
+ * not overwrite newer answers.
+ * </p>
  */
 @Entity
-@Table(
-        name = "attempt_questions",
-        uniqueConstraints = @UniqueConstraint(
-                name = "uk_attempt_questions_attempt_order",
-                columnNames = {"attempt_id", "display_order"}
-        )
-)
+@Table(name = "attempt_questions", uniqueConstraints = @UniqueConstraint(name = "uk_attempt_questions_attempt_order", columnNames = {
+        "attempt_id", "display_order"}))
 public class AttemptQuestion extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -62,11 +59,7 @@ public class AttemptQuestion extends BaseEntity {
     @Column(name = "correct")
     private Boolean correct;
 
-    @OneToMany(
-            mappedBy = "attemptQuestion",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "attemptQuestion", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("displayOrder ASC")
     private List<AttemptAnswerOption> options = new ArrayList<>();
 
@@ -77,8 +70,7 @@ public class AttemptQuestion extends BaseEntity {
             QuizAttempt attempt,
             Question question,
             int displayOrder,
-            List<AnswerOption> orderedOptions
-    ) {
+            List<AnswerOption> orderedOptions) {
         this.attempt = attempt;
         this.originalQuestionId = question.getId();
         this.questionText = question.getText();
@@ -106,8 +98,7 @@ public class AttemptQuestion extends BaseEntity {
             QuizAttempt attempt,
             Question question,
             int displayOrder,
-            List<AnswerOption> orderedOptions
-    ) {
+            List<AnswerOption> orderedOptions) {
         return new AttemptQuestion(attempt, question, displayOrder, orderedOptions);
     }
 
@@ -127,8 +118,7 @@ public class AttemptQuestion extends BaseEntity {
     public AutosaveOutcome autosaveAnswer(
             Long selectedOptionId,
             int incomingRevision,
-            Instant answeredAt
-    ) {
+            Instant answeredAt) {
         // Late browser requests must not overwrite a newer answer already saved
         // for this attempt question.
         if (incomingRevision <= answerRevision) {

@@ -35,8 +35,7 @@ public class DefaultAdminDashboardService implements AdminDashboardService {
                         row.scorePercentage(),
                         row.startedAt(),
                         row.submittedAt(),
-                        row.abandonedAt()
-                ))
+                        row.abandonedAt()))
                 .toList();
 
         return new AdminDashboardResponse(
@@ -57,7 +56,6 @@ public class DefaultAdminDashboardService implements AdminDashboardService {
                 metrics.manualCompletedAttempts(),
                 metrics.timeExpiredCompletedAttempts(),
                 metrics.averageScorePercentage(),
-                recentAttempts
-        );
+                recentAttempts);
     }
 }

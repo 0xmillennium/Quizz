@@ -8,8 +8,10 @@ import org.springframework.stereotype.Service;
 /**
  * Scoring service that evaluates an attempt snapshot before calculation.
  *
- * <p>Evaluation writes per-question correctness onto the attempt snapshot so
- * result and reporting views can display stored scoring state consistently.</p>
+ * <p>
+ * Evaluation writes per-question correctness onto the attempt snapshot so
+ * result and reporting views can display stored scoring state consistently.
+ * </p>
  */
 @Service
 public class DefaultScoringService implements ScoringService {

@@ -99,8 +99,7 @@ class QuizAdminControllerTest {
                 categoryQueryService,
                 categoryMapper,
                 questionQueryService,
-                questionMapper
-        );
+                questionMapper);
 
         mockMvc = MockMvcBuilders
                 .standaloneSetup(controller)
@@ -141,15 +140,15 @@ class QuizAdminControllerTest {
     @Test
     void postAdminQuizzesValidRedirectsToQuizzes() throws Exception {
         mockMvc.perform(post("/admin/quizzes")
-                        .with(user("admin@example.com").roles("ADMIN"))
-                        .with(csrf())
-                        .param("title", "Science Quiz")
-                        .param("categoryId", "1")
-                        .param("durationMinutes", "30")
-                        .param("questionCount", "1")
-                        .param("attemptLimit", "3")
-                        .param("retakeCooldownMinutes", "1440")
-                        .param("questionIds", "10"))
+                .with(user("admin@example.com").roles("ADMIN"))
+                .with(csrf())
+                .param("title", "Science Quiz")
+                .param("categoryId", "1")
+                .param("durationMinutes", "30")
+                .param("questionCount", "1")
+                .param("attemptLimit", "3")
+                .param("retakeCooldownMinutes", "1440")
+                .param("questionIds", "10"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/quizzes"));
 
@@ -161,15 +160,15 @@ class QuizAdminControllerTest {
         stubFormOptions();
 
         mockMvc.perform(post("/admin/quizzes")
-                        .with(user("admin@example.com").roles("ADMIN"))
-                        .with(csrf())
-                        .param("title", "")
-                        .param("categoryId", "1")
-                        .param("durationMinutes", "30")
-                        .param("questionCount", "1")
-                        .param("attemptLimit", "3")
-                        .param("retakeCooldownMinutes", "1440")
-                        .param("questionIds", "10"))
+                .with(user("admin@example.com").roles("ADMIN"))
+                .with(csrf())
+                .param("title", "")
+                .param("categoryId", "1")
+                .param("durationMinutes", "30")
+                .param("questionCount", "1")
+                .param("attemptLimit", "3")
+                .param("retakeCooldownMinutes", "1440")
+                .param("questionIds", "10"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/quizzes/create"));
 
@@ -208,15 +207,15 @@ class QuizAdminControllerTest {
     @Test
     void postAdminQuizUpdateValidRedirectsToQuizDetail() throws Exception {
         mockMvc.perform(post("/admin/quizzes/1")
-                        .with(user("admin@example.com").roles("ADMIN"))
-                        .with(csrf())
-                        .param("title", "Science Quiz")
-                        .param("categoryId", "1")
-                        .param("durationMinutes", "30")
-                        .param("questionCount", "1")
-                        .param("attemptLimit", "3")
-                        .param("retakeCooldownMinutes", "1440")
-                        .param("questionIds", "10"))
+                .with(user("admin@example.com").roles("ADMIN"))
+                .with(csrf())
+                .param("title", "Science Quiz")
+                .param("categoryId", "1")
+                .param("durationMinutes", "30")
+                .param("questionCount", "1")
+                .param("attemptLimit", "3")
+                .param("retakeCooldownMinutes", "1440")
+                .param("questionIds", "10"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/quizzes/1"));
 
@@ -228,30 +227,29 @@ class QuizAdminControllerTest {
         stubFormOptions();
 
         mockMvc.perform(post("/admin/quizzes/1")
-                        .with(user("admin@example.com").roles("ADMIN"))
-                        .with(csrf())
-                        .param("title", "")
-                        .param("categoryId", "1")
-                        .param("durationMinutes", "30")
-                        .param("questionCount", "1")
-                        .param("attemptLimit", "3")
-                        .param("retakeCooldownMinutes", "1440")
-                        .param("questionIds", "10"))
+                .with(user("admin@example.com").roles("ADMIN"))
+                .with(csrf())
+                .param("title", "")
+                .param("categoryId", "1")
+                .param("durationMinutes", "30")
+                .param("questionCount", "1")
+                .param("attemptLimit", "3")
+                .param("retakeCooldownMinutes", "1440")
+                .param("questionIds", "10"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/quizzes/edit"))
                 .andExpect(model().attribute("quizId", 1L));
 
         verify(quizCommandService, never()).updateDraft(
                 org.mockito.ArgumentMatchers.any(),
-                any(QuizUpdateRequest.class)
-        );
+                any(QuizUpdateRequest.class));
     }
 
     @Test
     void postPublishRedirectsToQuizDetail() throws Exception {
         mockMvc.perform(post("/admin/quizzes/1/publish")
-                        .with(user("admin@example.com").roles("ADMIN"))
-                        .with(csrf()))
+                .with(user("admin@example.com").roles("ADMIN"))
+                .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/quizzes/1"));
 
@@ -261,8 +259,8 @@ class QuizAdminControllerTest {
     @Test
     void postArchiveRedirectsToQuizzes() throws Exception {
         mockMvc.perform(post("/admin/quizzes/1/archive")
-                        .with(user("admin@example.com").roles("ADMIN"))
-                        .with(csrf()))
+                .with(user("admin@example.com").roles("ADMIN"))
+                .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/quizzes"));
 
@@ -272,8 +270,7 @@ class QuizAdminControllerTest {
     private void stubFormOptions() {
         List<CategoryOptionResponse> categories = List.of(new CategoryOptionResponse(1L, "Science"));
         List<QuestionSelectionResponse> questions = List.of(
-                new QuestionSelectionResponse(10L, "Question?", 1L, "Science")
-        );
+                new QuestionSelectionResponse(10L, "Question?", 1L, "Science"));
         when(categoryQueryService.findActive()).thenReturn(List.of());
         when(categoryMapper.toOptionResponseList(List.of())).thenReturn(categories);
         when(questionQueryService.findActive()).thenReturn(List.of());
@@ -295,19 +292,20 @@ class QuizAdminControllerTest {
 
     private Filter springSecurityFilterChain() throws Exception {
         CustomUserDetailsService userDetailsService = new CustomUserDetailsService(new MissingUserQueryService());
-        SecurityConfig securityConfig = new SecurityConfig(userDetailsService, new CustomAuthenticationSuccessHandler());
+        SecurityConfig securityConfig = new SecurityConfig(userDetailsService,
+                new CustomAuthenticationSuccessHandler());
         PasswordEncoder passwordEncoder = securityConfig.passwordEncoder();
         AuthenticationProvider authenticationProvider = securityConfig.authenticationProvider(passwordEncoder);
         SecurityFilterChain securityFilterChain = securityConfig.securityFilterChain(
                 httpSecurity(authenticationProvider),
-                authenticationProvider
-        );
+                authenticationProvider);
         return new FilterChainProxy(securityFilterChain);
     }
 
     private HttpSecurity httpSecurity(AuthenticationProvider authenticationProvider) {
         ObjectPostProcessor<Object> objectPostProcessor = new PassthroughObjectPostProcessor();
-        AuthenticationManagerBuilder authenticationManagerBuilder = new AuthenticationManagerBuilder(objectPostProcessor);
+        AuthenticationManagerBuilder authenticationManagerBuilder = new AuthenticationManagerBuilder(
+                objectPostProcessor);
         authenticationManagerBuilder.authenticationProvider(authenticationProvider);
 
         ApplicationContext applicationContext = new StaticApplicationContext();

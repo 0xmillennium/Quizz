@@ -13,26 +13,19 @@ import jakarta.persistence.UniqueConstraint;
 /**
  * Membership of a question in a quiz pool.
  *
- * <p>This type records authored pool membership and display order, not the
+ * <p>
+ * This type records authored pool membership and display order, not the
  * randomized question order shown to a user during an attempt. Attempt creation
  * samples from these rows and stores immutable attempt-question snapshots.
  * Keeping the join explicit avoids a broad {@code ManyToMany} coupling between
- * quiz definitions and questions.</p>
+ * quiz definitions and questions.
+ * </p>
  */
 @Entity
-@Table(
-        name = "quiz_questions",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_quiz_questions_quiz_question",
-                        columnNames = {"quiz_id", "question_id"}
-                ),
-                @UniqueConstraint(
-                        name = "uk_quiz_questions_quiz_order",
-                        columnNames = {"quiz_id", "display_order"}
-                )
-        }
-)
+@Table(name = "quiz_questions", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_quiz_questions_quiz_question", columnNames = {"quiz_id", "question_id"}),
+        @UniqueConstraint(name = "uk_quiz_questions_quiz_order", columnNames = {"quiz_id", "display_order"})
+})
 public class QuizQuestion extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

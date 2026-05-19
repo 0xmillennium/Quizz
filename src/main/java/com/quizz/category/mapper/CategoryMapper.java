@@ -15,8 +15,7 @@ public class CategoryMapper {
                 category.getId(),
                 category.getName(),
                 category.getDescription(),
-                category.isActive()
-        );
+                category.isActive());
     }
 
     public List<CategoryResponse> toResponseList(List<Category> categories) {
