@@ -9,6 +9,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+/**
+ * Owned answer option child of a {@link Question}.
+ *
+ * <p>Answer options are managed through the question aggregate rather than a
+ * separate repository or service. Correctness is copied into attempt snapshots
+ * for scoring and reporting; active play-page DTOs must not expose it.</p>
+ */
 @Entity
 @Table(
         name = "answer_options",

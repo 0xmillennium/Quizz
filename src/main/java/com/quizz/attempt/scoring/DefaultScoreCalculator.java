@@ -6,6 +6,13 @@ import com.quizz.common.exception.BusinessRuleException;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
+/**
+ * Default percentage-based score calculator.
+ *
+ * <p>The calculator expects questions to have already been evaluated against
+ * their attempt answer-option snapshots. It treats missing selections as
+ * unanswered and derives wrong answers from the remaining evaluated questions.</p>
+ */
 @Component
 public class DefaultScoreCalculator implements ScoreCalculator {
 

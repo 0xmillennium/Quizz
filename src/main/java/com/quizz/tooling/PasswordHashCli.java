@@ -7,6 +7,15 @@ import java.nio.charset.StandardCharsets;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+/**
+ * CLI helper for generating bcrypt password hashes from the production jar.
+ *
+ * <p>The {@code hash-password} mode reads the plaintext password from standard
+ * input, writes only the generated hash to standard output, and writes
+ * validation or I/O failures to standard error. It is invoked before the Spring
+ * application context starts so operators can generate admin bootstrap hashes
+ * without connecting to application infrastructure.</p>
+ */
 public final class PasswordHashCli {
 
     private static final int BCRYPT_STRENGTH = 12;

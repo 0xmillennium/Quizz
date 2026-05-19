@@ -13,6 +13,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+/**
+ * HTTP security configuration for MVC routes.
+ *
+ * <p>Public routes are limited to the home redirect, login, registration,
+ * static assets, health, and error handling. Admin routes require
+ * {@code ROLE_ADMIN}; quiz, attempt, and leaderboard routes require an
+ * authenticated user. CSRF remains enabled through Spring Security defaults,
+ * and logout invalidates the HTTP session and clears {@code JSESSIONID}.</p>
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {

@@ -19,6 +19,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Snapshot of a live question captured when an attempt starts.
+ *
+ * <p>The selected option is stored as a scalar attempt-answer-option id, not as
+ * a live answer-option relationship. {@code answerRevision} is the optimistic
+ * client-side autosave guard: older revisions are ignored so late requests do
+ * not overwrite newer answers.</p>
+ */
 @Entity
 @Table(
         name = "attempt_questions",
@@ -121,6 +129,8 @@ public class AttemptQuestion extends BaseEntity {
             int incomingRevision,
             Instant answeredAt
     ) {
+        // Late browser requests must not overwrite a newer answer already saved
+        // for this attempt question.
         if (incomingRevision <= answerRevision) {
             return AutosaveOutcome.staleOutcome();
         }

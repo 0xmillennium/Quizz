@@ -26,6 +26,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
+/**
+ * Immutable quiz-content snapshot and lifecycle aggregate for one user's attempt.
+ *
+ * <p>An attempt is {@code IN_PROGRESS}, {@code COMPLETED}, or {@code ABANDONED}.
+ * Completed attempts have a completion reason of {@code MANUAL} or
+ * {@code TIME_EXPIRED}; result counters are meaningful only after completion.
+ * Restart abandons an in-progress attempt and creates a new attempt from the
+ * same sampled snapshot rather than drawing a new pool.</p>
+ *
+ * <p>{@link AttemptQuestion} children store the question and answer-option
+ * snapshot used for play, scoring, result review, and admin reporting. The live
+ * question bank may change after an attempt starts without changing this
+ * aggregate.</p>
+ */
 @Entity
 @Table(name = "quiz_attempts")
 public class QuizAttempt extends BaseEntity {
@@ -211,6 +225,13 @@ public class QuizAttempt extends BaseEntity {
         applyScore(scoreResult);
     }
 
+    /**
+     * Completes this attempt because its server-side time window expired.
+     *
+     * <p>The submitted time is set to {@code expiresAt}, not the current clock
+     * time, because the logical submission moment is the end of the quiz window
+     * even if the user returns later.</p>
+     */
     public void completeByTimeExpiry(ScoreResult scoreResult) {
         ensureInProgress();
         this.submittedAt = expiresAt;
@@ -220,6 +241,13 @@ public class QuizAttempt extends BaseEntity {
         applyScore(scoreResult);
     }
 
+    /**
+     * Abandons an active attempt as part of a restart transaction.
+     *
+     * <p>The replacement attempt is created from this attempt's snapshot before
+     * the old attempt becomes terminal at the service boundary, which prevents
+     * restart from becoming a way to repeatedly sample the question pool.</p>
+     */
     public void abandonForRestart(Instant abandonedAt) {
         ensureInProgress();
         this.submittedAt = null;

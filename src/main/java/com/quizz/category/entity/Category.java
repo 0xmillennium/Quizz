@@ -5,6 +5,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
+/**
+ * Master-data aggregate for grouping questions and quizzes.
+ *
+ * <p>Categories are activated and deactivated instead of hard-deleted. The
+ * aggregate intentionally has no bidirectional question or quiz collections, so
+ * those feature packages decide which category joins they need.</p>
+ */
 @Entity
 @Table(name = "categories")
 public class Category extends BaseEntity {

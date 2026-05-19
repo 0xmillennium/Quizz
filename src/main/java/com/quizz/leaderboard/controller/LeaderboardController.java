@@ -12,6 +12,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+/**
+ * Authenticated MVC boundary for public leaderboard views.
+ *
+ * <p>The controller binds leaderboard filters and prepares selector data while
+ * delegating ranking semantics to {@link LeaderboardService}. It does not query
+ * attempt tables directly or expose user email addresses.</p>
+ */
 @Controller
 @RequestMapping("/leaderboard")
 public class LeaderboardController {

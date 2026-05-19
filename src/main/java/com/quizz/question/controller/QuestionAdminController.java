@@ -22,6 +22,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * ADMIN MVC boundary for question-bank authoring.
+ *
+ * <p>The controller prepares form options, binds question and option input, and
+ * delegates aggregate changes to {@link QuestionCommandService}. It does not
+ * access repositories or decide correctness beyond invoking form validation and
+ * service contracts.</p>
+ */
 @Controller
 @RequestMapping("/admin/questions")
 public class QuestionAdminController {

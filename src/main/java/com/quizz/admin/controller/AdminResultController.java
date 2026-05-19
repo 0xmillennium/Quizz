@@ -15,6 +15,14 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+/**
+ * ADMIN MVC boundary for attempt-result reports.
+ *
+ * <p>The controller handles filter binding and view selection for
+ * {@code /admin/results}. Reporting data comes from {@link AdminResultService}
+ * snapshot read models; no repository access or score recalculation belongs in
+ * this layer.</p>
+ */
 @Controller
 @RequestMapping("/admin/results")
 public class AdminResultController {

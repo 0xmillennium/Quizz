@@ -12,6 +12,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+/**
+ * Authenticated MVC boundary for public quiz browsing and detail pages.
+ *
+ * <p>The controller renders published quiz views and asks
+ * {@link QuizAttemptStateProvider} for user-specific start/continue/restart
+ * state. It does not access repositories or mutate attempt lifecycle state.</p>
+ */
 @Controller
 public class QuizController {
 

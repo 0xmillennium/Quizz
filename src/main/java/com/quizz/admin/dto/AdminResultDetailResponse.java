@@ -3,6 +3,14 @@ package com.quizz.admin.dto;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * Administrator detail model for one attempt snapshot.
+ *
+ * <p>The detail view is allowed to include correct-answer information because
+ * it is an admin reporting context. Scores and answers come from persisted
+ * attempt snapshot rows and are not recalculated for display. User email is not
+ * part of this model.</p>
+ */
 public record AdminResultDetailResponse(
         Long attemptId,
         Long userId,

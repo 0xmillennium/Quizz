@@ -9,6 +9,13 @@ import java.util.Map;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+/**
+ * JDBC read model for administrator dashboard metrics.
+ *
+ * <p>The repository performs aggregate count and recent-attempt reads only. It
+ * does not mutate operational state and deliberately selects user display names,
+ * not email addresses, for recent attempt rows.</p>
+ */
 @Repository
 public class AdminDashboardQueryRepository {
 

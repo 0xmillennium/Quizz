@@ -8,6 +8,14 @@ import java.util.Map;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+/**
+ * JDBC read model for public leaderboard rankings.
+ *
+ * <p>There is no leaderboard table or entity. Queries rank completed attempts
+ * with non-null {@code submitted_at}, keep one best row per user within the
+ * selected view, and use deterministic tie-breakers. User email is deliberately
+ * excluded from the select list.</p>
+ */
 @Repository
 public class LeaderboardQueryRepository {
 

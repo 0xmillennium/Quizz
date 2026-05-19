@@ -19,6 +19,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * ADMIN MVC boundary for category management.
+ *
+ * <p>The controller handles form binding, validation errors, flash messages,
+ * and view selection for {@code /admin/categories}. Category lifecycle and
+ * persistence rules are delegated to command and query services.</p>
+ */
 @Controller
 @RequestMapping("/admin/categories")
 public class CategoryAdminController {

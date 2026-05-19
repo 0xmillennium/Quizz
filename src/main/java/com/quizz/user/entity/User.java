@@ -7,6 +7,15 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 
+/**
+ * Application account aggregate used by domain services and the security adapter.
+ *
+ * <p>The account stores role, enablement, and password hash state. Email lookup
+ * is case-insensitive through repository methods and database constraints, but
+ * this entity does not normalize the field by itself. The password hash should
+ * only leave the user boundary for authentication adapters; {@code User} does
+ * not implement Spring Security {@code UserDetails}.</p>
+ */
 @Entity
 @Table(name = "users")
 public class User extends BaseEntity {

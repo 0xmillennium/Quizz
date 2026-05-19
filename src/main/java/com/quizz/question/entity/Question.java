@@ -17,6 +17,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Question-bank aggregate root that owns its answer options.
+ *
+ * <p>Creation and update replace the owned {@link AnswerOption} children as a
+ * unit. The command service validates the authored invariant that a question
+ * has a bounded option set with exactly one correct option. Archive and restore
+ * keep historical references intact for quizzes and attempt snapshots.</p>
+ */
 @Entity
 @Table(name = "questions")
 public class Question extends BaseEntity {

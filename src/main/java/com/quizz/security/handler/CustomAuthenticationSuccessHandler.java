@@ -9,6 +9,13 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
+/**
+ * Post-login redirect policy for form authentication.
+ *
+ * <p>Admins land on the admin dashboard and regular users land on the published
+ * quiz list. Authentication itself is still handled by Spring Security's form
+ * login filter.</p>
+ */
 @Component
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 

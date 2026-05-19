@@ -19,6 +19,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Quiz definition aggregate that owns its question pool memberships.
+ *
+ * <p>A quiz starts as {@code DRAFT}, can be published after validation, and can
+ * be archived. Draft updates replace the pool and policy fields. Published
+ * quizzes are not updated through the aggregate; the supported post-publish
+ * lifecycle transition is archive.</p>
+ *
+ * <p>{@code questionCount} controls how many pool questions are sampled for
+ * each fresh attempt, {@code attemptLimit} controls rights in the cooldown
+ * window, and {@code retakeCooldownMinutes} defines the reset delay once rights
+ * are exhausted.</p>
+ */
 @Entity
 @Table(name = "quizzes")
 public class Quiz extends BaseEntity {
@@ -127,6 +140,13 @@ public class Quiz extends BaseEntity {
         replaceQuestions(selectedQuestions);
     }
 
+    /**
+     * Publishes a draft quiz after enforcing aggregate-local policy checks.
+     *
+     * <p>The command service performs cross-aggregate checks for active
+     * category, active questions, and option correctness before calling this
+     * method. The aggregate protects the local pool size and policy bounds.</p>
+     */
     public void publish() {
         ensureDraft();
         if (questions.isEmpty()) {

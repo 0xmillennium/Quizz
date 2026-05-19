@@ -7,6 +7,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+/**
+ * Spring Security-backed current-user provider.
+ *
+ * <p>This adapter is the production boundary that reads
+ * {@code SecurityContextHolder}. It converts the authenticated
+ * {@link CustomUserDetails} principal into an {@link AuthenticatedUser} record
+ * so MVC and service code do not depend on framework principal types.</p>
+ */
 @Component
 public class SecurityCurrentUserProvider implements CurrentUserProvider {
 

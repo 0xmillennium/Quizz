@@ -5,6 +5,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+/**
+ * ADMIN MVC boundary for dashboard reporting.
+ *
+ * <p>The controller renders dashboard views from {@link AdminDashboardService}
+ * read models only. It does not mutate domain state or recalculate scores.</p>
+ */
 @Controller
 public class AdminDashboardController {
 

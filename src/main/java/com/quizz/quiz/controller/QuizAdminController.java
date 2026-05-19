@@ -24,6 +24,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * ADMIN MVC boundary for quiz definition authoring.
+ *
+ * <p>The controller serves {@code /admin/quizzes} views, prepares category and
+ * question selectors, and delegates draft, publish, and archive operations to
+ * {@link QuizCommandService}. It keeps repository fetch and publication rules
+ * behind service contracts.</p>
+ */
 @Controller
 @RequestMapping("/admin/quizzes")
 public class QuizAdminController {

@@ -10,6 +10,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Bridges Quizz user accounts to Spring Security authentication.
+ *
+ * <p>The domain {@link User} entity does not implement {@code UserDetails}.
+ * This service resolves the account through {@link UserQueryService} and wraps
+ * it in {@link CustomUserDetails} for the authentication provider.</p>
+ */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 

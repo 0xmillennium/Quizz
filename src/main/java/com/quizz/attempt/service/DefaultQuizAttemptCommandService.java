@@ -34,6 +34,14 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Transactional implementation of attempt lifecycle commands.
+ *
+ * <p>The implementation coordinates quiz/user reads, attempt snapshots,
+ * persisted answer state, scoring, and allowance locking in one write boundary.
+ * Controllers should depend on {@link QuizAttemptCommandService}, not on the
+ * attempt repositories directly.</p>
+ */
 @Service
 @Transactional
 public class DefaultQuizAttemptCommandService implements QuizAttemptCommandService {
@@ -134,6 +142,8 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
                 throw new BusinessRuleException("No restart attempts remaining.");
             }
             loadQuestionOptions(existing);
+            // Restart reuses the previous snapshot so users cannot repeatedly
+            // restart to sample the entire question pool.
             existing.abandonForRestart(now);
             quizAttemptRepository.flush();
             allowance.consumeRight(now);
@@ -172,6 +182,8 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
             throw new BusinessRuleException("Abandoned attempts cannot be changed.");
         }
         if (attempt.isOverdueAt(now)) {
+            // Overdue autosave uses previously persisted answers; the incoming
+            // browser payload is no longer part of the logical quiz window.
             autoSubmitExisting(attempt);
             updateAllowanceAfterTerminal(attempt);
             return new AutosaveAnswerResponse(
@@ -335,6 +347,8 @@ public class DefaultQuizAttemptCommandService implements QuizAttemptCommandServi
                 attempt.getQuiz().getId(),
                 AttemptStatus.IN_PROGRESS
         );
+        // Cooldown starts only when exhausted rights are no longer paired with
+        // an active attempt the user can finish or restart.
         if (hasActiveAttempt) {
             return;
         }

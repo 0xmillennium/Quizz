@@ -23,6 +23,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * Authenticated MVC boundary for taking, autosaving, submitting, and reviewing attempts.
+ *
+ * <p>The controller performs HTTP binding, current-user resolution, JSON/view
+ * response selection, and redirect/flash behavior. Attempt lifecycle mutations
+ * are delegated to {@link QuizAttemptCommandService}; play, result, chart, and
+ * history reads are delegated to {@link QuizAttemptQueryService}.</p>
+ */
 @Controller
 public class QuizAttemptController {
 

@@ -8,6 +8,13 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+/**
+ * Spring Data access for question-bank aggregates.
+ *
+ * <p>Fetch graphs are declared for admin/detail use so services can load
+ * categories and owned options without exposing repository details to
+ * controllers.</p>
+ */
 public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     @EntityGraph(attributePaths = {"category", "options"})

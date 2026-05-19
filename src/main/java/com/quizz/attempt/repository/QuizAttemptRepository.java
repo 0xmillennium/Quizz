@@ -10,6 +10,13 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+/**
+ * Spring Data access for attempt snapshots and lifecycle queries.
+ *
+ * <p>Methods intentionally resolve user-scoped attempts for play/result flows
+ * and expose fetch graphs needed by command services. Controllers should use
+ * attempt services instead of this repository.</p>
+ */
 public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> {
 
     @EntityGraph(attributePaths = {

@@ -6,6 +6,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+/**
+ * Spring Data access for category master data.
+ *
+ * <p>Controllers should depend on category services instead of this repository.
+ * Name uniqueness checks are case-insensitive to preserve a stable authoring
+ * identity for categories.</p>
+ */
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     boolean existsByNameIgnoreCase(String name);

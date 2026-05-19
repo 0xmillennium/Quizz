@@ -7,6 +7,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
+/**
+ * Spring Data access for per-user quiz attempt allowances.
+ *
+ * <p>Command flows use the pessimistic write query when consuming rights or
+ * starting cooldown so concurrent starts/restarts serialize on the user+quiz
+ * allowance row.</p>
+ */
 public interface QuizAttemptAllowanceRepository extends JpaRepository<QuizAttemptAllowance, Long> {
 
     Optional<QuizAttemptAllowance> findByUserIdAndQuizId(Long userId, Long quizId);

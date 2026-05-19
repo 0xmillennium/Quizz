@@ -11,6 +11,15 @@ import java.util.Optional;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+/**
+ * JDBC read model for administrator attempt-result reporting.
+ *
+ * <p>Summary and detail rows are read from attempt snapshot tables and persisted
+ * score columns. Detail rows join attempt questions to attempt answer options,
+ * not live question-bank options, so reports reflect what the user saw. User
+ * email is deliberately excluded, and this repository never recalculates
+ * scores.</p>
+ */
 @Repository
 public class AdminResultQueryRepository {
 

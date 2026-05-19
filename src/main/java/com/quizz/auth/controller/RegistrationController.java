@@ -12,6 +12,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * MVC boundary for public registration routes.
+ *
+ * <p>The controller binds and validates registration forms, delegates account
+ * creation to {@link RegistrationService}, and selects views or redirects. It
+ * does not authenticate credentials or access user repositories directly.</p>
+ */
 @Controller
 public class RegistrationController {
 

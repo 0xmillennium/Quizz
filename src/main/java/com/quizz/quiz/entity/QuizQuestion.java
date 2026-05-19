@@ -10,6 +10,15 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+/**
+ * Membership of a question in a quiz pool.
+ *
+ * <p>This type records authored pool membership and display order, not the
+ * randomized question order shown to a user during an attempt. Attempt creation
+ * samples from these rows and stores immutable attempt-question snapshots.
+ * Keeping the join explicit avoids a broad {@code ManyToMany} coupling between
+ * quiz definitions and questions.</p>
+ */
 @Entity
 @Table(
         name = "quiz_questions",
