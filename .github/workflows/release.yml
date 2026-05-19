@@ -38,9 +38,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          TAG_TYPE="$(git cat-file -t "${GITHUB_REF_NAME}")"
-          if [ "${TAG_TYPE}" != "tag" ]; then
-            echo "::error::Release tag ${GITHUB_REF_NAME} is a ${TAG_TYPE}, not an annotated tag object."
+          git tag -d "${GITHUB_REF_NAME}" 2>/dev/null || true
+          git fetch --force origin "refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"
+          if ! git rev-parse -q --verify "refs/tags/${GITHUB_REF_NAME}^{tag}" >/dev/null; then
+            echo "::error::Release tag ${GITHUB_REF_NAME} is not an annotated tag object."
             echo "::error::Create release tags with: git tag -a ${GITHUB_REF_NAME} -m \"${GITHUB_REF_NAME}\""
             exit 1
           fi
@@ -50,7 +51,7 @@ jobs:
         run: |
           set -euo pipefail
           git fetch origin master:refs/remotes/origin/master --prune
-          TAG_COMMIT="$(git rev-list -n 1 "${GITHUB_REF_NAME}")"
+          TAG_COMMIT="$(git rev-list -n 1 "refs/tags/${GITHUB_REF_NAME}")"
           if ! git merge-base --is-ancestor "${TAG_COMMIT}" origin/master; then
             echo "::error::Release tag ${GITHUB_REF_NAME} points to ${TAG_COMMIT}, which is not reachable from origin/master."
             echo "::error::Release tags must be created from validated commits on the protected master branch."
