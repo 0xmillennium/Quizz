@@ -27,10 +27,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 /**
  * ADMIN MVC boundary for quiz definition authoring.
  *
- * <p>The controller serves {@code /admin/quizzes} views, prepares category and
+ * <p>
+ * The controller serves {@code /admin/quizzes} views, prepares category and
  * question selectors, and delegates draft, publish, and archive operations to
  * {@link QuizCommandService}. It keeps repository fetch and publication rules
- * behind service contracts.</p>
+ * behind service contracts.
+ * </p>
  */
 @Controller
 @RequestMapping("/admin/quizzes")
@@ -53,8 +55,7 @@ public class QuizAdminController {
             CategoryQueryService categoryQueryService,
             CategoryMapper categoryMapper,
             QuestionQueryService questionQueryService,
-            QuestionMapper questionMapper
-    ) {
+            QuestionMapper questionMapper) {
         this.quizCommandService = quizCommandService;
         this.quizQueryService = quizQueryService;
         this.quizMapper = quizMapper;
@@ -83,8 +84,7 @@ public class QuizAdminController {
             @Valid @ModelAttribute("quizCreateRequest") QuizCreateRequest request,
             BindingResult bindingResult,
             Model model,
-            RedirectAttributes redirectAttributes
-    ) {
+            RedirectAttributes redirectAttributes) {
         quizFormValidator.validateCreate(request, bindingResult);
         if (bindingResult.hasErrors()) {
             addFormOptions(model);
@@ -94,8 +94,7 @@ public class QuizAdminController {
         quizCommandService.create(request);
         redirectAttributes.addFlashAttribute(
                 "flashMessage",
-                FlashMessage.success("Quiz draft created successfully.")
-        );
+                FlashMessage.success("Quiz draft created successfully."));
         return "redirect:/admin/quizzes";
     }
 
@@ -124,8 +123,7 @@ public class QuizAdminController {
             @Valid @ModelAttribute("quizUpdateRequest") QuizUpdateRequest request,
             BindingResult bindingResult,
             Model model,
-            RedirectAttributes redirectAttributes
-    ) {
+            RedirectAttributes redirectAttributes) {
         quizFormValidator.validateUpdate(request, bindingResult);
         if (bindingResult.hasErrors()) {
             model.addAttribute("quizId", id);
@@ -136,8 +134,7 @@ public class QuizAdminController {
         quizCommandService.updateDraft(id, request);
         redirectAttributes.addFlashAttribute(
                 "flashMessage",
-                FlashMessage.success("Quiz draft updated successfully.")
-        );
+                FlashMessage.success("Quiz draft updated successfully."));
         return "redirect:/admin/quizzes/" + id;
     }
 
@@ -146,8 +143,7 @@ public class QuizAdminController {
         quizCommandService.publish(id);
         redirectAttributes.addFlashAttribute(
                 "flashMessage",
-                FlashMessage.success("Quiz published successfully.")
-        );
+                FlashMessage.success("Quiz published successfully."));
         return "redirect:/admin/quizzes/" + id;
     }
 
@@ -156,19 +152,16 @@ public class QuizAdminController {
         quizCommandService.archive(id);
         redirectAttributes.addFlashAttribute(
                 "flashMessage",
-                FlashMessage.success("Quiz archived successfully.")
-        );
+                FlashMessage.success("Quiz archived successfully."));
         return "redirect:/admin/quizzes";
     }
 
     private void addFormOptions(Model model) {
         model.addAttribute(
                 "categories",
-                categoryMapper.toOptionResponseList(categoryQueryService.findActive())
-        );
+                categoryMapper.toOptionResponseList(categoryQueryService.findActive()));
         model.addAttribute(
                 "questions",
-                questionMapper.toSelectionResponseList(questionQueryService.findActive())
-        );
+                questionMapper.toSelectionResponseList(questionQueryService.findActive()));
     }
 }

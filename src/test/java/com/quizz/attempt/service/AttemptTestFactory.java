@@ -37,9 +37,7 @@ public final class AttemptTestFactory {
                 category,
                 List.of(
                         new AnswerOptionDraft(text + " correct", true),
-                        new AnswerOptionDraft(text + " wrong", false)
-                )
-        );
+                        new AnswerOptionDraft(text + " wrong", false)));
         setId(question, id);
         setId(question.getOptions().get(0), id * 10 + 1);
         setId(question.getOptions().get(1), id * 10 + 2);
@@ -61,8 +59,7 @@ public final class AttemptTestFactory {
                 quiz.getQuestions(),
                 question -> question.getOptions().stream()
                         .sorted(Comparator.comparingInt(option -> option.getDisplayOrder()))
-                        .toList()
-        );
+                        .toList());
         setId(attempt, id);
         long questionId = id * 100;
         long optionId = id * 1000;

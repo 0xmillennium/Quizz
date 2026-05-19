@@ -7,8 +7,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * MVC view-controller configuration.
  *
- * <p>The root route redirects to the authenticated quiz list, leaving route
- * authorization to {@link com.quizz.security.config.SecurityConfig}.</p>
+ * <p>
+ * The root route redirects to the authenticated quiz list, leaving route
+ * authorization to {@link com.quizz.security.config.SecurityConfig}.
+ * </p>
  */
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {

@@ -25,10 +25,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 /**
  * ADMIN MVC boundary for question-bank authoring.
  *
- * <p>The controller prepares form options, binds question and option input, and
+ * <p>
+ * The controller prepares form options, binds question and option input, and
  * delegates aggregate changes to {@link QuestionCommandService}. It does not
  * access repositories or decide correctness beyond invoking form validation and
- * service contracts.</p>
+ * service contracts.
+ * </p>
  */
 @Controller
 @RequestMapping("/admin/questions")
@@ -47,8 +49,7 @@ public class QuestionAdminController {
             QuestionMapper questionMapper,
             QuestionFormValidator questionFormValidator,
             CategoryQueryService categoryQueryService,
-            CategoryMapper categoryMapper
-    ) {
+            CategoryMapper categoryMapper) {
         this.questionCommandService = questionCommandService;
         this.questionQueryService = questionQueryService;
         this.questionMapper = questionMapper;
@@ -61,8 +62,7 @@ public class QuestionAdminController {
     public String list(Model model) {
         model.addAttribute(
                 "questions",
-                questionMapper.toSummaryResponseList(questionQueryService.findAllForAdmin())
-        );
+                questionMapper.toSummaryResponseList(questionQueryService.findAllForAdmin()));
         return "admin/questions/list";
     }
 
@@ -78,8 +78,7 @@ public class QuestionAdminController {
             @Valid @ModelAttribute("questionCreateRequest") QuestionCreateRequest request,
             BindingResult bindingResult,
             Model model,
-            RedirectAttributes redirectAttributes
-    ) {
+            RedirectAttributes redirectAttributes) {
         questionFormValidator.validateCreate(request, bindingResult);
         if (bindingResult.hasErrors()) {
             addActiveCategories(model);
@@ -89,8 +88,7 @@ public class QuestionAdminController {
         questionCommandService.create(request);
         redirectAttributes.addFlashAttribute(
                 "flashMessage",
-                FlashMessage.success("Question created successfully.")
-        );
+                FlashMessage.success("Question created successfully."));
         return "redirect:/admin/questions";
     }
 
@@ -109,8 +107,7 @@ public class QuestionAdminController {
             @Valid @ModelAttribute("questionUpdateRequest") QuestionUpdateRequest request,
             BindingResult bindingResult,
             Model model,
-            RedirectAttributes redirectAttributes
-    ) {
+            RedirectAttributes redirectAttributes) {
         questionFormValidator.validateUpdate(request, bindingResult);
         if (bindingResult.hasErrors()) {
             model.addAttribute("questionId", id);
@@ -121,8 +118,7 @@ public class QuestionAdminController {
         questionCommandService.update(id, request);
         redirectAttributes.addFlashAttribute(
                 "flashMessage",
-                FlashMessage.success("Question updated successfully.")
-        );
+                FlashMessage.success("Question updated successfully."));
         return "redirect:/admin/questions";
     }
 
@@ -131,8 +127,7 @@ public class QuestionAdminController {
         questionCommandService.archive(id);
         redirectAttributes.addFlashAttribute(
                 "flashMessage",
-                FlashMessage.success("Question archived successfully.")
-        );
+                FlashMessage.success("Question archived successfully."));
         return "redirect:/admin/questions";
     }
 
@@ -141,16 +136,14 @@ public class QuestionAdminController {
         questionCommandService.restore(id);
         redirectAttributes.addFlashAttribute(
                 "flashMessage",
-                FlashMessage.success("Question restored successfully.")
-        );
+                FlashMessage.success("Question restored successfully."));
         return "redirect:/admin/questions";
     }
 
     private void addActiveCategories(Model model) {
         model.addAttribute(
                 "categories",
-                categoryMapper.toOptionResponseList(categoryQueryService.findActive())
-        );
+                categoryMapper.toOptionResponseList(categoryQueryService.findActive()));
     }
 
     private QuestionCreateRequest createRequestWithDefaultOptions() {

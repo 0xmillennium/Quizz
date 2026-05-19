@@ -1,7 +1,5 @@
 package com.quizz.attempt.entity;
 
 public enum AttemptStatus {
-    IN_PROGRESS,
-    COMPLETED,
-    ABANDONED
+    IN_PROGRESS, COMPLETED, ABANDONED
 }

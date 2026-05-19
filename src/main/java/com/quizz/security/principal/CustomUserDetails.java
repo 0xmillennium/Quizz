@@ -11,9 +11,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 /**
  * Spring Security principal built from a Quizz {@link User}.
  *
- * <p>The wrapper exposes the password hash and authorities required by Spring
+ * <p>
+ * The wrapper exposes the password hash and authorities required by Spring
  * Security while keeping the domain entity independent from framework
- * interfaces.</p>
+ * interfaces.
+ * </p>
  */
 public class CustomUserDetails implements UserDetails {
 

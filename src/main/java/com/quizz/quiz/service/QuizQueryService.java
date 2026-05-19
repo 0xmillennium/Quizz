@@ -6,9 +6,11 @@ import java.util.List;
 /**
  * Read boundary for quiz definitions.
  *
- * <p>Query methods provide admin views, public published views, and fetch graphs
+ * <p>
+ * Query methods provide admin views, public published views, and fetch graphs
  * needed to start attempts. Implementations must not mutate quiz lifecycle
- * state or bypass publication checks for public/user-facing reads.</p>
+ * state or bypass publication checks for public/user-facing reads.
+ * </p>
  */
 public interface QuizQueryService {
 

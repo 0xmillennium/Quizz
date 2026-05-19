@@ -19,8 +19,7 @@ class CustomAuthenticationSuccessHandlerTest {
         TestingAuthenticationToken authentication = new TestingAuthenticationToken(
                 "admin",
                 "password",
-                List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
-        );
+                List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
 
         handler.onAuthenticationSuccess(new MockHttpServletRequest(), response, authentication);
 
@@ -33,8 +32,7 @@ class CustomAuthenticationSuccessHandlerTest {
         TestingAuthenticationToken authentication = new TestingAuthenticationToken(
                 "user",
                 "password",
-                List.of(new SimpleGrantedAuthority("ROLE_USER"))
-        );
+                List.of(new SimpleGrantedAuthority("ROLE_USER")));
 
         handler.onAuthenticationSuccess(new MockHttpServletRequest(), response, authentication);
 

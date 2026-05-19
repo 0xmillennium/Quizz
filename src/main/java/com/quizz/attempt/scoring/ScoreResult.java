@@ -6,6 +6,5 @@ public record ScoreResult(
         int wrongCount,
         int unansweredCount,
         int scorePercentage,
-        String scoringVersion
-) {
+        String scoringVersion) {
 }

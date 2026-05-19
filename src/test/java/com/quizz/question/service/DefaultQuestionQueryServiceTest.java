@@ -121,7 +121,6 @@ class DefaultQuestionQueryServiceTest {
         return Question.create(
                 "What is water?",
                 Category.create("Science", null),
-                List.of(new AnswerOptionDraft("H2O", true), new AnswerOptionDraft("CO2", false))
-        );
+                List.of(new AnswerOptionDraft("H2O", true), new AnswerOptionDraft("CO2", false)));
     }
 }

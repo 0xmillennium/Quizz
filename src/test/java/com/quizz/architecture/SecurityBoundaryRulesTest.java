@@ -18,8 +18,7 @@ class SecurityBoundaryRulesTest {
     private static final Path MAIN_SOURCES = Path.of("src/main/java");
     private static final Path TEMPLATES = Path.of("src/main/resources/templates");
     private static final Path STATIC = Path.of("src/main/resources/static");
-    private static final String ALLOWED_SECURITY_CONTEXT_HOLDER_FILE =
-            "com/quizz/security/context/SecurityCurrentUserProvider.java";
+    private static final String ALLOWED_SECURITY_CONTEXT_HOLDER_FILE = "com/quizz/security/context/SecurityCurrentUserProvider.java";
     private static final Pattern STATIC_REFERENCE = Pattern.compile("th:(?:href|src)=\"@\\{/((?:css|js)/[^}\"()]+)");
 
     @Test

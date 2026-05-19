@@ -33,8 +33,7 @@ public class DefaultQuizAttemptStateProvider implements QuizAttemptStateProvider
             QuizAttemptCommandService quizAttemptCommandService,
             QuizQueryService quizQueryService,
             UserQueryService userQueryService,
-            Clock clock
-    ) {
+            Clock clock) {
         this.quizAttemptRepository = quizAttemptRepository;
         this.allowanceRepository = allowanceRepository;
         this.quizAttemptCommandService = quizAttemptCommandService;
@@ -51,8 +50,7 @@ public class DefaultQuizAttemptStateProvider implements QuizAttemptStateProvider
         QuizAttempt activeAttempt = quizAttemptRepository.findByUserIdAndQuizIdAndStatus(
                 userId,
                 quizId,
-                AttemptStatus.IN_PROGRESS
-        ).orElse(null);
+                AttemptStatus.IN_PROGRESS).orElse(null);
 
         Long autoSubmittedAttemptId = null;
         if (activeAttempt != null && activeAttempt.isOverdueAt(now)) {
@@ -69,8 +67,7 @@ public class DefaultQuizAttemptStateProvider implements QuizAttemptStateProvider
                 .findFirstByUserIdAndQuizIdAndStatusOrderBySubmittedAtDescStartedAtDesc(
                         userId,
                         quizId,
-                        AttemptStatus.COMPLETED
-                )
+                        AttemptStatus.COMPLETED)
                 .map(QuizAttempt::getId)
                 .orElse(null);
 
@@ -91,7 +88,6 @@ public class DefaultQuizAttemptStateProvider implements QuizAttemptStateProvider
                 allowance.getCooldownUntil(),
                 canStart,
                 canContinue,
-                canRestart
-        );
+                canRestart);
     }
 }

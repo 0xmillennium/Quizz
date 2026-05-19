@@ -108,19 +108,20 @@ class RouteSecurityMatrixTest {
 
     private Filter springSecurityFilterChain() throws Exception {
         CustomUserDetailsService userDetailsService = new CustomUserDetailsService(new MissingUserQueryService());
-        SecurityConfig securityConfig = new SecurityConfig(userDetailsService, new CustomAuthenticationSuccessHandler());
+        SecurityConfig securityConfig = new SecurityConfig(userDetailsService,
+                new CustomAuthenticationSuccessHandler());
         PasswordEncoder passwordEncoder = securityConfig.passwordEncoder();
         AuthenticationProvider authenticationProvider = securityConfig.authenticationProvider(passwordEncoder);
         SecurityFilterChain securityFilterChain = securityConfig.securityFilterChain(
                 httpSecurity(authenticationProvider),
-                authenticationProvider
-        );
+                authenticationProvider);
         return new FilterChainProxy(securityFilterChain);
     }
 
     private HttpSecurity httpSecurity(AuthenticationProvider authenticationProvider) {
         ObjectPostProcessor<Object> objectPostProcessor = new PassthroughObjectPostProcessor();
-        AuthenticationManagerBuilder authenticationManagerBuilder = new AuthenticationManagerBuilder(objectPostProcessor);
+        AuthenticationManagerBuilder authenticationManagerBuilder = new AuthenticationManagerBuilder(
+                objectPostProcessor);
         authenticationManagerBuilder.authenticationProvider(authenticationProvider);
 
         ApplicationContext applicationContext = new StaticApplicationContext();

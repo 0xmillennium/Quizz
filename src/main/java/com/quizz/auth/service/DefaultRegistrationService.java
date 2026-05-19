@@ -32,8 +32,7 @@ public class DefaultRegistrationService implements RegistrationService {
                 request.getFullName(),
                 request.getEmail(),
                 passwordHash,
-                UserRole.USER
-        );
+                UserRole.USER);
 
         userAccountService.createUser(command);
     }

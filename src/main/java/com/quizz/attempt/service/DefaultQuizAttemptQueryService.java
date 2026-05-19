@@ -24,8 +24,7 @@ public class DefaultQuizAttemptQueryService implements QuizAttemptQueryService {
     public DefaultQuizAttemptQueryService(
             QuizAttemptRepository quizAttemptRepository,
             QuizAttemptMapper quizAttemptMapper,
-            Clock clock
-    ) {
+            Clock clock) {
         this.quizAttemptRepository = quizAttemptRepository;
         this.quizAttemptMapper = quizAttemptMapper;
         this.clock = clock;

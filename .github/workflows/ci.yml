@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Java, Python, Javadocs, and static audits
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Set up Java
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.x"
+
+      - name: Ensure ripgrep is available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v rg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ripgrep
+          fi
+
+      - name: Spotless check
+        run: mvn spotless:check
+
+      - name: Maven tests
+        run: mvn clean test
+
+      - name: Javadocs
+        run: mvn -q javadoc:javadoc
+
+      - name: Python demo tooling tests
+        run: python3 -m unittest discover scripts/demo/tests
+
+      - name: Static audits
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          fail_if_match() {
+            local description="$1"
+            shift
+            if rg -n "$@"; then
+              echo "::error::Static audit failed: ${description}"
+              exit 1
+            fi
+          }
+
+          fail_if_match "inline styles in templates" 'style="' src/main/resources/templates
+          fail_if_match "hardcoded localhost in templates" 'http://localhost' src/main/resources/templates
+          fail_if_match "frontend framework references" 'bootstrap|tailwind|react|vue' pom.xml src/main/resources
+          fail_if_match "play page answer metadata leakage" 'originalAnswerOptionId|correctOptionText' src/main/resources/templates/attempt/play.html
+          fail_if_match "play page correctness wording leakage" '\bcorrect\b' src/main/resources/templates/attempt/play.html
+          fail_if_match "mutating GET form suspicion" 'method="get".*(publish|archive|restore|activate|deactivate|restart|submit|logout)' src/main/resources/templates
+          fail_if_match "mutating GET link suspicion" 'href=.*(publish|archive|restore|activate|deactivate|restart|submit|logout)' src/main/resources/templates
+          fail_if_match "sensitive template exposure" 'passwordHash|users\.email' src/main/resources/templates
+
+  pr-title:
+    name: PR title
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+
+      - name: Lint PR title
+        shell: bash
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -euo pipefail
+          printf '%s\n' "${PR_TITLE}" | npx --yes @commitlint/cli@20.1.0 --config .commitlintrc.yaml

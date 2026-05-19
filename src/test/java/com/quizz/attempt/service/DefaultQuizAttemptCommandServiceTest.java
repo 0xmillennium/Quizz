@@ -89,8 +89,7 @@ class DefaultQuizAttemptCommandServiceTest {
                 userQueryService,
                 scoringService,
                 deterministicRandomizer,
-                Clock.fixed(NOW, ZoneOffset.UTC)
-        );
+                Clock.fixed(NOW, ZoneOffset.UTC));
 
         lenient().when(allowanceRepository.findByUserIdAndQuizIdForUpdate(1L, 3L))
                 .thenReturn(Optional.of(allowance));
@@ -233,7 +232,8 @@ class DefaultQuizAttemptCommandServiceTest {
         first.autosaveAnswer(newerOption, 2, NOW.minusSeconds(5));
         when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
 
-        AutosaveAnswerResponse response = service.autosaveAnswer(4L, first.getId(), 1L, first.getOptions().get(0).getId(), 1);
+        AutosaveAnswerResponse response = service.autosaveAnswer(4L, first.getId(), 1L,
+                first.getOptions().get(0).getId(), 1);
 
         assertThat(response.stale()).isTrue();
         assertThat(first.getSelectedOptionId()).isEqualTo(newerOption);
@@ -259,7 +259,8 @@ class DefaultQuizAttemptCommandServiceTest {
         when(quizAttemptRepository.findByIdAndUserIdWithQuestions(4L, 1L)).thenReturn(Optional.of(attempt));
         when(scoringService.score(attempt)).thenReturn(SCORE);
 
-        AutosaveAnswerResponse response = service.autosaveAnswer(4L, first.getId(), 1L, first.getOptions().get(0).getId(), 1);
+        AutosaveAnswerResponse response = service.autosaveAnswer(4L, first.getId(), 1L,
+                first.getOptions().get(0).getId(), 1);
 
         assertThat(response.autoSubmitted()).isTrue();
         assertThat(response.redirectUrl()).isEqualTo("/attempts/4/result");
@@ -276,8 +277,7 @@ class DefaultQuizAttemptCommandServiceTest {
 
         service.submitAttempt(4L, 1L, request(
                 answer(first, first.getOptions().get(0).getId()),
-                answer(second, second.getOptions().get(0).getId())
-        ));
+                answer(second, second.getOptions().get(0).getId())));
 
         assertThat(attempt.getStatus()).isEqualTo(AttemptStatus.COMPLETED);
         assertThat(attempt.getCompletionReason()).isEqualTo(AttemptCompletionReason.MANUAL);
@@ -298,8 +298,7 @@ class DefaultQuizAttemptCommandServiceTest {
 
         service.submitAttempt(4L, 1L, request(
                 answer(first, first.getOptions().get(0).getId()),
-                answer(second, second.getOptions().get(0).getId())
-        ));
+                answer(second, second.getOptions().get(0).getId())));
 
         assertThat(allowance.getCooldownUntil()).isEqualTo(NOW.plusSeconds(1440 * 60L));
     }
@@ -319,8 +318,7 @@ class DefaultQuizAttemptCommandServiceTest {
 
         service.submitAttempt(4L, 1L, request(
                 answer(first, first.getOptions().get(0).getId()),
-                answer(second, second.getOptions().get(0).getId())
-        ));
+                answer(second, second.getOptions().get(0).getId())));
 
         assertThat(allowance.getCooldownUntil()).isNull();
     }
@@ -383,8 +381,7 @@ class DefaultQuizAttemptCommandServiceTest {
                 userQueryService,
                 scoringService,
                 reversingRandomizer(),
-                Clock.fixed(NOW, ZoneOffset.UTC)
-        );
+                Clock.fixed(NOW, ZoneOffset.UTC));
         when(userQueryService.getById(1L)).thenReturn(user);
         when(quizQueryService.getPublishedByIdForAttempt(13L)).thenReturn(samplingQuiz);
         when(quizAttemptRepository.findByUserIdAndQuizIdAndStatus(1L, 13L, AttemptStatus.IN_PROGRESS))
@@ -416,8 +413,7 @@ class DefaultQuizAttemptCommandServiceTest {
         assertThatThrownBy(() -> service.submitAttempt(
                 4L,
                 1L,
-                request(answer(first, first.getOptions().get(0).getId()))
-        ))
+                request(answer(first, first.getOptions().get(0).getId()))))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessage("All attempt questions must be submitted.");
     }
@@ -432,8 +428,7 @@ class DefaultQuizAttemptCommandServiceTest {
 
         service.submitAttempt(4L, 1L, request(
                 answer(first, null),
-                answer(second, second.getOptions().get(0).getId())
-        ));
+                answer(second, second.getOptions().get(0).getId())));
 
         assertThat(first.getSelectedOptionId()).isNull();
         assertThat(attempt.getStatus()).isEqualTo(AttemptStatus.COMPLETED);
@@ -450,8 +445,7 @@ class DefaultQuizAttemptCommandServiceTest {
         assertThatThrownBy(() -> service.submitAttempt(4L, 1L, request(
                 answer(first, first.getOptions().get(0).getId()),
                 answer(first, first.getOptions().get(1).getId()),
-                answer(second, second.getOptions().get(0).getId())
-        )))
+                answer(second, second.getOptions().get(0).getId()))))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessage("Duplicate answers are not allowed.");
     }
@@ -464,8 +458,7 @@ class DefaultQuizAttemptCommandServiceTest {
 
         assertThatThrownBy(() -> service.submitAttempt(4L, 1L, request(
                 answer(first, first.getOptions().get(0).getId()),
-                answer(999L, null)
-        )))
+                answer(999L, null))))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessage("Attempt question not found.");
     }
@@ -479,8 +472,7 @@ class DefaultQuizAttemptCommandServiceTest {
 
         assertThatThrownBy(() -> service.submitAttempt(4L, 1L, request(
                 answer(first, second.getOptions().get(0).getId()),
-                answer(second, second.getOptions().get(1).getId())
-        )))
+                answer(second, second.getOptions().get(1).getId()))))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessage("Selected option does not belong to this question.");
     }

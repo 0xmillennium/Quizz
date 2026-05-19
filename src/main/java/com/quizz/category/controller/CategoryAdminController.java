@@ -22,9 +22,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 /**
  * ADMIN MVC boundary for category management.
  *
- * <p>The controller handles form binding, validation errors, flash messages,
+ * <p>
+ * The controller handles form binding, validation errors, flash messages,
  * and view selection for {@code /admin/categories}. Category lifecycle and
- * persistence rules are delegated to command and query services.</p>
+ * persistence rules are delegated to command and query services.
+ * </p>
  */
 @Controller
 @RequestMapping("/admin/categories")
@@ -39,8 +41,7 @@ public class CategoryAdminController {
             CategoryCommandService categoryCommandService,
             CategoryQueryService categoryQueryService,
             CategoryMapper categoryMapper,
-            CategoryFormValidator categoryFormValidator
-    ) {
+            CategoryFormValidator categoryFormValidator) {
         this.categoryCommandService = categoryCommandService;
         this.categoryQueryService = categoryQueryService;
         this.categoryMapper = categoryMapper;
@@ -63,8 +64,7 @@ public class CategoryAdminController {
     public String create(
             @Valid @ModelAttribute("categoryCreateRequest") CategoryCreateRequest request,
             BindingResult bindingResult,
-            RedirectAttributes redirectAttributes
-    ) {
+            RedirectAttributes redirectAttributes) {
         categoryFormValidator.validateCreate(request, bindingResult);
         if (bindingResult.hasErrors()) {
             return "admin/categories/create";
@@ -73,8 +73,7 @@ public class CategoryAdminController {
         categoryCommandService.create(request);
         redirectAttributes.addFlashAttribute(
                 "flashMessage",
-                FlashMessage.success("Category created successfully.")
-        );
+                FlashMessage.success("Category created successfully."));
         return "redirect:/admin/categories";
     }
 
@@ -92,8 +91,7 @@ public class CategoryAdminController {
             @Valid @ModelAttribute("categoryUpdateRequest") CategoryUpdateRequest request,
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
-            Model model
-    ) {
+            Model model) {
         categoryFormValidator.validateUpdate(id, request, bindingResult);
         if (bindingResult.hasErrors()) {
             model.addAttribute("categoryId", id);
@@ -103,8 +101,7 @@ public class CategoryAdminController {
         categoryCommandService.update(id, request);
         redirectAttributes.addFlashAttribute(
                 "flashMessage",
-                FlashMessage.success("Category updated successfully.")
-        );
+                FlashMessage.success("Category updated successfully."));
         return "redirect:/admin/categories";
     }
 
@@ -113,8 +110,7 @@ public class CategoryAdminController {
         categoryCommandService.activate(id);
         redirectAttributes.addFlashAttribute(
                 "flashMessage",
-                FlashMessage.success("Category activated successfully.")
-        );
+                FlashMessage.success("Category activated successfully."));
         return "redirect:/admin/categories";
     }
 
@@ -123,8 +119,7 @@ public class CategoryAdminController {
         categoryCommandService.deactivate(id);
         redirectAttributes.addFlashAttribute(
                 "flashMessage",
-                FlashMessage.success("Category deactivated successfully.")
-        );
+                FlashMessage.success("Category deactivated successfully."));
         return "redirect:/admin/categories";
     }
 }

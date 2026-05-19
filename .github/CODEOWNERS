@@ -1,0 +1,23 @@
+# Repository governance and automation
+.github/ @0xmillennium
+.github/workflows/ @0xmillennium
+.github/dependabot.yml @0xmillennium
+.github/CODEOWNERS @0xmillennium
+
+# Build, release, and runtime
+pom.xml @0xmillennium
+Dockerfile @0xmillennium
+docker-compose.yml @0xmillennium
+mkdocs.yml @0xmillennium
+requirements-docs.txt @0xmillennium
+
+# Database and security-sensitive areas
+src/main/resources/db/migration/ @0xmillennium
+src/main/java/com/quizz/security/ @0xmillennium
+src/main/java/com/quizz/auth/ @0xmillennium
+src/main/java/com/quizz/attempt/ @0xmillennium
+
+# Release and architecture decisions
+docs/decisions/ @0xmillennium
+docs/operations/release-and-delivery.md @0xmillennium
+SECURITY.md @0xmillennium

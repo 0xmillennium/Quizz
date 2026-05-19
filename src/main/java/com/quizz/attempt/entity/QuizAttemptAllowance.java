@@ -17,21 +17,18 @@ import java.time.Instant;
 /**
  * Attempt-rights window for a user and quiz pair.
  *
- * <p>Starting or restarting an attempt consumes a right; resuming an active
+ * <p>
+ * Starting or restarting an attempt consumes a right; resuming an active
  * attempt and completing an already-started attempt do not consume another
  * right. When rights are exhausted, cooldown begins only after no active
  * attempt remains. The repository uses pessimistic locking for command flows
  * that update this aggregate, and the version column preserves an additional
- * optimistic concurrency signal.</p>
+ * optimistic concurrency signal.
+ * </p>
  */
 @Entity
-@Table(
-        name = "quiz_attempt_allowances",
-        uniqueConstraints = @UniqueConstraint(
-                name = "uk_quiz_attempt_allowances_user_quiz",
-                columnNames = {"user_id", "quiz_id"}
-        )
-)
+@Table(name = "quiz_attempt_allowances", uniqueConstraints = @UniqueConstraint(name = "uk_quiz_attempt_allowances_user_quiz", columnNames = {
+        "user_id", "quiz_id"}))
 public class QuizAttemptAllowance extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

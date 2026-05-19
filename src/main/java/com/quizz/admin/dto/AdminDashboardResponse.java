@@ -20,6 +20,5 @@ public record AdminDashboardResponse(
         long manualCompletedAttempts,
         long timeExpiredCompletedAttempts,
         double averageScorePercentage,
-        List<AdminRecentAttemptResponse> recentAttempts
-) {
+        List<AdminRecentAttemptResponse> recentAttempts) {
 }

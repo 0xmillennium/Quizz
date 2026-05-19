@@ -88,8 +88,7 @@ class QuestionAdminControllerTest {
                 questionMapper,
                 questionFormValidator,
                 categoryQueryService,
-                categoryMapper
-        );
+                categoryMapper);
 
         mockMvc = MockMvcBuilders
                 .standaloneSetup(controller)
@@ -131,13 +130,13 @@ class QuestionAdminControllerTest {
     @Test
     void postQuestionsValidRedirectsToQuestions() throws Exception {
         mockMvc.perform(post("/admin/questions")
-                        .with(user("admin@example.com").roles("ADMIN"))
-                        .with(csrf())
-                        .param("text", "What is water?")
-                        .param("categoryId", "1")
-                        .param("options[0].text", "H2O")
-                        .param("options[0].correct", "true")
-                        .param("options[1].text", "CO2"))
+                .with(user("admin@example.com").roles("ADMIN"))
+                .with(csrf())
+                .param("text", "What is water?")
+                .param("categoryId", "1")
+                .param("options[0].text", "H2O")
+                .param("options[0].correct", "true")
+                .param("options[1].text", "CO2"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/questions"));
 
@@ -149,13 +148,13 @@ class QuestionAdminControllerTest {
         stubActiveCategories();
 
         mockMvc.perform(post("/admin/questions")
-                        .with(user("admin@example.com").roles("ADMIN"))
-                        .with(csrf())
-                        .param("text", "")
-                        .param("categoryId", "1")
-                        .param("options[0].text", "H2O")
-                        .param("options[0].correct", "true")
-                        .param("options[1].text", "CO2"))
+                .with(user("admin@example.com").roles("ADMIN"))
+                .with(csrf())
+                .param("text", "")
+                .param("categoryId", "1")
+                .param("options[0].text", "H2O")
+                .param("options[0].correct", "true")
+                .param("options[1].text", "CO2"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/questions/create"));
 
@@ -181,13 +180,13 @@ class QuestionAdminControllerTest {
     @Test
     void postQuestionUpdateValidRedirectsToQuestions() throws Exception {
         mockMvc.perform(post("/admin/questions/1")
-                        .with(user("admin@example.com").roles("ADMIN"))
-                        .with(csrf())
-                        .param("text", "What is water?")
-                        .param("categoryId", "1")
-                        .param("options[0].text", "H2O")
-                        .param("options[0].correct", "true")
-                        .param("options[1].text", "CO2"))
+                .with(user("admin@example.com").roles("ADMIN"))
+                .with(csrf())
+                .param("text", "What is water?")
+                .param("categoryId", "1")
+                .param("options[0].text", "H2O")
+                .param("options[0].correct", "true")
+                .param("options[1].text", "CO2"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/questions"));
 
@@ -199,28 +198,27 @@ class QuestionAdminControllerTest {
         stubActiveCategories();
 
         mockMvc.perform(post("/admin/questions/1")
-                        .with(user("admin@example.com").roles("ADMIN"))
-                        .with(csrf())
-                        .param("text", "")
-                        .param("categoryId", "1")
-                        .param("options[0].text", "H2O")
-                        .param("options[0].correct", "true")
-                        .param("options[1].text", "CO2"))
+                .with(user("admin@example.com").roles("ADMIN"))
+                .with(csrf())
+                .param("text", "")
+                .param("categoryId", "1")
+                .param("options[0].text", "H2O")
+                .param("options[0].correct", "true")
+                .param("options[1].text", "CO2"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/questions/edit"))
                 .andExpect(model().attribute("questionId", 1L));
 
         verify(questionCommandService, never()).update(
                 org.mockito.ArgumentMatchers.any(),
-                any(QuestionUpdateRequest.class)
-        );
+                any(QuestionUpdateRequest.class));
     }
 
     @Test
     void postQuestionDeleteRedirectsToQuestions() throws Exception {
         mockMvc.perform(post("/admin/questions/1/delete")
-                        .with(user("admin@example.com").roles("ADMIN"))
-                        .with(csrf()))
+                .with(user("admin@example.com").roles("ADMIN"))
+                .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/questions"));
 
@@ -230,8 +228,8 @@ class QuestionAdminControllerTest {
     @Test
     void postQuestionRestoreRedirectsToQuestions() throws Exception {
         mockMvc.perform(post("/admin/questions/1/restore")
-                        .with(user("admin@example.com").roles("ADMIN"))
-                        .with(csrf()))
+                .with(user("admin@example.com").roles("ADMIN"))
+                .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/questions"));
 
@@ -246,19 +244,20 @@ class QuestionAdminControllerTest {
 
     private Filter springSecurityFilterChain() throws Exception {
         CustomUserDetailsService userDetailsService = new CustomUserDetailsService(new MissingUserQueryService());
-        SecurityConfig securityConfig = new SecurityConfig(userDetailsService, new CustomAuthenticationSuccessHandler());
+        SecurityConfig securityConfig = new SecurityConfig(userDetailsService,
+                new CustomAuthenticationSuccessHandler());
         PasswordEncoder passwordEncoder = securityConfig.passwordEncoder();
         AuthenticationProvider authenticationProvider = securityConfig.authenticationProvider(passwordEncoder);
         SecurityFilterChain securityFilterChain = securityConfig.securityFilterChain(
                 httpSecurity(authenticationProvider),
-                authenticationProvider
-        );
+                authenticationProvider);
         return new FilterChainProxy(securityFilterChain);
     }
 
     private HttpSecurity httpSecurity(AuthenticationProvider authenticationProvider) {
         ObjectPostProcessor<Object> objectPostProcessor = new PassthroughObjectPostProcessor();
-        AuthenticationManagerBuilder authenticationManagerBuilder = new AuthenticationManagerBuilder(objectPostProcessor);
+        AuthenticationManagerBuilder authenticationManagerBuilder = new AuthenticationManagerBuilder(
+                objectPostProcessor);
         authenticationManagerBuilder.authenticationProvider(authenticationProvider);
 
         ApplicationContext applicationContext = new StaticApplicationContext();

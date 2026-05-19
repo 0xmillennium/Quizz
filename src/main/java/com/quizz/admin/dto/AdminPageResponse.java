@@ -6,6 +6,5 @@ public record AdminPageResponse(
         long totalItems,
         int totalPages,
         boolean hasPrevious,
-        boolean hasNext
-) {
+        boolean hasNext) {
 }

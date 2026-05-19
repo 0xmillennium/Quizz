@@ -6,9 +6,11 @@ import com.quizz.leaderboard.dto.LeaderboardViewResponse;
 /**
  * Read-only service for public leaderboard views.
  *
- * <p>The service delegates deterministic ranking to the query repository and
+ * <p>
+ * The service delegates deterministic ranking to the query repository and
  * returns only completed submitted attempts. It must not expose user email
- * addresses or create leaderboard persistence state.</p>
+ * addresses or create leaderboard persistence state.
+ * </p>
  */
 public interface LeaderboardService {
 

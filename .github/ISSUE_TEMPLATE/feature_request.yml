@@ -1,0 +1,48 @@
+name: Feature request
+description: Propose an improvement to Quizz.
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user or maintainer problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed solution
+      description: Describe the desired behavior or workflow.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What other approaches did you consider?
+    validations:
+      required: false
+  - type: textarea
+    id: affected-users
+    attributes:
+      label: Affected users
+      description: Who benefits or is affected?
+    validations:
+      required: true
+  - type: textarea
+    id: security-privacy
+    attributes:
+      label: Security/privacy impact
+      description: Describe possible security, privacy, authorization, or data exposure implications.
+    validations:
+      required: true
+  - type: textarea
+    id: documentation
+    attributes:
+      label: Documentation impact
+      description: What docs or ADRs would need to change?
+    validations:
+      required: true

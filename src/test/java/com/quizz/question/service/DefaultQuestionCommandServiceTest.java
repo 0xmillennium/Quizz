@@ -41,13 +41,15 @@ class DefaultQuestionCommandServiceTest {
     void setUp() {
         category = Category.create("Science", null);
         service = new DefaultQuestionCommandService(questionRepository, categoryQueryService);
-        lenient().when(questionRepository.save(any(Question.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        lenient().when(questionRepository.save(any(Question.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
         lenient().when(categoryQueryService.getActiveById(1L)).thenReturn(category);
     }
 
     @Test
     void createCreatesActiveQuestionWithOptions() {
-        Question question = service.create(createRequest("What is water?", 1L, option("H2O", true), option("CO2", false)));
+        Question question = service
+                .create(createRequest("What is water?", 1L, option("H2O", true), option("CO2", false)));
 
         assertThat(question.getText()).isEqualTo("What is water?");
         assertThat(question.getCategory()).isSameAs(category);
@@ -68,7 +70,8 @@ class DefaultQuestionCommandServiceTest {
     void createPropagatesInactiveCategoryBusinessRuleException() {
         when(categoryQueryService.getActiveById(1L)).thenThrow(new BusinessRuleException("Category is inactive."));
 
-        assertThatThrownBy(() -> service.create(createRequest("What is water?", 1L, option("H2O", true), option("CO2", false))))
+        assertThatThrownBy(
+                () -> service.create(createRequest("What is water?", 1L, option("H2O", true), option("CO2", false))))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessage("Category is inactive.");
     }
@@ -91,46 +94,51 @@ class DefaultQuestionCommandServiceTest {
                 option("D", false),
                 option("E", false),
                 option("F", false),
-                option("G", false)
-        )))
+                option("G", false))))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessage("A question can have at most 6 options.");
     }
 
     @Test
     void createValidatesExactlyOneCorrectOption() {
-        assertThatThrownBy(() -> service.create(createRequest("What is water?", 1L, option("H2O", false), option("CO2", false))))
+        assertThatThrownBy(
+                () -> service.create(createRequest("What is water?", 1L, option("H2O", false), option("CO2", false))))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessage("Exactly one option must be marked as correct.");
     }
 
     @Test
     void createValidatesDuplicateOptionTextCaseInsensitively() {
-        assertThatThrownBy(() -> service.create(createRequest("What is water?", 1L, option("H2O", true), option(" h2o ", false))))
+        assertThatThrownBy(
+                () -> service.create(createRequest("What is water?", 1L, option("H2O", true), option(" h2o ", false))))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessage("Option text must be unique.");
     }
 
     @Test
     void createTrimsQuestionText() {
-        Question question = service.create(createRequest("  What is water?  ", 1L, option("H2O", true), option("CO2", false)));
+        Question question = service
+                .create(createRequest("  What is water?  ", 1L, option("H2O", true), option("CO2", false)));
 
         assertThat(question.getText()).isEqualTo("What is water?");
     }
 
     @Test
     void createNormalizesOptionText() {
-        Question question = service.create(createRequest("What is water?", 1L, option("  Heavy   water  ", true), option("CO2", false)));
+        Question question = service
+                .create(createRequest("What is water?", 1L, option("  Heavy   water  ", true), option("CO2", false)));
 
         assertThat(question.getOptions().get(0).getText()).isEqualTo("Heavy water");
     }
 
     @Test
     void updateReplacesOptions() {
-        Question question = service.create(createRequest("What is water?", 1L, option("H2O", true), option("CO2", false)));
+        Question question = service
+                .create(createRequest("What is water?", 1L, option("H2O", true), option("CO2", false)));
         when(questionRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(question));
 
-        Question updated = service.update(1L, updateRequest("Updated question", 1L, option("One", false), option("Two", true)));
+        Question updated = service.update(1L,
+                updateRequest("Updated question", 1L, option("One", false), option("Two", true)));
 
         assertThat(updated.getText()).isEqualTo("Updated question");
         assertThat(updated.getOptions()).hasSize(2);
@@ -142,24 +150,28 @@ class DefaultQuestionCommandServiceTest {
     void updateThrowsNotFoundExceptionWhenQuestionMissing() {
         when(questionRepository.findByIdWithDetails(99L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.update(99L, updateRequest("Updated question", 1L, option("One", true), option("Two", false))))
+        assertThatThrownBy(() -> service.update(99L,
+                updateRequest("Updated question", 1L, option("One", true), option("Two", false))))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("Question not found.");
     }
 
     @Test
     void updateThrowsBusinessRuleExceptionForInvalidOptions() {
-        Question question = service.create(createRequest("What is water?", 1L, option("H2O", true), option("CO2", false)));
+        Question question = service
+                .create(createRequest("What is water?", 1L, option("H2O", true), option("CO2", false)));
         when(questionRepository.findByIdWithDetails(1L)).thenReturn(Optional.of(question));
 
-        assertThatThrownBy(() -> service.update(1L, updateRequest("Updated question", 1L, option("One", false), option("Two", false))))
+        assertThatThrownBy(() -> service.update(1L,
+                updateRequest("Updated question", 1L, option("One", false), option("Two", false))))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessage("Exactly one option must be marked as correct.");
     }
 
     @Test
     void archiveMarksQuestionArchived() {
-        Question question = service.create(createRequest("What is water?", 1L, option("H2O", true), option("CO2", false)));
+        Question question = service
+                .create(createRequest("What is water?", 1L, option("H2O", true), option("CO2", false)));
         when(questionRepository.findById(1L)).thenReturn(Optional.of(question));
 
         service.archive(1L);
@@ -169,7 +181,8 @@ class DefaultQuestionCommandServiceTest {
 
     @Test
     void archiveIsIdempotent() {
-        Question question = service.create(createRequest("What is water?", 1L, option("H2O", true), option("CO2", false)));
+        Question question = service
+                .create(createRequest("What is water?", 1L, option("H2O", true), option("CO2", false)));
         question.archive();
         when(questionRepository.findById(1L)).thenReturn(Optional.of(question));
 
@@ -181,7 +194,8 @@ class DefaultQuestionCommandServiceTest {
 
     @Test
     void restoreMarksQuestionActive() {
-        Question question = service.create(createRequest("What is water?", 1L, option("H2O", true), option("CO2", false)));
+        Question question = service
+                .create(createRequest("What is water?", 1L, option("H2O", true), option("CO2", false)));
         question.archive();
         when(questionRepository.findById(1L)).thenReturn(Optional.of(question));
 
@@ -192,7 +206,8 @@ class DefaultQuestionCommandServiceTest {
 
     @Test
     void restoreIsIdempotent() {
-        Question question = service.create(createRequest("What is water?", 1L, option("H2O", true), option("CO2", false)));
+        Question question = service
+                .create(createRequest("What is water?", 1L, option("H2O", true), option("CO2", false)));
         when(questionRepository.findById(1L)).thenReturn(Optional.of(question));
 
         service.restore(1L);

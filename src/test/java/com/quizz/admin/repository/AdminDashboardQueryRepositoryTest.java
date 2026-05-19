@@ -110,7 +110,8 @@ class AdminDashboardQueryRepositoryTest {
     private CapturedQuery<DashboardMetricsRow> captureMetricsQuery() {
         ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<Map<String, ?>> paramsCaptor = ArgumentCaptor.forClass((Class) Map.class);
-        ArgumentCaptor<RowMapper<DashboardMetricsRow>> rowMapperCaptor = ArgumentCaptor.forClass((Class) RowMapper.class);
+        ArgumentCaptor<RowMapper<DashboardMetricsRow>> rowMapperCaptor = ArgumentCaptor
+                .forClass((Class) RowMapper.class);
         verify(jdbcTemplate).queryForObject(sqlCaptor.capture(), paramsCaptor.capture(), rowMapperCaptor.capture());
         return new CapturedQuery<>(sqlCaptor.getValue(), paramsCaptor.getValue(), rowMapperCaptor.getValue());
     }
@@ -127,8 +128,7 @@ class AdminDashboardQueryRepositoryTest {
     private record CapturedQuery<T>(
             String sql,
             Map<String, ?> params,
-            RowMapper<T> rowMapper
-    ) {
+            RowMapper<T> rowMapper) {
     }
 
     private static <T> RowMapper<T> anyRowMapper() {

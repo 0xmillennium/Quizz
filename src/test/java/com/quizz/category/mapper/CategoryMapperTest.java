@@ -47,8 +47,7 @@ class CategoryMapperTest {
     void toResponseListMapsList() {
         List<CategoryResponse> responses = mapper.toResponseList(List.of(
                 category(1L, "Science", null),
-                category(2L, "History", null)
-        ));
+                category(2L, "History", null)));
 
         assertThat(responses).extracting(CategoryResponse::name)
                 .containsExactly("Science", "History");
@@ -58,8 +57,7 @@ class CategoryMapperTest {
     void toOptionResponseListMapsList() {
         List<CategoryOptionResponse> responses = mapper.toOptionResponseList(List.of(
                 category(1L, "Science", null),
-                category(2L, "History", null)
-        ));
+                category(2L, "History", null)));
 
         assertThat(responses).extracting(CategoryOptionResponse::name)
                 .containsExactly("Science", "History");

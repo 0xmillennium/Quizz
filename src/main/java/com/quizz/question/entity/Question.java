@@ -20,10 +20,12 @@ import java.util.List;
 /**
  * Question-bank aggregate root that owns its answer options.
  *
- * <p>Creation and update replace the owned {@link AnswerOption} children as a
+ * <p>
+ * Creation and update replace the owned {@link AnswerOption} children as a
  * unit. The command service validates the authored invariant that a question
  * has a bounded option set with exactly one correct option. Archive and restore
- * keep historical references intact for quizzes and attempt snapshots.</p>
+ * keep historical references intact for quizzes and attempt snapshots.
+ * </p>
  */
 @Entity
 @Table(name = "questions")
@@ -40,11 +42,7 @@ public class Question extends BaseEntity {
     @Column(name = "status", nullable = false, length = 30)
     private QuestionStatus status;
 
-    @OneToMany(
-            mappedBy = "question",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("displayOrder ASC")
     private List<AnswerOption> options = new ArrayList<>();
 

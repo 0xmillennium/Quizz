@@ -19,6 +19,7 @@
 
     <properties>
         <java.version>25</java.version>
+        <spotless.version>3.4.0</spotless.version>
     </properties>
 
     <dependencies>
@@ -91,6 +92,20 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.version}</version>
+                <configuration>
+                    <java>
+                        <eclipse>
+                            <version>4.37</version>
+                            <file>${project.basedir}/config/spotless/eclipse-java-formatter.xml</file>
+                        </eclipse>
+                        <formatAnnotations/>
+                    </java>
+                </configuration>
             </plugin>
         </plugins>
     </build>

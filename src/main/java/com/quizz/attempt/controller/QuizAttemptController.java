@@ -26,10 +26,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 /**
  * Authenticated MVC boundary for taking, autosaving, submitting, and reviewing attempts.
  *
- * <p>The controller performs HTTP binding, current-user resolution, JSON/view
+ * <p>
+ * The controller performs HTTP binding, current-user resolution, JSON/view
  * response selection, and redirect/flash behavior. Attempt lifecycle mutations
  * are delegated to {@link QuizAttemptCommandService}; play, result, chart, and
- * history reads are delegated to {@link QuizAttemptQueryService}.</p>
+ * history reads are delegated to {@link QuizAttemptQueryService}.
+ * </p>
  */
 @Controller
 public class QuizAttemptController {
@@ -43,8 +45,7 @@ public class QuizAttemptController {
             CurrentUserProvider currentUserProvider,
             QuizAttemptCommandService quizAttemptCommandService,
             QuizAttemptQueryService quizAttemptQueryService,
-            QuizAttemptMapper quizAttemptMapper
-    ) {
+            QuizAttemptMapper quizAttemptMapper) {
         this.currentUserProvider = currentUserProvider;
         this.quizAttemptCommandService = quizAttemptCommandService;
         this.quizAttemptQueryService = quizAttemptQueryService;
@@ -64,7 +65,8 @@ public class QuizAttemptController {
         Long userId = currentUserProvider.getCurrentUserId();
         StartQuizResponse response = quizAttemptCommandService.restartAttempt(attemptId, userId);
         redirectAttributes.addFlashAttribute("flashMessage", response.previousAttemptAutoSubmitted()
-                ? FlashMessage.info("Your previous attempt was automatically submitted because time expired. A new attempt has started.")
+                ? FlashMessage.info(
+                        "Your previous attempt was automatically submitted because time expired. A new attempt has started.")
                 : FlashMessage.success("Quiz restarted."));
         return "redirect:/attempts/" + response.attemptId();
     }
@@ -85,8 +87,7 @@ public class QuizAttemptController {
     @PostMapping("/attempts/{attemptId}/submit")
     public String submit(
             @PathVariable Long attemptId,
-            @ModelAttribute("submitQuizRequest") SubmitQuizRequest request
-    ) {
+            @ModelAttribute("submitQuizRequest") SubmitQuizRequest request) {
         Long userId = currentUserProvider.getCurrentUserId();
         quizAttemptCommandService.submitAttempt(attemptId, userId, request);
         return "redirect:/attempts/" + attemptId + "/result";
@@ -97,8 +98,7 @@ public class QuizAttemptController {
     public AutosaveAnswerResponse autosaveAnswer(
             @PathVariable Long attemptId,
             @PathVariable Long attemptQuestionId,
-            @ModelAttribute AutosaveAnswerRequest request
-    ) {
+            @ModelAttribute AutosaveAnswerRequest request) {
         Long userId = currentUserProvider.getCurrentUserId();
         if (request.getAnswerRevision() == null) {
             throw new com.quizz.common.exception.BusinessRuleException("Answer revision is required.");
@@ -108,8 +108,7 @@ public class QuizAttemptController {
                 attemptQuestionId,
                 userId,
                 request.getSelectedOptionId(),
-                request.getAnswerRevision()
-        );
+                request.getAnswerRevision());
     }
 
     @PostMapping("/attempts/{attemptId}/auto-submit")
@@ -134,8 +133,7 @@ public class QuizAttemptController {
         quizAttemptCommandService.autoSubmitOverdueAttemptsForUser(userId);
         model.addAttribute(
                 "history",
-                quizAttemptMapper.toHistoryResponseList(quizAttemptQueryService.findHistoryByUser(userId))
-        );
+                quizAttemptMapper.toHistoryResponseList(quizAttemptQueryService.findHistoryByUser(userId)));
         return "attempt/history";
     }
 
@@ -163,7 +161,8 @@ public class QuizAttemptController {
             return FlashMessage.info("Continuing your active attempt.");
         }
         if (response.previousAttemptAutoSubmitted()) {
-            return FlashMessage.info("Your previous attempt was automatically submitted because time expired. A new attempt has started.");
+            return FlashMessage.info(
+                    "Your previous attempt was automatically submitted because time expired. A new attempt has started.");
         }
         return FlashMessage.success("Quiz started.");
     }

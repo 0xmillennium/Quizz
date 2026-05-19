@@ -152,7 +152,8 @@ class PackageDependencyRulesTest {
 
     private static SourceFile readSource(Path path) {
         try {
-            return new SourceFile(MAIN_SOURCES.relativize(path).toString(), Files.readString(path, StandardCharsets.UTF_8));
+            return new SourceFile(MAIN_SOURCES.relativize(path).toString(),
+                    Files.readString(path, StandardCharsets.UTF_8));
         } catch (IOException exception) {
             throw new IllegalStateException("Could not read " + path, exception);
         }

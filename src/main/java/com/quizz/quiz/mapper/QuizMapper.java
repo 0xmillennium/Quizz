@@ -30,8 +30,7 @@ public class QuizMapper {
                 quiz.getQuestions().stream()
                         .sorted(Comparator.comparingInt(QuizQuestion::getDisplayOrder))
                         .map(this::toQuizQuestionResponse)
-                        .toList()
-        );
+                        .toList());
     }
 
     public List<QuizAdminResponse> toAdminResponseList(List<Quiz> quizzes) {
@@ -48,8 +47,7 @@ public class QuizMapper {
                 quiz.getDurationMinutes(),
                 quiz.getQuestionCount(),
                 quiz.getAttemptLimit(),
-                quiz.getRetakeCooldownMinutes()
-        );
+                quiz.getRetakeCooldownMinutes());
     }
 
     public List<QuizSummaryResponse> toSummaryResponseList(List<Quiz> quizzes) {
@@ -72,8 +70,7 @@ public class QuizMapper {
                 quiz.getQuestions().stream()
                         .sorted(Comparator.comparingInt(QuizQuestion::getDisplayOrder))
                         .map(this::toQuizQuestionResponse)
-                        .toList()
-        );
+                        .toList());
     }
 
     public QuizUpdateRequest toUpdateRequest(Quiz quiz) {
@@ -97,7 +94,6 @@ public class QuizMapper {
                 quizQuestion.getQuestion().getId(),
                 quizQuestion.getQuestion().getText(),
                 quizQuestion.getQuestion().getCategory().getName(),
-                quizQuestion.getDisplayOrder()
-        );
+                quizQuestion.getDisplayOrder());
     }
 }

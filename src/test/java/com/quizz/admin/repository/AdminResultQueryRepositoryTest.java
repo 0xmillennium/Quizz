@@ -221,8 +221,7 @@ class AdminResultQueryRepositoryTest {
                 Instant.parse("2026-01-01T00:00:00Z"),
                 Instant.parse("2026-02-01T00:00:00Z"),
                 25,
-                50
-        );
+                50);
     }
 
     private void stubSummaryResultSet(Instant startedAt, Instant expiresAt, Instant submittedAt) throws Exception {
@@ -264,14 +263,12 @@ class AdminResultQueryRepositoryTest {
     private record CapturedQuery<T>(
             String sql,
             Map<String, ?> params,
-            RowMapper<T> rowMapper
-    ) {
+            RowMapper<T> rowMapper) {
     }
 
     private record CapturedCountQuery(
             String sql,
-            Map<String, ?> params
-    ) {
+            Map<String, ?> params) {
     }
 
     private static <T> RowMapper<T> anyRowMapper() {

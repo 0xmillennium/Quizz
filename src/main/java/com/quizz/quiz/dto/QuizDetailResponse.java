@@ -12,6 +12,5 @@ public record QuizDetailResponse(
         int attemptLimit,
         int retakeCooldownMinutes,
         int poolSize,
-        List<QuizQuestionResponse> questions
-) {
+        List<QuizQuestionResponse> questions) {
 }

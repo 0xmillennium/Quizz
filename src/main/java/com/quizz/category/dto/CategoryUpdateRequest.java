@@ -5,12 +5,9 @@ import jakarta.validation.constraints.Size;
 
 public class CategoryUpdateRequest {
 
-    @NotBlank
-    @Size(min = 2, max = 80)
-    private String name;
+    @NotBlank @Size(min = 2, max = 80) private String name;
 
-    @Size(max = 500)
-    private String description;
+    @Size(max = 500) private String description;
 
     public String getName() {
         return name;

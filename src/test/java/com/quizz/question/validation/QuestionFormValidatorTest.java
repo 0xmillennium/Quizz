@@ -84,8 +84,7 @@ class QuestionFormValidatorTest {
                 option("D", false),
                 option("E", false),
                 option("F", false),
-                option("G", false)
-        );
+                option("G", false));
         BindingResult bindingResult = bindingResult(request, "questionCreateRequest");
 
         validator.validateCreate(request, bindingResult);

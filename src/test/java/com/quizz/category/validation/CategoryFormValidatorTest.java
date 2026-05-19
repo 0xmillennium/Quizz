@@ -96,8 +96,7 @@ class CategoryFormValidatorTest {
 
         verify(categoryQueryService, never()).existsByNameExceptId(
                 org.mockito.ArgumentMatchers.any(),
-                org.mockito.ArgumentMatchers.any()
-        );
+                org.mockito.ArgumentMatchers.any());
     }
 
     private CategoryCreateRequest createRequest(String name) {

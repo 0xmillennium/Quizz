@@ -66,8 +66,7 @@ class SecurityCurrentUserProviderTest {
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 principal,
                 principal.getPassword(),
-                principal.getAuthorities()
-        );
+                principal.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

@@ -5,9 +5,11 @@ import java.util.List;
 /**
  * Administrator question snapshot within an attempt result.
  *
- * <p>The record reflects the question text, selected snapshot option, and
+ * <p>
+ * The record reflects the question text, selected snapshot option, and
  * correctness stored for the attempt. It does not read current live question
- * content.</p>
+ * content.
+ * </p>
  */
 public record AdminResultQuestionResponse(
         Long attemptQuestionId,
@@ -16,6 +18,5 @@ public record AdminResultQuestionResponse(
         int displayOrder,
         Long selectedOptionId,
         Boolean correct,
-        List<AdminResultAnswerOptionResponse> options
-) {
+        List<AdminResultAnswerOptionResponse> options) {
 }

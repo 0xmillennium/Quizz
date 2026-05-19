@@ -10,16 +10,11 @@ import java.util.List;
 
 public class QuestionCreateRequest {
 
-    @NotBlank
-    @Size(min = 5, max = 1000)
-    private String text;
+    @NotBlank @Size(min = 5, max = 1000) private String text;
 
-    @NotNull
-    private Long categoryId;
+    @NotNull private Long categoryId;
 
-    @Valid
-    @NotEmpty
-    private List<AnswerOptionRequest> options = new ArrayList<>();
+    @Valid @NotEmpty private List<AnswerOptionRequest> options = new ArrayList<>();
 
     public String getText() {
         return text;

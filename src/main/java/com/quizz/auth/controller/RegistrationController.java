@@ -15,9 +15,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 /**
  * MVC boundary for public registration routes.
  *
- * <p>The controller binds and validates registration forms, delegates account
+ * <p>
+ * The controller binds and validates registration forms, delegates account
  * creation to {@link RegistrationService}, and selects views or redirects. It
- * does not authenticate credentials or access user repositories directly.</p>
+ * does not authenticate credentials or access user repositories directly.
+ * </p>
  */
 @Controller
 public class RegistrationController {
@@ -25,7 +27,8 @@ public class RegistrationController {
     private final RegistrationService registrationService;
     private final RegistrationValidator registrationValidator;
 
-    public RegistrationController(RegistrationService registrationService, RegistrationValidator registrationValidator) {
+    public RegistrationController(RegistrationService registrationService,
+            RegistrationValidator registrationValidator) {
         this.registrationService = registrationService;
         this.registrationValidator = registrationValidator;
     }
@@ -40,8 +43,7 @@ public class RegistrationController {
     public String register(
             @Valid @ModelAttribute("registerRequest") RegisterRequest request,
             BindingResult bindingResult,
-            RedirectAttributes redirectAttributes
-    ) {
+            RedirectAttributes redirectAttributes) {
         registrationValidator.validate(request, bindingResult);
         if (bindingResult.hasErrors()) {
             return "auth/register";
@@ -50,8 +52,7 @@ public class RegistrationController {
         registrationService.register(request);
         redirectAttributes.addFlashAttribute(
                 "flashMessage",
-                FlashMessage.success("Registration successful. You can now log in.")
-        );
+                FlashMessage.success("Registration successful. You can now log in."));
         return "redirect:/login";
     }
 }

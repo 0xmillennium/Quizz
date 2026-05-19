@@ -83,8 +83,7 @@ class QuizAttemptControllerTest {
                 currentUserProvider,
                 quizAttemptCommandService,
                 quizAttemptQueryService,
-                quizAttemptMapper
-        );
+                quizAttemptMapper);
 
         mockMvc = MockMvcBuilders
                 .standaloneSetup(controller)
@@ -96,12 +95,13 @@ class QuizAttemptControllerTest {
     @Test
     void postStartRedirectsToAttempt() throws Exception {
         when(currentUserProvider.getCurrentUserId()).thenReturn(7L);
-        when(quizAttemptCommandService.startAttempt(3L, 7L)).thenReturn(new StartQuizResponse(11L, false, false, null, 2, null));
+        when(quizAttemptCommandService.startAttempt(3L, 7L))
+                .thenReturn(new StartQuizResponse(11L, false, false, null, 2, null));
 
         mockMvc.perform(post("/attempts/start")
-                        .param("quizId", "3")
-                        .with(user("user@example.com").roles("USER"))
-                        .with(csrf()))
+                .param("quizId", "3")
+                .with(user("user@example.com").roles("USER"))
+                .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/attempts/11"));
 
@@ -117,8 +117,7 @@ class QuizAttemptControllerTest {
                 30,
                 Instant.parse("2026-01-01T12:00:00Z"),
                 Instant.parse("2026-01-01T12:30:00Z"),
-                List.of()
-        );
+                List.of());
         SubmitQuizRequest submitQuizRequest = new SubmitQuizRequest();
         when(currentUserProvider.getCurrentUserId()).thenReturn(7L);
         when(quizAttemptQueryService.getAttemptPage(11L, 7L)).thenReturn(attempt);
@@ -137,12 +136,13 @@ class QuizAttemptControllerTest {
         when(currentUserProvider.getCurrentUserId()).thenReturn(7L);
 
         mockMvc.perform(post("/attempts/11/submit")
-                        .with(user("user@example.com").roles("USER"))
-                        .with(csrf()))
+                .with(user("user@example.com").roles("USER"))
+                .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/attempts/11/result"));
 
-        verify(quizAttemptCommandService).submitAttempt(org.mockito.ArgumentMatchers.eq(11L), org.mockito.ArgumentMatchers.eq(7L), org.mockito.ArgumentMatchers.any(SubmitQuizRequest.class));
+        verify(quizAttemptCommandService).submitAttempt(org.mockito.ArgumentMatchers.eq(11L),
+                org.mockito.ArgumentMatchers.eq(7L), org.mockito.ArgumentMatchers.any(SubmitQuizRequest.class));
     }
 
     @Test
@@ -184,8 +184,7 @@ class QuizAttemptControllerTest {
                 Instant.parse("2026-01-01T12:00:00Z"),
                 Instant.parse("2026-01-01T12:30:00Z"),
                 Instant.parse("2026-01-01T12:01:00Z"),
-                null
-        );
+                null);
         when(currentUserProvider.getCurrentUserId()).thenReturn(7L);
         when(quizAttemptQueryService.findHistoryByUser(7L)).thenReturn(List.of(attempt));
         when(quizAttemptMapper.toHistoryResponseList(List.of(attempt))).thenReturn(List.of(history));
@@ -231,16 +230,15 @@ class QuizAttemptControllerTest {
                 false,
                 null,
                 Instant.parse("2026-01-01T12:01:00Z"),
-                Instant.parse("2026-01-01T12:30:00Z")
-        );
+                Instant.parse("2026-01-01T12:30:00Z"));
         when(currentUserProvider.getCurrentUserId()).thenReturn(7L);
         when(quizAttemptCommandService.autosaveAnswer(11L, 22L, 7L, 33L, 1)).thenReturn(response);
 
         mockMvc.perform(post("/attempts/11/questions/22/answer")
-                        .param("selectedOptionId", "33")
-                        .param("answerRevision", "1")
-                        .with(user("user@example.com").roles("USER"))
-                        .with(csrf()))
+                .param("selectedOptionId", "33")
+                .param("answerRevision", "1")
+                .with(user("user@example.com").roles("USER"))
+                .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.saved").value(true))
                 .andExpect(jsonPath("$.stale").value(false));
@@ -253,8 +251,8 @@ class QuizAttemptControllerTest {
                 .thenReturn(new AutoSubmitResponse(11L, "COMPLETED", "TIME_EXPIRED", "/attempts/11/result"));
 
         mockMvc.perform(post("/attempts/11/auto-submit")
-                        .with(user("user@example.com").roles("USER"))
-                        .with(csrf()))
+                .with(user("user@example.com").roles("USER"))
+                .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.completionReason").value("TIME_EXPIRED"))
                 .andExpect(jsonPath("$.redirectUrl").value("/attempts/11/result"));
@@ -270,19 +268,19 @@ class QuizAttemptControllerTest {
     @Test
     void postRoutesRequireCsrf() throws Exception {
         mockMvc.perform(post("/attempts/start")
-                        .param("quizId", "3")
-                        .with(user("user@example.com").roles("USER")))
+                .param("quizId", "3")
+                .with(user("user@example.com").roles("USER")))
                 .andExpect(status().isForbidden());
         mockMvc.perform(post("/attempts/11/restart")
-                        .with(user("user@example.com").roles("USER")))
+                .with(user("user@example.com").roles("USER")))
                 .andExpect(status().isForbidden());
         mockMvc.perform(post("/attempts/11/auto-submit")
-                        .with(user("user@example.com").roles("USER")))
+                .with(user("user@example.com").roles("USER")))
                 .andExpect(status().isForbidden());
         mockMvc.perform(post("/attempts/11/questions/22/answer")
-                        .param("selectedOptionId", "33")
-                        .param("answerRevision", "1")
-                        .with(user("user@example.com").roles("USER")))
+                .param("selectedOptionId", "33")
+                .param("answerRevision", "1")
+                .with(user("user@example.com").roles("USER")))
                 .andExpect(status().isForbidden());
     }
 
@@ -303,25 +301,25 @@ class QuizAttemptControllerTest {
                 Instant.parse("2026-01-01T12:30:00Z"),
                 Instant.parse("2026-01-01T12:01:00Z"),
                 null,
-                List.of()
-        );
+                List.of());
     }
 
     private Filter springSecurityFilterChain() throws Exception {
         CustomUserDetailsService userDetailsService = new CustomUserDetailsService(new MissingUserQueryService());
-        SecurityConfig securityConfig = new SecurityConfig(userDetailsService, new CustomAuthenticationSuccessHandler());
+        SecurityConfig securityConfig = new SecurityConfig(userDetailsService,
+                new CustomAuthenticationSuccessHandler());
         PasswordEncoder passwordEncoder = securityConfig.passwordEncoder();
         AuthenticationProvider authenticationProvider = securityConfig.authenticationProvider(passwordEncoder);
         SecurityFilterChain securityFilterChain = securityConfig.securityFilterChain(
                 httpSecurity(authenticationProvider),
-                authenticationProvider
-        );
+                authenticationProvider);
         return new FilterChainProxy(securityFilterChain);
     }
 
     private HttpSecurity httpSecurity(AuthenticationProvider authenticationProvider) {
         ObjectPostProcessor<Object> objectPostProcessor = new PassthroughObjectPostProcessor();
-        AuthenticationManagerBuilder authenticationManagerBuilder = new AuthenticationManagerBuilder(objectPostProcessor);
+        AuthenticationManagerBuilder authenticationManagerBuilder = new AuthenticationManagerBuilder(
+                objectPostProcessor);
         authenticationManagerBuilder.authenticationProvider(authenticationProvider);
 
         ApplicationContext applicationContext = new StaticApplicationContext();

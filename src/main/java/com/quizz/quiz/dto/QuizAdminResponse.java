@@ -14,6 +14,5 @@ public record QuizAdminResponse(
         int retakeCooldownMinutes,
         String status,
         int poolSize,
-        List<QuizQuestionResponse> questions
-) {
+        List<QuizQuestionResponse> questions) {
 }

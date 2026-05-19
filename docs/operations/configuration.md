@@ -38,7 +38,7 @@ The env loaders reject `POSTGRES_PASSWORD`, `SPRING_DATASOURCE_PASSWORD`, `ADMIN
 
 Compose reads `.env` and uses it for:
 
-- Published application port: `${QUIZZ_HTTP_PORT}:8080`
+- Published application port: `<QUIZZ_HTTP_PORT>:8080`
 - Database name: `${POSTGRES_DB}`
 - Database username: `${POSTGRES_USER}`
 - Application datasource URL and username

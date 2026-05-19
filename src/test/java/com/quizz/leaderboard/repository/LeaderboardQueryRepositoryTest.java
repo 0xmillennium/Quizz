@@ -126,8 +126,7 @@ class LeaderboardQueryRepositoryTest {
     private record CapturedQuery(
             String sql,
             Map<String, ?> params,
-            RowMapper<LeaderboardRow> rowMapper
-    ) {
+            RowMapper<LeaderboardRow> rowMapper) {
     }
 
     private static <T> RowMapper<T> anyRowMapper() {

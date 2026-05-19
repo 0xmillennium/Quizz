@@ -69,8 +69,7 @@ class QuizAttemptMapperTest {
         assertThat(request.getAnswers()).extracting("attemptQuestionId")
                 .containsExactly(
                         attempt.getQuestions().get(0).getId(),
-                        attempt.getQuestions().get(1).getId()
-                );
+                        attempt.getQuestions().get(1).getId());
         assertThat(request.getAnswers()).allMatch(answer -> answer.getSelectedOptionId() == null);
     }
 

@@ -9,9 +9,11 @@ import org.springframework.stereotype.Component;
 /**
  * Default percentage-based score calculator.
  *
- * <p>The calculator expects questions to have already been evaluated against
+ * <p>
+ * The calculator expects questions to have already been evaluated against
  * their attempt answer-option snapshots. It treats missing selections as
- * unanswered and derives wrong answers from the remaining evaluated questions.</p>
+ * unanswered and derives wrong answers from the remaining evaluated questions.
+ * </p>
  */
 @Component
 public class DefaultScoreCalculator implements ScoreCalculator {
@@ -38,7 +40,6 @@ public class DefaultScoreCalculator implements ScoreCalculator {
                 wrongCount,
                 unansweredCount,
                 scorePercentage,
-                QuizAttempt.DEFAULT_SCORING_VERSION
-        );
+                QuizAttempt.DEFAULT_SCORING_VERSION);
     }
 }

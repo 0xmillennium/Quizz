@@ -1,0 +1,303 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Release validation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate release tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "${GITHUB_REF_NAME}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Release tags must use vMAJOR.MINOR.PATCH, for example v1.2.3."
+            exit 1
+          fi
+
+      - name: Verify release tag is annotated
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG_TYPE="$(git cat-file -t "${GITHUB_REF_NAME}")"
+          if [ "${TAG_TYPE}" != "tag" ]; then
+            echo "::error::Release tag ${GITHUB_REF_NAME} is a ${TAG_TYPE}, not an annotated tag object."
+            echo "::error::Create release tags with: git tag -a ${GITHUB_REF_NAME} -m \"${GITHUB_REF_NAME}\""
+            exit 1
+          fi
+
+      - name: Verify release tag points to master history
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin master:refs/remotes/origin/master --prune
+          TAG_COMMIT="$(git rev-list -n 1 "${GITHUB_REF_NAME}")"
+          if ! git merge-base --is-ancestor "${TAG_COMMIT}" origin/master; then
+            echo "::error::Release tag ${GITHUB_REF_NAME} points to ${TAG_COMMIT}, which is not reachable from origin/master."
+            echo "::error::Release tags must be created from validated commits on the protected master branch."
+            exit 1
+          fi
+
+      - name: Set up Java
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.x"
+
+      - name: Spotless check
+        run: mvn spotless:check
+
+      - name: Maven tests
+        run: mvn clean test
+
+      - name: Javadocs
+        run: mvn -q javadoc:javadoc
+
+      - name: Python demo tooling tests
+        run: python3 -m unittest discover scripts/demo/tests
+
+      - name: Ensure ripgrep is available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v rg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ripgrep
+          fi
+
+      - name: Run release static audits
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          fail_if_match() {
+            local description="$1"
+            shift
+            if rg -n "$@"; then
+              echo "::error::Release static audit failed: ${description}"
+              exit 1
+            fi
+          }
+
+          fail_if_match "inline styles in templates" 'style="' src/main/resources/templates
+          fail_if_match "hardcoded localhost in templates" 'http://localhost' src/main/resources/templates
+          fail_if_match "frontend framework references" 'bootstrap|tailwind|react|vue' pom.xml src/main/resources
+          fail_if_match "play page answer metadata leakage" 'originalAnswerOptionId|correctOptionText' src/main/resources/templates/attempt/play.html
+          fail_if_match "play page correctness wording leakage" '\bcorrect\b' src/main/resources/templates/attempt/play.html
+          fail_if_match "mutating GET form suspicion" 'method="get".*(publish|archive|restore|activate|deactivate|restart|submit|logout)' src/main/resources/templates
+          fail_if_match "mutating GET link suspicion" 'href=.*(publish|archive|restore|activate|deactivate|restart|submit|logout)' src/main/resources/templates
+          fail_if_match "sensitive template exposure" 'passwordHash|users\.email' src/main/resources/templates
+          fail_if_match "unfinished documentation markers" 'TODO|FIXME|TBD|coming soon|placeholder' docs README.md mkdocs.yml CONTRIBUTING.md SECURITY.md SUPPORT.md CODE_OF_CONDUCT.md
+          weak_change="$(printf 'change%s' '-me')"
+          weak_plain="$(printf 'change%s' 'me')"
+          weak_password="$(printf 'password%s' '123')"
+          weak_strong="$(printf 'StrongPassword%s' '123')"
+          weak_pattern="${weak_change}|${weak_plain}|${weak_password}|${weak_strong}"
+          fail_if_match "weak or fake secret examples" "${weak_pattern}" docs README.md .github CONTRIBUTING.md SECURITY.md SUPPORT.md CODE_OF_CONDUCT.md
+          disallowed_branch="$(printf 'ma%s' 'in')"
+          branch_pattern="branches:\s*\[${disallowed_branch}\]|branches:\s*${disallowed_branch}|default branch.*${disallowed_branch}|target.*${disallowed_branch}|push.*${disallowed_branch}|pull request.*${disallowed_branch}|current \`${disallowed_branch}\` branch"
+          fail_if_match "branch governance references to disallowed branch" "${branch_pattern}" .github README.md docs CONTRIBUTING.md SECURITY.md SUPPORT.md
+
+          legacy_docs="$(find . -maxdepth 2 -type f \( -name "DOCKER.md" -o -name "LOCAL_SETUP.md" -o -name "ADMIN_BOOTSTRAP.md" -o -name "DEMO_FIXTURES.md" -o -name "ARCHITECTURE.md" -o -name "FINAL_REQUIREMENTS_CHECKLIST.md" -o -name "PHASE_SUMMARY.md" \))"
+          if [ -n "${legacy_docs}" ]; then
+            echo "${legacy_docs}"
+            echo "::error::Legacy documentation files must not be restored."
+            exit 1
+          fi
+
+      - name: Install docs dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-docs.txt
+
+      - name: Build documentation
+        run: mkdocs build --strict
+
+      - name: Prepare CI local configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .env.example .env
+          mkdir -p docker/secrets
+          openssl rand -base64 48 | tr -d '\n' > docker/secrets/postgres_password.txt
+
+      - name: Validate Docker Compose configuration
+        run: docker compose config
+
+      - name: Build Docker images
+        run: docker compose build
+
+      - name: Start Docker runtime
+        run: docker compose up --build --wait
+
+      - name: Smoke test application health
+        shell: bash
+        run: |
+          set -euo pipefail
+          QUIZZ_HTTP_PORT="$(awk -F= '/^QUIZZ_HTTP_PORT=/{print $2; exit}' .env | tr -d '\r' | sed 's/^"//; s/"$//')"
+          curl -fsS "http://localhost:${QUIZZ_HTTP_PORT}/actuator/health"
+
+      - name: Stop Docker runtime
+        if: always()
+        run: docker compose down -v
+
+  publish:
+    name: Publish GHCR image and GitHub Release
+    runs-on: ubuntu-latest
+    needs: validate
+    permissions:
+      contents: write
+      packages: write
+      attestations: write
+      id-token: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Prepare release metadata
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          if [[ ! "${TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Release tags must use vMAJOR.MINOR.PATCH, for example v1.2.3."
+            exit 1
+          fi
+
+          VERSION="${TAG#v}"
+          MAJOR_MINOR="${VERSION%.*}"
+          MAJOR="${VERSION%%.*}"
+          IMAGE_NAME="ghcr.io/${GITHUB_REPOSITORY,,}"
+
+          {
+            echo "tag=${TAG}"
+            echo "version=${VERSION}"
+            echo "major_minor=${MAJOR_MINOR}"
+            echo "major=${MAJOR}"
+            echo "image_name=${IMAGE_NAME}"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
+        with:
+          images: ${{ steps.release.outputs.image_name }}
+          tags: |
+            type=raw,value=${{ steps.release.outputs.version }}
+            type=raw,value=${{ steps.release.outputs.major_minor }}
+            type=raw,value=${{ steps.release.outputs.major }}
+            type=raw,value=latest
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ steps.release.outputs.version }}
+            org.opencontainers.image.title=Quizz
+            org.opencontainers.image.description=Spring Boot MVC quiz platform
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: true
+          sbom: true
+
+      - name: Attest container image
+        uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
+        with:
+          subject-name: ${{ steps.release.outputs.image_name }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+      - name: Verify published image can be pulled
+        shell: bash
+        run: |
+          set -euo pipefail
+          IMAGE="${{ steps.release.outputs.image_name }}:${{ steps.release.outputs.version }}"
+          docker pull "${IMAGE}"
+          docker image inspect "${IMAGE}"
+
+      - name: Create release notes
+        shell: bash
+        run: |
+          set -euo pipefail
+          IMAGE_NAME="${{ steps.release.outputs.image_name }}"
+          VERSION="${{ steps.release.outputs.version }}"
+          MAJOR_MINOR="${{ steps.release.outputs.major_minor }}"
+          MAJOR="${{ steps.release.outputs.major }}"
+          DIGEST="${{ steps.build.outputs.digest }}"
+          cat > release-notes.md <<EOF
+          Container image:
+          ${IMAGE_NAME}:${VERSION}
+
+          Additional tags:
+          ${IMAGE_NAME}:${MAJOR_MINOR}
+          ${IMAGE_NAME}:${MAJOR}
+          ${IMAGE_NAME}:latest
+
+          Digest:
+          ${DIGEST}
+
+          Verify provenance:
+          gh attestation verify oci://${IMAGE_NAME}:${VERSION} -R ${GITHUB_REPOSITORY}
+
+          Documentation:
+          MkDocs documentation is deployed to GitHub Pages from validated commits on master.
+          EOF
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create "${{ steps.release.outputs.tag }}" \
+            --generate-notes \
+            --title "${{ steps.release.outputs.tag }}" \
+            --notes-file release-notes.md

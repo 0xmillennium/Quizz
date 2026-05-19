@@ -319,8 +319,7 @@ class DefaultQuizCommandServiceTest {
             String description,
             Long categoryId,
             Integer durationMinutes,
-            Long... questionIds
-    ) {
+            Long... questionIds) {
         QuizCreateRequest request = new QuizCreateRequest();
         request.setTitle(title);
         request.setDescription(description);
@@ -335,8 +334,7 @@ class DefaultQuizCommandServiceTest {
             String description,
             Long categoryId,
             Integer durationMinutes,
-            Long... questionIds
-    ) {
+            Long... questionIds) {
         QuizUpdateRequest request = new QuizUpdateRequest();
         request.setTitle(title);
         request.setDescription(description);
@@ -356,8 +354,7 @@ class DefaultQuizCommandServiceTest {
         Question created = Question.create(
                 text,
                 category,
-                List.of(new AnswerOptionDraft("A", true), new AnswerOptionDraft("B", false))
-        );
+                List.of(new AnswerOptionDraft("A", true), new AnswerOptionDraft("B", false)));
         setId(created, id);
         return created;
     }

@@ -5,6 +5,5 @@ public record QuestionSummaryResponse(
         String text,
         String categoryName,
         String status,
-        int optionCount
-) {
+        int optionCount) {
 }

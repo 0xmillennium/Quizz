@@ -79,8 +79,7 @@ class QuizControllerTest {
                 categoryQueryService,
                 categoryMapper,
                 quizAttemptStateProvider,
-                currentUserProvider
-        );
+                currentUserProvider);
 
         mockMvc = MockMvcBuilders
                 .standaloneSetup(controller)
@@ -115,8 +114,8 @@ class QuizControllerTest {
         when(quizMapper.toSummaryResponseList(List.of())).thenReturn(List.of());
 
         mockMvc.perform(get("/quizzes")
-                        .param("categoryId", "1")
-                        .with(user("user@example.com").roles("USER")))
+                .param("categoryId", "1")
+                .with(user("user@example.com").roles("USER")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("quiz/list"))
                 .andExpect(model().attribute("selectedCategoryId", 1L));
@@ -125,7 +124,8 @@ class QuizControllerTest {
     @Test
     void getQuizDetailAsAuthenticatedUserReturnsDetailView() throws Exception {
         Quiz quiz = org.mockito.Mockito.mock(Quiz.class);
-        QuizDetailResponse response = new QuizDetailResponse(1L, "Science Quiz", null, "Science", 30, 1, 3, 1440, 0, List.of());
+        QuizDetailResponse response = new QuizDetailResponse(1L, "Science Quiz", null, "Science", 30, 1, 3, 1440, 0,
+                List.of());
         when(quizQueryService.getPublishedById(1L)).thenReturn(quiz);
         when(quizMapper.toDetailResponse(quiz)).thenReturn(response);
         when(currentUserProvider.getCurrentUserId()).thenReturn(7L);
@@ -159,19 +159,20 @@ class QuizControllerTest {
 
     private Filter springSecurityFilterChain() throws Exception {
         CustomUserDetailsService userDetailsService = new CustomUserDetailsService(new MissingUserQueryService());
-        SecurityConfig securityConfig = new SecurityConfig(userDetailsService, new CustomAuthenticationSuccessHandler());
+        SecurityConfig securityConfig = new SecurityConfig(userDetailsService,
+                new CustomAuthenticationSuccessHandler());
         PasswordEncoder passwordEncoder = securityConfig.passwordEncoder();
         AuthenticationProvider authenticationProvider = securityConfig.authenticationProvider(passwordEncoder);
         SecurityFilterChain securityFilterChain = securityConfig.securityFilterChain(
                 httpSecurity(authenticationProvider),
-                authenticationProvider
-        );
+                authenticationProvider);
         return new FilterChainProxy(securityFilterChain);
     }
 
     private HttpSecurity httpSecurity(AuthenticationProvider authenticationProvider) {
         ObjectPostProcessor<Object> objectPostProcessor = new PassthroughObjectPostProcessor();
-        AuthenticationManagerBuilder authenticationManagerBuilder = new AuthenticationManagerBuilder(objectPostProcessor);
+        AuthenticationManagerBuilder authenticationManagerBuilder = new AuthenticationManagerBuilder(
+                objectPostProcessor);
         authenticationManagerBuilder.authenticationProvider(authenticationProvider);
 
         ApplicationContext applicationContext = new StaticApplicationContext();

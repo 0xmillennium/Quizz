@@ -4,8 +4,7 @@ import jakarta.validation.constraints.NotNull;
 
 public class UserAnswerRequest {
 
-    @NotNull
-    private Long attemptQuestionId;
+    @NotNull private Long attemptQuestionId;
 
     private Long selectedOptionId;
 

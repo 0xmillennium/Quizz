@@ -18,10 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 /**
  * ADMIN MVC boundary for attempt-result reports.
  *
- * <p>The controller handles filter binding and view selection for
+ * <p>
+ * The controller handles filter binding and view selection for
  * {@code /admin/results}. Reporting data comes from {@link AdminResultService}
  * snapshot read models; no repository access or score recalculation belongs in
- * this layer.</p>
+ * this layer.
+ * </p>
  */
 @Controller
 @RequestMapping("/admin/results")
@@ -38,8 +40,7 @@ public class AdminResultController {
             CategoryQueryService categoryQueryService,
             CategoryMapper categoryMapper,
             QuizQueryService quizQueryService,
-            QuizMapper quizMapper
-    ) {
+            QuizMapper quizMapper) {
         this.adminResultService = adminResultService;
         this.categoryQueryService = categoryQueryService;
         this.categoryMapper = categoryMapper;

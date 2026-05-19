@@ -72,14 +72,12 @@ class PasswordHashCliTest {
         int exitCode = PasswordHashCli.run(
                 new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)),
                 new PrintStream(stdout, true, StandardCharsets.UTF_8),
-                new PrintStream(stderr, true, StandardCharsets.UTF_8)
-        );
+                new PrintStream(stderr, true, StandardCharsets.UTF_8));
 
         return new CliResult(
                 exitCode,
                 stdout.toString(StandardCharsets.UTF_8),
-                stderr.toString(StandardCharsets.UTF_8)
-        );
+                stderr.toString(StandardCharsets.UTF_8));
     }
 
     private record CliResult(int exitCode, String stdout, String stderr) {

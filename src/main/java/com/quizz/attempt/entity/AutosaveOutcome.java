@@ -2,8 +2,7 @@ package com.quizz.attempt.entity;
 
 public record AutosaveOutcome(
         boolean saved,
-        boolean stale
-) {
+        boolean stale) {
     public static AutosaveOutcome savedOutcome() {
         return new AutosaveOutcome(true, false);
     }
