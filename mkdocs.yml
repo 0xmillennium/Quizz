@@ -1,0 +1,81 @@
+site_name: Quizz Documentation
+site_description: Developer documentation for the Quizz Spring Boot MVC quiz platform.
+site_author: Quizz Maintainers
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.tabs.link
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Overview: getting-started/index.md
+      - Docker: getting-started/docker.md
+      - Local Development: getting-started/local-development.md
+      - Admin Bootstrap: getting-started/admin-bootstrap.md
+      - Demo Fixtures: getting-started/demo-fixtures.md
+  - Architecture:
+      - Overview: architecture/index.md
+      - Package Boundaries: architecture/package-boundaries.md
+      - Domain Model: architecture/domain-model.md
+      - Attempt Lifecycle: architecture/attempt-lifecycle.md
+      - Quiz Randomization and Attempt Rights: architecture/quiz-randomization-and-attempt-rights.md
+      - Security: architecture/security.md
+      - Persistence: architecture/persistence.md
+      - UI Architecture: architecture/ui-architecture.md
+  - Operations:
+      - Overview: operations/index.md
+      - Configuration: operations/configuration.md
+      - Secrets: operations/secrets.md
+      - Docker Runtime: operations/docker-runtime.md
+      - Troubleshooting: operations/troubleshooting.md
+  - Reference:
+      - Overview: reference/index.md
+      - Routes: reference/routes.md
+      - Configuration: reference/configuration.md
+      - Database Schema: reference/database-schema.md
+      - Scripts: reference/scripts.md
+      - Testing: reference/testing.md
+      - Glossary: reference/glossary.md
+  - Decisions:
+      - Overview: decisions/index.md
+      - ADR-0001 Spring MVC Monolith: decisions/adr-0001-spring-mvc-monolith.md
+      - ADR-0002 PostgreSQL, Flyway, and Schema Validation: decisions/adr-0002-postgresql-flyway-schema-validation.md
+      - ADR-0003 Immutable Attempt Snapshots: decisions/adr-0003-immutable-attempt-snapshots.md
+      - ADR-0004 Autosave, Resume, and Auto-submit: decisions/adr-0004-autosave-resume-auto-submit.md
+      - ADR-0005 Randomized Quiz Pools and Attempt Rights: decisions/adr-0005-randomized-quiz-pools-and-attempt-rights.md
+      - ADR-0006 Secrets and Local Configuration Boundary: decisions/adr-0006-secrets-and-local-configuration-boundary.md
+      - ADR-0007 Server-rendered UI Design System: decisions/adr-0007-server-rendered-ui-design-system.md
+  - Contributing:
+      - Documentation Style Guide: contributing/documentation-style-guide.md
+      - Code Documentation Standard: contributing/code-documentation-standard.md
